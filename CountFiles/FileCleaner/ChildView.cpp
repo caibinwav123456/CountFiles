@@ -71,40 +71,6 @@ void CChildView::OnDraw(CDC* pDC)
 	// TODO: Add your specialized code here and/or call the base class
 	m_TreeList.Draw(pDC,true);
 }
-/*
-static int test()
-{
-	const char* listfile="E:\\Programs\\CountFiles\\CountFiles\\IPCIF.txt";
-	FileListLoader loader;
-	int ret=loader.Load(listfile);
-	if(ret!=0)
-		return ret;
-	ret=loader.ExpandNode(loader.GetRootNode(),true);
-	if(ret!=0)
-		return ret;
-
-	file_node_info info;
-
-	for(int i=0;i<(int)get_subdir_cnt(loader.GetRootNode());i++)
-		ret=loader.GetNodeInfo(get_subdir(loader.GetRootNode(),i),&info);
-	for(int i=0;i<(int)get_subfile_cnt(loader.GetRootNode());i++)
-		ret=loader.GetNodeInfo(get_subfile(loader.GetRootNode(),i),&info);
-
-	for(int i=0;i<(int)get_subdir_cnt(loader.GetRootNode());i++)
-		ret=loader.GetNodeInfo(get_subdir(loader.GetRootNode(),i),&info);
-	for(int i=0;i<(int)get_subfile_cnt(loader.GetRootNode());i++)
-		ret=loader.GetNodeInfo(get_subfile(loader.GetRootNode(),i),&info);
-
-	for(int i=0;i<(int)get_subdir_cnt(loader.GetRootNode());i++)
-		ret=loader.GetNodeInfo(get_subdir(loader.GetRootNode(),i),&info);
-	ret=loader.GetNodeInfo(get_subfile(loader.GetRootNode(),0),&info);
-
-	dir_node tmpnode=*get_subdir(loader.GetRootNode(),0);
-	ret=loader.GetNodeInfo(get_subdir(loader.GetRootNode(),0),&info);
-	ret=loader.GetNodeInfo(&tmpnode,&info);
-
-	return ret;
-}*/
 int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CScrollView::OnCreate(lpCreateStruct) == -1)
@@ -112,7 +78,6 @@ int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// TODO:  Add your specialized creation code here
 
-	//test();
 	if(m_TreeList.Init()!=0)
 		return -1;
 

@@ -28,7 +28,7 @@ CString ConvertAnsiStrToTStr(const string& from)
 	USES_CONVERSION;
 	return A2T(from.c_str());
 }
-TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_bExpand(FALSE)
+TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd)
 {
 
 }
@@ -75,15 +75,7 @@ void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 {
 	CDCDraw canvas(m_pWnd,pClientDC,true);
 	CDrawer drawer(&canvas);
-	drawer.FillEllipse(&CRect(500,500,600,600),RGB(255,0,255));
-	drawer.DrawEllipse(&CRect(300,300,400,400),RGB(255,0,0),5);
-	drawer.DrawRect(&CRect(400,200,500,300),RGB(0,0,255),3);
-	drawer.FillRect(&CRect(200,400,300,500),RGB(0,255,0));
-	//drawer.DrawBitmap(&m_bmpFolder,&CPoint(100,100));
-	drawer.FillRect(&CRect(90,90,834,134),RGB(255,255,0));
-	for(int i=eFSEqual;i<eFSMax;i++)
-		DrawFolder(&drawer,&CPoint(100*i,100),i,m_bExpand);
-	drawer.DrawText(&CPoint(200,200),_T("hello"),50,RGB(255,0,127));
+
 }
 void TreeListCtrl::OnLBDown(const CPoint& pt)
 {
@@ -95,8 +87,7 @@ void TreeListCtrl::OnLBUp(const CPoint& pt)
 }
 void TreeListCtrl::OnLBDblClick(const CPoint& pt)
 {
-	m_bExpand=!m_bExpand;
-	Invalidate();
+
 }
 void TreeListCtrl::OnRBUp(const CPoint& pt)
 {

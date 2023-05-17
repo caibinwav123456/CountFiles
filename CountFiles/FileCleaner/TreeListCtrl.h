@@ -43,7 +43,6 @@ private:
 //List data
 private:
 	FileListLoader m_ListLoader;
-	BOOL m_bExpand;
 
 //private functions
 private:
