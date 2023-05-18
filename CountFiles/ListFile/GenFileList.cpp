@@ -97,7 +97,7 @@ static int log_file_info(const string& path,const string& name,dword type,file_c
 	int ret=0;
 	intf_cntfile* callback=param->user_callback;
 	bool bDir=type==FILE_TYPE_DIR;
-	const byte *Tag=bDir?(const byte*)"D ":(const byte*)"N ";
+	const byte *Tag=(const byte*)(bDir?TAG_TYPE_DIR:TAG_TYPE_FILE);
 	UInteger64 size;
 	CDateTime date;
 	string strsize,strdate;
@@ -119,7 +119,7 @@ static int log_file_info(const string& path,const string& name,dword type,file_c
 		return ret;
 	if(bDir)
 	{
-		sprintf((char*)buf,"DirRecSize: %u ",ref_param->rec_len);
+		sprintf((char*)buf,"%s%u ",TAG_DRSIZE,ref_param->rec_len);
 		if(0!=(ret=log_rec(path,buf,strlen((char*)buf),callback,param)))
 			return ret;
 	}
@@ -128,7 +128,7 @@ static int log_file_info(const string& path,const string& name,dword type,file_c
 		return ret;
 	strsize=FormatI64(size);
 	date.Format(strdate,FORMAT_DATE|FORMAT_TIME|FORMAT_WEEKDAY);
-	sprintf((char*)buf,"Size: %s %s\n",strsize.c_str(),strdate.c_str());
+	sprintf((char*)buf,"%s%s %s\n",TAG_SIZE,strsize.c_str(),strdate.c_str());
 	if(0!=(ret=log_rec(path,buf,strlen((char*)buf),callback,param)))
 		return ret;
 	param->total_size+=size;

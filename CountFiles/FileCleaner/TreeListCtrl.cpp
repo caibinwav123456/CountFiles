@@ -73,9 +73,8 @@ void TreeListCtrl::DrawFolder(CDrawer* drawer,POINT* pt,int state,BOOL expand)
 }
 void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 {
-	CDCDraw canvas(m_pWnd,pClientDC,true);
+	CDCDraw canvas(m_pWnd,pClientDC,buffered);
 	CDrawer drawer(&canvas);
-
 }
 void TreeListCtrl::OnLBDown(const CPoint& pt)
 {

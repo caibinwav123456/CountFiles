@@ -3,4 +3,9 @@
 
 #define LINE_HEIGHT 24
 
+#define TAG_TYPE_DIR "D "
+#define TAG_TYPE_FILE "N "
+#define TAG_DRSIZE "DirRecSize: "
+#define TAG_SIZE "Size: "
+
 #endif
