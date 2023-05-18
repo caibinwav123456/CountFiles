@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "TreeListCtrl.h"
 #include "resource.h"
+#define t2a(p) ConvertTStrToAnsiStr(p)
+#define a2t(p) ConvertAnsiStrToTStr(p)
 enum E_FOLDER_STATE
 {
 	eFSEqual=1,

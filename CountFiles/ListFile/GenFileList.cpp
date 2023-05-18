@@ -41,9 +41,8 @@ static bool less_rec(file_rec* a,file_rec* b)
 	int ret=CmpNoCase(a->name.c_str(),b->name.c_str(),min(a->name.size(),b->name.size()));
 	if(ret!=0)
 		return ret<0;
-	ret=(a->name.size()<b->name.size());
-	if(ret!=0)
-		return ret<0;
+	if(a->name.size()!=b->name.size())
+		return a->name.size()<b->name.size();
 	return a->name<b->name;
 }
 static int init_param(file_cnt_param* param)
@@ -139,6 +138,9 @@ static int log_file_info(const string& path,const string& name,dword type,file_c
 	}
 	else if(param->update_time<date)
 		param->update_time=date;
+	if(callback->cb_rec!=NULL)
+		if(0!=(ret=callback->cb_rec((byte*)path.c_str(),path.size(),callback->param)))
+			return ret;
 
 	return 0;
 }
