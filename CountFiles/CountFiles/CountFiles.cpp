@@ -117,6 +117,7 @@ int _tmain(int argc,TCHAR** argv)
 	callback.param=&obj;
 	callback.cb_info=cb_wr_file_info;
 	callback.cb_error=(err_file!=NULL?cb_wr_file_err:NULL);
+	callback.cb_rec=NULL;
 	ret=GenFileList(cnt_path,&callback,'\\');
 	sys_fclose(obj.hFile);
 	if(err_file!=NULL)

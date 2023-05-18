@@ -132,7 +132,9 @@ void CChildView::OnDestroy()
 void CChildView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	m_TreeList.OnLBDown(point);
+	CPoint pt=point;
+	pt.Offset(CSize(GetScrollPosition()));
+	m_TreeList.OnLBDown(pt);
 	CScrollView::OnLButtonDown(nFlags, point);
 }
 
@@ -140,7 +142,9 @@ void CChildView::OnLButtonDown(UINT nFlags, CPoint point)
 void CChildView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	m_TreeList.OnLBUp(point);
+	CPoint pt=point;
+	pt.Offset(CSize(GetScrollPosition()));
+	m_TreeList.OnLBUp(pt);
 	CScrollView::OnLButtonUp(nFlags, point);
 }
 
@@ -148,7 +152,9 @@ void CChildView::OnLButtonUp(UINT nFlags, CPoint point)
 void CChildView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	m_TreeList.OnMMove(point);
+	CPoint pt=point;
+	pt.Offset(CSize(GetScrollPosition()));
+	m_TreeList.OnMMove(pt);
 	CScrollView::OnMouseMove(nFlags, point);
 }
 
@@ -156,7 +162,9 @@ void CChildView::OnMouseMove(UINT nFlags, CPoint point)
 void CChildView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	m_TreeList.OnLBDblClick(point);
+	CPoint pt=point;
+	pt.Offset(CSize(GetScrollPosition()));
+	m_TreeList.OnLBDblClick(pt);
 	CScrollView::OnLButtonDblClk(nFlags, point);
 }
 
@@ -164,6 +172,8 @@ void CChildView::OnLButtonDblClk(UINT nFlags, CPoint point)
 void CChildView::OnRButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	m_TreeList.OnRBUp(point);
+	CPoint pt=point;
+	pt.Offset(CSize(GetScrollPosition()));
+	m_TreeList.OnRBUp(pt);
 	CScrollView::OnRButtonUp(nFlags, point);
 }

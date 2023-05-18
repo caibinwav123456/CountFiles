@@ -10,8 +10,16 @@ struct intf_cntfile
 {
 	file_info_callback cb_info;
 	file_info_callback cb_error;
+	file_info_callback cb_rec;
 	void* param;
 };
+inline void init_intf_cntfile(intf_cntfile* cbdata)
+{
+	cbdata->cb_info=NULL;
+	cbdata->cb_error=NULL;
+	cbdata->cb_rec=NULL;
+	cbdata->param=NULL;
+}
 #define FLAG_NODE_EXPANDED    1
 #define FLAG_NODE_DELETED     2
 #define FLAG_NODE_LOADERR     4
