@@ -1,6 +1,7 @@
 #define DLL_IMPORT
 #include "struct.h"
 #include "LRUCache.h"
+#include <assert.h>
 #define safe_fclose(hfile) \
 	if(VALID(hfile)) \
 	{ \
@@ -36,6 +37,76 @@ void free_dir_node(dir_node* dir)
 	delete dir->contents;
 	dir->contents=NULL;
 }
+static inline uint forward_str(const byte*& ptr,uint& len,uint step)
+{
+	uint cstep=0;
+	for(;len>0&&cstep<step;cstep++)
+	{
+		if((*ptr)&0x80)
+		{
+			if(len>1)
+			{
+				ptr+=2;
+				len-=2;
+			}
+			else
+			{
+				ptr+=len;
+				len=0;
+			}
+		}
+		else
+		{
+			ptr++;
+			len--;
+		}
+	}
+	return cstep;
+}
+static inline bool rev_str(const byte* ptr,const byte* start,const byte*& revout)
+{
+	assert(ptr>=start);
+	const byte* tmpptr;
+	for(tmpptr=ptr;tmpptr>=start;tmpptr--)
+	{
+		if(tmpptr-1>=start)
+		{
+			if(*(tmpptr-1)&0x80)
+			{
+				tmpptr--;
+				continue;
+			}
+			else if(*tmpptr=='\n')
+			{
+				revout=tmpptr+1;
+				return true;
+			}
+		}
+		else
+			break;
+	}
+	revout=tmpptr+1;
+	return false;
+}
+static inline bool find_byte(const byte*& ptr,uint& len,byte c)
+{
+	for(;len>0;forward_str(ptr,len,1))
+	{
+		if(*ptr==c)
+			return true;
+	}
+	return false;
+}
+#define advance_ptr(ptr,len,step) \
+	if(forward_str(ptr,len,step)<step) \
+		return ERR_BUFFER_OVERFLOW
+#define pass_byte(c) \
+	buf=ptr; \
+	advance_ptr(ptr,len,1); \
+	if(*buf!=(byte)(c)) \
+		return ERR_BAD_CONFIG_FORMAT; \
+	buf=ptr
+#define pass_space pass_byte(' ')
 int RevFindLine(UInteger64& off,void* hlf)
 {
 	if(off<=UInteger64(1))
@@ -52,47 +123,18 @@ int RevFindLine(UInteger64& off,void* hlf)
 		uint len=(tmpoff-start).low;
 		if(0!=(ret=sys_fread(hlf,buf,len)))
 			return ret;
-		byte* ptr=NULL;
-		for(byte* tmpptr=buf+len-1;tmpptr>=buf;tmpptr--)
-		{
-			if(*tmpptr=='\n')
-			{
-				ptr=tmpptr+1;
-				break;
-			}
-		}
-		if(ptr!=NULL)
+		const byte* ptr=NULL;
+		if(rev_str(buf+len-1,buf,ptr))
 		{
 			tmpoff=start+UInteger64(ptr-buf);
 			break;
 		}
-		tmpoff=start;
+		tmpoff=start+UInteger64(start==UInteger64(0)?0:ptr-buf);
 	}
 	off=tmpoff;
 	return 0;
 }
-#define advance_ptr(ptr,len,step) \
-	if(len<step) \
-		return ERR_BUFFER_OVERFLOW; \
-	ptr+=step; \
-	len-=step
-#define pass_byte(c) \
-	buf=ptr; \
-	advance_ptr(ptr,len,1); \
-	if(*buf!=(byte)(c)) \
-		return ERR_BAD_CONFIG_FORMAT; \
-	buf=ptr
-#define pass_space pass_byte(' ')
-static inline bool find_byte(byte*& ptr,uint& len,byte c)
-{
-	for(;len>0;ptr++,len--)
-	{
-		if(*ptr==c)
-			return true;
-	}
-	return false;
-}
-static inline int match_tagged_size(const char* tag,UInteger64& size,byte*& ptr,uint& len,byte* tmpbuf,uint tmpbuflen)
+static inline int match_tagged_size(const char* tag,UInteger64& size,const byte*& ptr,uint& len,byte* tmpbuf,uint tmpbuflen)
 {
 	const byte* buf=ptr;
 	uint taglen=strlen(tag);
@@ -114,12 +156,12 @@ static inline int match_tagged_size(const char* tag,UInteger64& size,byte*& ptr,
 	size=tmpsize;
 	return 0;
 }
-int parse_rec(byte* buf,uint len,file_node_info* pinfo,UInteger64& recsize)
+int parse_rec(const byte* buf,uint len,file_node_info* pinfo,UInteger64& recsize)
 {
 	int ret=0;
 	const char* tag_recsize="DirRecSize: ";
 	const char* tag_size="Size: ";
-	byte* ptr=buf;
+	const byte* ptr=buf;
 	UInteger64 tmpsize(0);
 	uint tmplen;
 	advance_ptr(ptr,len,2);

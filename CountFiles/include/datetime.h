@@ -54,7 +54,7 @@ public:
 	void ConvertFromEpoch(int days);
 	byte CalculateWeekDay() const;
 	void Format(string& str,dword flags,const char* sepday="/",const char* septime=":",const char* sep=" ") const;
-	int FromString(byte*& ptr,uint& len,char sepday='/',char septime=':',char sep=' ');
+	int FromString(const byte*& ptr,uint& len,char sepday='/',char septime=':',char sep=' ');
 	static void SetWorkDay(bool workday);
 	static bool GetWorkDay();
 private:

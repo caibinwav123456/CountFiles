@@ -442,7 +442,7 @@ void CDateTime::Format(string& str,dword flags,const char* sepday,const char* se
 		return ERR_BAD_CONFIG_FORMAT; \
 	buf=ptr
 #define pass_space pass_byte(' ')
-static inline bool find_byte(byte*& ptr,uint& len,byte c)
+static inline bool find_byte(const byte*& ptr,uint& len,byte c)
 {
 	for(;len>0;ptr++,len--)
 	{
@@ -451,10 +451,10 @@ static inline bool find_byte(byte*& ptr,uint& len,byte c)
 	}
 	return false;
 }
-static inline int extract_next_decimal(int& num,byte*& ptr,uint& len,char token,byte* tmpbuf,uint tmpbuflen)
+static inline int extract_next_decimal(int& num,const byte*& ptr,uint& len,char token,byte* tmpbuf,uint tmpbuflen)
 {
 	uint tmplen;
-	byte* buf=ptr;
+	const byte* buf=ptr;
 	if(token==0)
 	{
 		int i;
@@ -476,11 +476,12 @@ static inline int extract_next_decimal(int& num,byte*& ptr,uint& len,char token,
 	sscanf((char*)tmpbuf,"%d",&num);
 	return 0;
 }
-int CDateTime::FromString(byte*& ptr,uint& len,char sepday,char septime,char sep)
+int CDateTime::FromString(const byte*& ptr,uint& len,char sepday,char septime,char sep)
 {
 	int ret=0;
 	int num=0;
-	byte tmpbuf[20],*buf=ptr;
+	const byte* buf=ptr;
+	byte tmpbuf[20];
 
 	if(0!=(ret=extract_next_decimal(num,ptr,len,sepday,tmpbuf,20)))
 		return ret;

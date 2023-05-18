@@ -73,7 +73,7 @@ void TreeListCtrl::DrawFolder(CDrawer* drawer,POINT* pt,int state,BOOL expand)
 }
 void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 {
-	CDCDraw canvas(m_pWnd,pClientDC,true);
+	CDCDraw canvas(m_pWnd,pClientDC,buffered);
 	CDrawer drawer(&canvas);
 	drawer.FillEllipse(&CRect(500,500,600,600),RGB(255,0,255));
 	drawer.DrawEllipse(&CRect(300,300,400,400),RGB(255,0,0),5);
