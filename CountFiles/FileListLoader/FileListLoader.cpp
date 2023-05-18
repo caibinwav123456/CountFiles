@@ -159,14 +159,14 @@ static inline int match_tagged_size(const char* tag,UInteger64& size,const byte*
 int parse_rec(const byte* buf,uint len,file_node_info* pinfo,UInteger64& recsize)
 {
 	int ret=0;
-	const char* tag_recsize="DirRecSize: ";
-	const char* tag_size="Size: ";
+	const char* tag_recsize=TAG_DRSIZE;
+	const char* tag_size=TAG_SIZE;
 	const byte* ptr=buf;
 	UInteger64 tmpsize(0);
 	uint tmplen;
 	advance_ptr(ptr,len,2);
 	byte tmpbuf[100];
-	if(memcmp(buf,"D ",2)==0)
+	if(memcmp(buf,TAG_TYPE_DIR,2)==0)
 	{
 		buf=ptr;
 		if(0!=(ret=match_tagged_size(tag_recsize,tmpsize,ptr,len,tmpbuf,100)))
@@ -174,7 +174,7 @@ int parse_rec(const byte* buf,uint len,file_node_info* pinfo,UInteger64& recsize
 		pinfo->type=FILE_TYPE_DIR;
 		pass_space;
 	}
-	else if(memcmp(buf,"N ",2)==0)
+	else if(memcmp(buf,TAG_TYPE_FILE,2)==0)
 		pinfo->type=FILE_TYPE_NORMAL;
 	else
 		return ERR_GENERIC;
