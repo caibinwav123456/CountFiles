@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CChildView, CScrollView)
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDBLCLK()
+	ON_WM_RBUTTONDOWN()
 	ON_WM_RBUTTONUP()
 END_MESSAGE_MAP()
 
@@ -166,6 +167,16 @@ void CChildView::OnLButtonDblClk(UINT nFlags, CPoint point)
 	pt.Offset(CSize(GetScrollPosition()));
 	m_TreeList.OnLBDblClick(pt);
 	CScrollView::OnLButtonDblClk(nFlags, point);
+}
+
+
+void CChildView::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	CPoint pt=point;
+	pt.Offset(CSize(GetScrollPosition()));
+	m_TreeList.OnRBDown(pt);
+	CScrollView::OnRButtonDown(nFlags, point);
 }
 
 

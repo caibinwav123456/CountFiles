@@ -22,6 +22,7 @@ public:
 	void OnLBDown(const CPoint& pt);
 	void OnLBUp(const CPoint& pt);
 	void OnLBDblClick(const CPoint& pt);
+	void OnRBDown(const CPoint& pt);
 	void OnRBUp(const CPoint& pt);
 	void OnMMove(const CPoint& pt);
 

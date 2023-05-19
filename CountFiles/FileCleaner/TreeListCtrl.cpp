@@ -100,6 +100,10 @@ void TreeListCtrl::OnLBDblClick(const CPoint& pt)
 	m_bExpand=!m_bExpand;
 	Invalidate();
 }
+void TreeListCtrl::OnRBDown(const CPoint& pt)
+{
+
+}
 void TreeListCtrl::OnRBUp(const CPoint& pt)
 {
 

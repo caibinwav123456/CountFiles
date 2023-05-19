@@ -40,7 +40,7 @@ void free_dir_node(dir_node* dir)
 static inline uint forward_str(const byte*& ptr,uint& len,uint step)
 {
 	uint cstep=0;
-	for(;len>0&&cstep<step;cstep++)
+	for(;cstep<step&&len>0;cstep++)
 	{
 		if((*ptr)&0x80)
 		{
