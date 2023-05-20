@@ -263,51 +263,54 @@ int expand_dir(dir_node* node,bool expand,void* hlf)
 	if(expand&&node_get_expand_state(node)
 		||((!expand)&&(!node_get_expand_state(node))))
 		return 0;
-	if(expand)
-	{
-		node_expand(node);
-		if(node->contents!=NULL)
-			return 0;
-		dir_contents* contents=node->contents=new dir_contents;
-		dir_node dirnode;
-		fnode filenode;
-		file_node_info info;
-		UInteger64 off=node->fl_end;
-		if(0!=(ret=RevFindLine(off,hlf)))
-			return ret;
-		while(off>node->fl_start)
-		{
-			UInteger64 endoff=off;
-			RevReadNode(hlf,off,&info);
-			switch(info.type)
-			{
-			case FILE_TYPE_DIR:
-				dirnode.fl_start=off;
-				dirnode.fl_end=endoff;
-				contents->dirs.push_back(dirnode);
-				break;
-			case FILE_TYPE_NORMAL:
-				filenode.fl_start=off;
-				filenode.fl_end=endoff;
-				contents->files.push_back(filenode);
-				break;
-			}
-		}
-		if(off<node->fl_start)
-		{
-			delete node->contents;
-			node->contents=NULL;
-			node_foldup(node);
-			return ERR_GENERIC;
-		}
-		reverse(node->contents->dirs.begin(),node->contents->dirs.end());
-		reverse(node->contents->files.begin(),node->contents->files.end());
-	}
-	else
+	if(!expand)
 	{
 		node_foldup(node);
+		return 0;
 	}
+	node_expand(node);
+	if(node->contents!=NULL)
+		return 0;
+	dir_contents* contents=node->contents=new dir_contents;
+	dir_node dirnode;
+	fnode filenode;
+	file_node_info info;
+	UInteger64 off=node->fl_end;
+	if(0!=(ret=RevFindLine(off,hlf)))
+		goto fail;
+	while(off>node->fl_start)
+	{
+		UInteger64 endoff=off;
+		if(0!=(ret=RevReadNode(hlf,off,&info)))
+			goto fail;
+		switch(info.type)
+		{
+		case FILE_TYPE_DIR:
+			dirnode.fl_start=off;
+			dirnode.fl_end=endoff;
+			contents->dirs.push_back(dirnode);
+			break;
+		case FILE_TYPE_NORMAL:
+			filenode.fl_start=off;
+			filenode.fl_end=endoff;
+			contents->files.push_back(filenode);
+			break;
+		}
+	}
+	if(off<node->fl_start)
+	{
+		ret=ERR_GENERIC;
+		goto fail;
+	}
+	reverse(node->contents->dirs.begin(),node->contents->dirs.end());
+	reverse(node->contents->files.begin(),node->contents->files.end());
 	return 0;
+
+fail:
+	delete node->contents;
+	node->contents=NULL;
+	node_foldup(node);
+	return ret;
 }
 static int build_base_tree(dir_node*& base,void* hlf,const UInteger64& endrec)
 {
