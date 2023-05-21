@@ -67,23 +67,17 @@ static inline bool rev_str(const byte* ptr,const byte* start,const byte*& revout
 {
 	assert(ptr>=start);
 	const byte* tmpptr;
-	for(tmpptr=ptr;tmpptr>=start;tmpptr--)
+	for(tmpptr=ptr;tmpptr>start;tmpptr--)
 	{
-		if(tmpptr-1>=start)
+		if(*(tmpptr-1)&0x80)
 		{
-			if(*(tmpptr-1)&0x80)
-			{
-				tmpptr--;
-				continue;
-			}
-			else if(*tmpptr=='\n')
-			{
-				revout=tmpptr+1;
-				return true;
-			}
+			tmpptr--;
 		}
-		else
-			break;
+		else if(*tmpptr=='\n')
+		{
+			revout=tmpptr+1;
+			return true;
+		}
 	}
 	revout=tmpptr+1;
 	return false;
