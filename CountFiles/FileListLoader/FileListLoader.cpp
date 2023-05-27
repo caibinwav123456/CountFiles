@@ -254,8 +254,8 @@ int expand_dir(dir_node* node,bool expand,void* hlf)
 	int ret=0;
 	if(node==NULL)
 		return ERR_GENERIC;
-	if(expand&&node_get_expand_state(node)
-		||((!expand)&&(!node_get_expand_state(node))))
+	if(expand&&node_state_exp(node)
+		||((!expand)&&(!node_state_exp(node))))
 		return 0;
 	if(!expand)
 	{
