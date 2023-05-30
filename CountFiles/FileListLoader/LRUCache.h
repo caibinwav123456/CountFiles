@@ -1,10 +1,5 @@
 #ifndef _LRU_CACHE_H_
 #define _LRU_CACHE_H_
-struct LRUCacheItem
-{
-	uint idx;
-	virtual ~LRUCacheItem(){}
-};
 class LRUCache
 {
 	struct HandleSlot
@@ -14,14 +9,14 @@ class LRUCache
 		uint sid;
 		uint oldsid;
 		uint newslot;
-		LRUCacheItem* item;
+		void* item;
 	};
 public:
-	LRUCache(uint _capacity,void (*_free_item)(LRUCacheItem* item));
+	LRUCache(uint _capacity,void (*_free_item)(void*));
 	~LRUCache();
 	void clear();
-	LRUCacheItem* get(void** phandle);
-	void put(LRUCacheItem* item,void** phandle);
+	void* get(void** phandle);
+	void put(void* item,void** phandle);
 private:
 	void move_to_front(HandleSlot* slot);
 	void add_to_front(HandleSlot* slot);
@@ -36,7 +31,7 @@ private:
 	uint size;
 	uint capacity;
 	HandleSlot* lookup_table;
-	void (*free_item)(LRUCacheItem* item);
+	void (*free_item)(void*);
 	uint next_sid;
 };
 #endif

@@ -3,7 +3,7 @@
 #include <string>
 #define FLIST_CACHE_SIZE 500
 #define GET_DATA(data) FileListData* data=(FileListData*)priv
-void free_cache_item(LRUCacheItem* item);
+void free_cache_item(void* item);
 int load_file_list(ctx_flist_loader* ctx,LRUCache* cache);
 void unload_file_list(ctx_flist_loader* ctx,LRUCache* cache);
 int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cache);

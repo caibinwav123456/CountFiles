@@ -8,14 +8,9 @@
 		sys_fclose(hfile); \
 		hfile=NULL; \
 	}
-template<class T>
-struct ListItem:public LRUCacheItem
+void free_cache_item(void* item)
 {
-	T t;
-};
-void free_cache_item(LRUCacheItem* item)
-{
-	delete item;
+	delete (file_node_info*)item;
 }
 static void free_flist_file_data(ctx_flist_loader* ctx)
 {
@@ -237,16 +232,16 @@ int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cac
 	if(node==NULL)
 		return ERR_GENERIC;
 	int ret=0;
-	ListItem<file_node_info>* item=(ListItem<file_node_info>*)cache->get(&node->handle);
+	file_node_info* item=(file_node_info*)cache->get(&node->handle);
 	if(item==NULL)
 	{
-		item=new ListItem<file_node_info>;
+		item=new file_node_info;
 		cache->put(item,&node->handle);
 		UInteger64 tmpoff=node->fl_end;
-		if(0!=(ret=RevReadNode(hlf,tmpoff,&item->t)))
+		if(0!=(ret=RevReadNode(hlf,tmpoff,item)))
 			return ret;
 	}
-	*pinfo=item->t;
+	*pinfo=*item;
 	return 0;
 }
 int expand_dir(dir_node* node,bool expand,void* hlf)

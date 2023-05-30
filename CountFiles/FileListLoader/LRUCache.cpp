@@ -45,7 +45,7 @@ static inline uint expire_id(uint id,uint refid)
 	return (uint)(ushort)rid;
 }
 #endif
-LRUCache::LRUCache(uint _capacity,void (*_free_item)(LRUCacheItem* item))
+LRUCache::LRUCache(uint _capacity,void (*_free_item)(void*))
 {
 	size=0;
 	capacity=_capacity;
@@ -100,7 +100,7 @@ void LRUCache::clear()
 		add_to_free(lookup_table+i);
 	}
 }
-LRUCacheItem* LRUCache::get(void** phandle)
+void* LRUCache::get(void** phandle)
 {
 	void*& handle=*phandle;
 	if(handle==NULL)
@@ -130,7 +130,7 @@ LRUCacheItem* LRUCache::get(void** phandle)
 		return NULL;
 	}
 }
-void LRUCache::put(LRUCacheItem* item,void** phandle)
+void LRUCache::put(void* item,void** phandle)
 {
 	void*& handle=*phandle;
 	HandleSlot* pslot;
@@ -173,7 +173,6 @@ void LRUCache::put(LRUCacheItem* item,void** phandle)
 		}
 	}
 end_update_new_slot:
-	item->idx=idx;
 	slot.item=item;
 	slot.sid=next_sid;
 	next_sid=next_id(next_sid);
