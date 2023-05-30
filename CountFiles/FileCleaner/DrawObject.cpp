@@ -152,23 +152,26 @@ CDCDraw::~CDCDraw()
 }
 CDrawer::CDrawer(CDCDraw* canvas):m_pCanvas(canvas)
 {
+	switch(m_pCanvas->m_nType)
+	{
+	case eDrawDirect:
+		m_pDCDraw=m_pCanvas->m_pClientDC;
+		break;
+	case eDrawBuffered:
+	case eDrawBufferedNoCreateDC:
+		m_pDCDraw=m_pCanvas->m_pMemDC;
+		break;
+	default:
+		ASSERT(FALSE);
+		m_pDCDraw=NULL;
+	}
 }
 CDrawer::~CDrawer()
 {
 }
-CDC* CDrawer::SelectDC()
+inline CDC* CDrawer::SelectDC()
 {
-	switch(m_pCanvas->m_nType)
-	{
-	case eDrawDirect:
-		return m_pCanvas->m_pClientDC;
-	case eDrawBuffered:
-	case eDrawBufferedNoCreateDC:
-		return m_pCanvas->m_pMemDC;
-	default:
-		ASSERT(FALSE);
-		return NULL;
-	}
+	return m_pDCDraw;
 }
 void CDrawer::DrawLine(POINT* start,POINT* end,COLORREF clr,int width,int style)
 {

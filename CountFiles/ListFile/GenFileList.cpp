@@ -53,10 +53,10 @@ static int init_param(file_cnt_param* param)
 	param->rec_len=0;
 	return 0;
 }
-static inline void log_error(const char* path,int ret,intf_cntfile* callback)
+static inline void log_error(const char* path,dword type,int ret,intf_cntfile* callback)
 {
 	char* errbuf=new char[strlen(path)+100];
-	sprintf(errbuf,"\"%s\" error: %s\n",path,get_error_desc(ret));
+	sprintf(errbuf,"\"%s%s\" error: %s\n",path,type==FILE_TYPE_DIR?"\\":"",get_error_desc(ret));
 	printf("%s",errbuf);
 	if(callback->cb_error!=NULL&&0!=(ret=callback->cb_error
 		((byte*)errbuf,strlen(errbuf),callback->param)))
@@ -69,31 +69,23 @@ static inline int log_end_rec(const string& path,uint npos,intf_cntfile* callbac
 		return callback->cb_rec((byte*)path.c_str(),path.size(),callback->param);
 	return 0;
 }
-static inline int log_rec(const string& path,uint npos,byte* buf,uint buflen,intf_cntfile* callback,file_cnt_param* param)
+static inline int log_rec(const string& path,uint npos,dword type,byte* buf,uint buflen,intf_cntfile* callback,file_cnt_param* param)
 {
 	int ret=0;
 	param->rec_len+=buflen;
 	if(0!=(ret=callback->cb_info(buf,buflen,callback->param)))
-		log_error(path.c_str()+npos,ret,callback);
+		log_error(path.c_str()+npos,type,ret,callback);
 	return ret;
 }
 static inline int query_file_info(const string& path,uint npos,UInteger64& size,CDateTime& date,intf_cntfile* callback)
 {
 	int ret=0;
 	if(0!=(ret=sys_get_file_time((char*)path.c_str(),NULL,&date,NULL)))
-	{
-		log_error(path.c_str()+npos,ret,callback);
 		return ret;
-	}
 	void* hFile=sys_fopen((char*)path.c_str(),FILE_READ|FILE_OPEN_EXISTING);
 	if(!VALID(hFile))
-	{
-		ret=ERR_OPEN_FILE_FAILED;
-		log_error(path.c_str()+npos,ret,callback);
-		return ret;
-	}
-	if(0!=(ret=sys_get_file_size(hFile,&size.low,&size.high)))
-		log_error(path.c_str()+npos,ret,callback);
+		return ERR_OPEN_FILE_FAILED;
+	ret=sys_get_file_size(hFile,&size.low,&size.high);
 	sys_fclose(hFile);
 	return ret;
 }
@@ -117,24 +109,27 @@ static int log_file_info(const string& path,uint npos,const string& name,dword t
 	else
 	{
 		if(query_file_info(path,npos,size,date,callback)!=0)
+		{
+			log_error(path.c_str()+npos,type,ret,callback);
 			return 0;
+		}
 	}
 
-	if(0!=(ret=log_rec(path,npos,(byte*)Tag,strlen((const char*)Tag),callback,param)))
+	if(0!=(ret=log_rec(path,npos,type,(byte*)Tag,strlen((const char*)Tag),callback,param)))
 		return ret;
 	if(bDir)
 	{
 		sprintf((char*)buf,"%s%u ",TAG_DRSIZE,ref_param->rec_len);
-		if(0!=(ret=log_rec(path,npos,buf,strlen((char*)buf),callback,param)))
+		if(0!=(ret=log_rec(path,npos,type,buf,strlen((char*)buf),callback,param)))
 			return ret;
 	}
 	pathname=string("\"")+name+"\" ";
-	if(0!=(ret=log_rec(path,npos,(byte*)pathname.c_str(),pathname.size(),callback,param)))
+	if(0!=(ret=log_rec(path,npos,type,(byte*)pathname.c_str(),pathname.size(),callback,param)))
 		return ret;
 	strsize=FormatI64(size);
 	date.Format(strdate,FORMAT_DATE|FORMAT_TIME|FORMAT_WEEKDAY);
 	sprintf((char*)buf,"%s%s %s\n",TAG_SIZE,strsize.c_str(),strdate.c_str());
-	if(0!=(ret=log_rec(path,npos,buf,strlen((char*)buf),callback,param)))
+	if(0!=(ret=log_rec(path,npos,type,buf,strlen((char*)buf),callback,param)))
 		return ret;
 	param->total_size+=size;
 	if(param->start_flag)

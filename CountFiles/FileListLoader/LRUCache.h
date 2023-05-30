@@ -26,6 +26,8 @@ private:
 	void move_to_front(LRUCacheItem* item);
 	void add_to_front(LRUCacheItem* item);
 	void remove(LRUCacheItem* item);
+	void sanitize(uint nslot);
+	void sanitize_one_slot(uint nslot);
 	LRUCacheItem head;
 	LRUCacheItem tail;
 	uint size;

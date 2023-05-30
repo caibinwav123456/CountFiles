@@ -2,7 +2,49 @@
 #include "LRUCache.h"
 #include <stdio.h>
 #include <string.h>
+#define clear_mem(m) memset(&m,0,sizeof(m))
 #define NULLSLOT ((uint)-1)
+#ifdef CONFIG_X64
+#define hiptr(ptr) ((uint)(((unsigned long long)(ptr))>>32))
+#define loptr(ptr) ((uint)(((unsigned long long)(ptr))&0xffffffff))
+#define mkptr(hi,lo) ((void*)((((unsigned long long)(uint)(hi))<<32)|(((unsigned long long)(uint)(lo))&0xffffffff)))
+static inline uint next_id(uint id)
+{
+	if(id+1==0)
+		return 1;
+	else
+		return id+1;
+}
+static inline uint expire_id(uint id,uint refid)
+{
+	int sid=(int)id;
+	int srefid=(int)refid;
+	if(srefid-sid>=0)
+		return id;
+	int rid=srefid-0x7fffffff;
+	return (uint)rid;
+}
+#else
+#define hiptr(ptr) ((uint)(((unsigned long long)(ptr))>>16))
+#define loptr(ptr) ((uint)(((unsigned long long)(ptr))&0xffff))
+#define mkptr(hi,lo) ((void*)(((hi)<<16)|((lo)&0xffff)))
+static inline uint next_id(uint id)
+{
+	if(id>=0xffff)
+		return 1;
+	else
+		return id+1;
+}
+static inline uint expire_id(uint id,uint refid)
+{
+	short sid=(short)(ushort)id;
+	short srefid=(short)(ushort)refid;
+	if(srefid-sid>=0)
+		return id;
+	short rid=srefid-(short)0x7fff;
+	return (uint)(ushort)rid;
+}
+#endif
 LRUCache::LRUCache(uint _capacity,void (*_free_item)(LRUCacheItem* item))
 {
 	size=0;
@@ -51,7 +93,7 @@ void LRUCache::clear()
 		if(lookup_table[i].item!=NULL)
 		{
 			free_item(lookup_table[i].item);
-			memset(&lookup_table[i],0,sizeof(lookup_table[i]));
+			clear_mem(lookup_table[i]);
 			lookup_table[i].newslot=NULLSLOT;
 		}
 	}
@@ -65,6 +107,7 @@ LRUCacheItem* LRUCache::get(void** phandle)
 	if(slot>=size)
 		return NULL;
 	uint sid=loptr(handle);
+	sanitize(slot);
 	HandleSlot& hslot=lookup_table[slot];
 	if(hslot.sid==sid&&hslot.item!=NULL)
 	{
@@ -107,10 +150,17 @@ void LRUCache::put(LRUCacheItem* item,void** phandle)
 		if(handle!=NULL)
 		{
 			uint oldslot=hiptr(handle);
-			if(lookup_table[oldslot].oldsid==loptr(handle)
+			HandleSlot& holdslot=lookup_table[oldslot];
+			uint s=expire_id(holdslot.oldsid,next_sid);
+			if(s!=holdslot.oldsid)
+			{
+				holdslot.oldsid=0;
+				holdslot.newslot=NULLSLOT;
+			}
+			else if(lookup_table[oldslot].oldsid==loptr(handle)
 				&&lookup_table[oldslot].newslot==NULLSLOT)
 			{
-				lookup_table[oldslot].newslot=idx;
+				holdslot.newslot=idx;
 			}
 		}
 		item->idx=idx;
@@ -148,4 +198,34 @@ void LRUCache::remove(LRUCacheItem* item)
 	item->prev->next=item->next;
 	item->next->prev=item->prev;
 	item->prev=item->next=item;
+}
+inline void LRUCache::sanitize_one_slot(uint nslot)
+{
+	HandleSlot& hslot=lookup_table[nslot];
+	uint s=expire_id(hslot.sid,next_sid);
+	if(s==hslot.sid)
+		return;
+	hslot.sid=0;
+	if(hslot.item!=NULL)
+	{
+		remove(hslot.item);
+		free_item(hslot.item);
+		hslot.item=NULL;
+		size--;
+	}
+}
+void LRUCache::sanitize(uint nslot)
+{
+	sanitize_one_slot(nslot);
+	HandleSlot& hslot=lookup_table[nslot];
+	uint s=expire_id(hslot.oldsid,next_sid);
+	if(s!=hslot.oldsid)
+	{
+		hslot.oldsid=0;
+		if(hslot.newslot!=NULLSLOT&&hslot.newslot!=nslot)
+		{
+			sanitize_one_slot(hslot.newslot);
+			hslot.newslot=NULLSLOT;
+		}
+	}
 }

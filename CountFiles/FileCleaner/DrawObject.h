@@ -34,5 +34,6 @@ public:
 private:
 	CDC* SelectDC();
 	CDCDraw* m_pCanvas;
+	CDC* m_pDCDraw;
 };
 #endif

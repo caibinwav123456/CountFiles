@@ -14,18 +14,9 @@ typedef unsigned long dword;
 #ifdef CONFIG_X64
 #define ptr_to_uint(ptr) ((uint)(signed int)(signed long long)(ptr))
 #define uint_to_ptr(n) ((void*)(signed long long)(signed int)(n))
-#define hiptr(ptr) ((uint)(((unsigned long long)(ptr))>>32))
-#define loptr(ptr) ((uint)(((unsigned long long)(ptr))&0xffffffff))
-#define mkptr(hi,lo) ((void*)((((unsigned long long)(uint)(hi))<<32)|(((unsigned long long)(uint)(lo))&0xffffffff)))
-#define next_id(id) ((id)+1==0?1:(id)+1)
 #else
 #define ptr_to_uint(ptr) ((uint)(ptr))
 #define uint_to_ptr(n) ((void*)(n))
-#define hiptr(ptr) ((uint)(((unsigned long long)(ptr))>>16))
-#define loptr(ptr) ((uint)(((unsigned long long)(ptr))&0xffff))
-#define mkptr(hi,lo) ((void*)(((hi)<<16)|((lo)&0xffff)))
-#define next_id(id) ((uint)((unsigned short)(id)+(unsigned short)1)==0? \
-					1:(uint)((unsigned short)(id)+(unsigned short)1))
 #endif
 #define hiword(x) ((x)>>16)
 #define loword(x) ((x)&0xffff)
@@ -59,6 +50,6 @@ typedef unsigned long dword;
 #define main_args int argc, char** argv
 #endif
 #include "ASTError.h"
-#include "sys.h"
 #include "defines.h"
+#include "sys.h"
 #endif
