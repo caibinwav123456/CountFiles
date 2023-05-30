@@ -26,24 +26,33 @@ inline void init_intf_cntfile(intf_cntfile* cbdata)
 #define node_state_exp(node) (!!((node)->flags&FLAG_NODE_EXPANDED))
 #define node_expand(node) ((node)->flags|=FLAG_NODE_EXPANDED)
 #define node_foldup(node) ((node)->flags&=~FLAG_NODE_EXPANDED)
-typedef struct fnode
+struct fnode
 {
 	dword flags;
 	UInteger64 fl_start;
 	UInteger64 fl_end;
 	void* handle;
 	fnode():flags(0),handle(NULL){}
-}err_dir_node;
+};
 struct dir_contents;
 struct dir_node:public fnode
 {
 	dir_contents* contents;
 	dir_node():contents(NULL){}
 };
+//here base fnode member fl_start & fl_end represents non-standard records.
+//In subdir list, they only represent subdir name.
+//In err_contents, they represent error record with path & error description.
 struct dir_err_contents
 {
-	vector<err_dir_node> err_dirs;
+	vector<fnode> err_dirs;
 	vector<fnode> err_files;
+};
+struct err_dir_node:public fnode
+{
+	dir_err_contents* err_contents;
+	vector<err_dir_node>* subdirs;
+	err_dir_node():err_contents(NULL),subdirs(NULL){}
 };
 struct dir_contents
 {
