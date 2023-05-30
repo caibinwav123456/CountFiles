@@ -198,11 +198,11 @@ void LRUCache::add_to_front(HandleSlot* slot)
 }
 void LRUCache::add_to_free(HandleSlot* slot)
 {
-	HandleSlot* next=free_head.next;
-	free_head.next=slot;
-	next->prev=slot;
-	slot->prev=&free_head;
-	slot->next=next;
+	HandleSlot* prev=free_tail.prev;
+	free_tail.prev=slot;
+	prev->next=slot;
+	slot->prev=prev;
+	slot->next=&free_tail;
 }
 void LRUCache::remove(HandleSlot* slot)
 {
