@@ -46,7 +46,7 @@ static int init_param(file_cnt_param* param)
 static inline void log_error(const char* path,dword type,int ret,const intf_cntfile* callback)
 {
 	char* errbuf=new char[strlen(path)+100];
-	sprintf(errbuf,"\"%s%s\" error: %s\n",path,type==FILE_TYPE_DIR?"\\":"",get_error_desc(ret));
+	sprintf(errbuf,"\"%s%s\" %s%s\n",path,type==FILE_TYPE_DIR?"\\":"",TAG_ERR_DESC,get_error_desc(ret));
 	printf("%s",errbuf);
 	if(callback->cb_error!=NULL&&0!=(ret=callback->cb_error
 		((byte*)errbuf,strlen(errbuf),callback->param)))

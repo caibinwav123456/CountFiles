@@ -7,5 +7,6 @@
 #define TAG_TYPE_FILE "N "
 #define TAG_DRSIZE "DirRecSize: "
 #define TAG_SIZE "Size: "
+#define TAG_ERR_DESC "error: "
 
 #endif

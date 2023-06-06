@@ -269,6 +269,8 @@ struct unode_iterator
 		case UNODE_ITERTYPE_ERR:
 			delete errit;
 			break;
+		default:
+			assert(false);
 		}
 	}
 	unode_iterator(const unode_iterator& other):type(other.type),master(false)
@@ -281,6 +283,8 @@ struct unode_iterator
 		case UNODE_ITERTYPE_ERR:
 			errit=other.errit;
 			break;
+		default:
+			assert(false);
 		}
 	}
 	path_value_t operator*()
