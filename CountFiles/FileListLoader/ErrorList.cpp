@@ -10,7 +10,7 @@ int retrieve_enode_info(efnode* node,err_node_info* pinfo,void* hef,LRUCache* ca
 {
 	return 0;
 }
-int get_err_dir_node_name(err_dir_node* enode,string& name)
+int get_err_dir_node_name(err_dir_node* enode,string& name,void* hef)
 {
 	return 0;
 }

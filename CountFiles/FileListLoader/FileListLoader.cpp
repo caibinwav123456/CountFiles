@@ -229,11 +229,12 @@ struct node_iterator:public iterator_base<dir_node>
 };
 struct err_node_iterator:public iterator_base<err_dir_node>
 {
-	err_node_iterator(vector<err_dir_node>& flist):iterator_base<err_dir_node>(flist){}
+	void* hef;
+	err_node_iterator(vector<err_dir_node>& flist,void* _hef):iterator_base<err_dir_node>(flist),hef(_hef){}
 	path_value_t operator*()
 	{
 		path_value_t v;
-		get_err_dir_node_name(&*it,v.val);
+		get_err_dir_node_name(&*it,v.val,hef);
 		return v;
 	}
 };
@@ -252,9 +253,9 @@ struct unode_iterator
 	{
 		dirit=new node_iterator(*flist,_hlf);
 	}
-	unode_iterator(vector<err_dir_node>* flist):type(UNODE_ITERTYPE_ERR),master(true)
+	unode_iterator(vector<err_dir_node>* flist,void* _hef):type(UNODE_ITERTYPE_ERR),master(true)
 	{
-		errit=new err_node_iterator(*flist);
+		errit=new err_node_iterator(*flist,_hef);
 	}
 	~unode_iterator()
 	{
@@ -294,7 +295,7 @@ struct unode_iterator
 			break;
 		default:
 			assert(false);
-			return *(path_value_t*)NULL;
+			return path_value_t();
 		}
 	}
 	operator bool()
@@ -345,10 +346,12 @@ int merge_callback(unode_iterator it1,unode_iterator it2,E_MERGE_SIDE side,void*
 	}
 	return 0;
 }
-static void merge_error_list(dir_node* node,void* hlf)
+static void merge_error_list(dir_node* node,void* hlf,void* hef)
 {
+	if(node->enode->subdirs==NULL)
+		return;
 	unode_iterator itdir(&node->contents->dirs,hlf);
-	unode_iterator iterr(node->enode->subdirs);
+	unode_iterator iterr(node->enode->subdirs,hef);
 	merge_ordered_list(itdir,iterr,&merge_callback,(void*)NULL);
 }
 int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cache)
@@ -368,7 +371,7 @@ int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cac
 	*pinfo=*item;
 	return 0;
 }
-int expand_dir(dir_node* node,bool expand,void* hlf)
+int expand_dir(dir_node* node,bool expand,void* hlf,void* hef)
 {
 	int ret=0;
 	if(node==NULL)
@@ -421,7 +424,7 @@ int expand_dir(dir_node* node,bool expand,void* hlf)
 	if(node->enode!=NULL)
 	{
 		node->contents->err_contents=node->enode->err_contents;
-		merge_error_list(node,hlf);
+		merge_error_list(node,hlf,hef);
 	}
 
 	return 0;

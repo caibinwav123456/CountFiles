@@ -29,7 +29,7 @@ struct file_cnt_param
 	CDateTime update_time;
 	uint rec_len;
 	bool start_flag;
-	intf_cntfile* user_callback;
+	const intf_cntfile* user_callback;
 };
 static bool less_rec(file_rec* a,file_rec* b)
 {
@@ -43,7 +43,7 @@ static int init_param(file_cnt_param* param)
 	param->rec_len=0;
 	return 0;
 }
-static inline void log_error(const char* path,dword type,int ret,intf_cntfile* callback)
+static inline void log_error(const char* path,dword type,int ret,const intf_cntfile* callback)
 {
 	char* errbuf=new char[strlen(path)+100];
 	sprintf(errbuf,"\"%s%s\" error: %s\n",path,type==FILE_TYPE_DIR?"\\":"",get_error_desc(ret));
@@ -53,13 +53,13 @@ static inline void log_error(const char* path,dword type,int ret,intf_cntfile* c
 		printf("log error failed: %s\n",get_error_desc(ret));
 	delete[] errbuf;
 }
-static inline int log_end_rec(const string& path,uint npos,intf_cntfile* callback)
+static inline int log_end_rec(const string& path,uint npos,const intf_cntfile* callback)
 {
 	if(callback->cb_rec!=NULL)
 		return callback->cb_rec((byte*)path.c_str(),path.size(),callback->param);
 	return 0;
 }
-static inline int log_rec(const string& path,uint npos,dword type,byte* buf,uint buflen,intf_cntfile* callback,file_cnt_param* param)
+static inline int log_rec(const string& path,uint npos,dword type,byte* buf,uint buflen,const intf_cntfile* callback,file_cnt_param* param)
 {
 	int ret=0;
 	param->rec_len+=buflen;
@@ -67,7 +67,7 @@ static inline int log_rec(const string& path,uint npos,dword type,byte* buf,uint
 		log_error(path.c_str()+npos,type,ret,callback);
 	return ret;
 }
-static inline int query_file_info(const string& path,uint npos,UInteger64& size,CDateTime& date,intf_cntfile* callback)
+static inline int query_file_info(const string& path,uint npos,UInteger64& size,CDateTime& date,const intf_cntfile* callback)
 {
 	int ret=0;
 	if(0!=(ret=sys_get_file_time((char*)path.c_str(),NULL,&date,NULL)))
@@ -82,7 +82,7 @@ static inline int query_file_info(const string& path,uint npos,UInteger64& size,
 static int log_file_info(const string& path,uint npos,const string& name,dword type,file_cnt_param* param,const file_cnt_param* ref_param)
 {
 	int ret=0;
-	intf_cntfile* callback=param->user_callback;
+	const intf_cntfile* callback=param->user_callback;
 	bool bDir=type==FILE_TYPE_DIR;
 	const byte *Tag=(const byte*)(bDir?TAG_TYPE_DIR:TAG_TYPE_FILE);
 	UInteger64 size;
@@ -185,7 +185,7 @@ static int recurse_cnt_file(const string& path,uint npos,const string& name,file
 	}
 	return log_file_info(path,npos,name,type,param,&next_param);
 }
-int GenFileListInternal(char* path,intf_cntfile* callback,char dsym)
+int GenFileListInternal(const char* path,const intf_cntfile* callback,char dsym)
 {
 	if(callback==NULL)
 		return ERR_GENERIC;
