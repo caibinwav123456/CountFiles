@@ -30,14 +30,10 @@ int retrieve_enode_info(efnode* node,err_node_info* pinfo,void* hef,LRUCache* ca
 				goto end2;
 			if(0!=(ret=sys_fread(hef,buf,len)))
 				goto end2;
-end2:
-			if(ret!=0)
-			{
-				delete[] buf;
-				goto end;
-			}
 			buf[len]=0;
 			peinfo->err_desc=buf;
+end2:
+			delete[] buf;
 		}
 end:
 		if(ret!=0)
