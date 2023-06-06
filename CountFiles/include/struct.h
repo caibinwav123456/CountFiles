@@ -5,6 +5,7 @@
 #include "Integer64.h"
 #include <vector>
 #include <string>
+#define fllapi //FileListLoader API's
 typedef int (*file_info_callback)(byte* buf,uint buflen,void* param);
 struct intf_cntfile
 {
@@ -69,19 +70,19 @@ struct dir_contents
 	dir_err_contents* err_contents;
 	dir_contents():err_contents(NULL){}
 };
-inline uint get_subdir_cnt(dir_node* dir)
+inline fllapi uint get_subdir_cnt(dir_node* dir)
 {
 	if(dir==NULL||dir->contents==NULL)
 		return 0;
 	return dir->contents->dirs.size();
 }
-inline uint get_subfile_cnt(dir_node* dir)
+inline fllapi uint get_subfile_cnt(dir_node* dir)
 {
 	if(dir==NULL||dir->contents==NULL)
 		return 0;
 	return dir->contents->files.size();
 }
-inline dir_node* get_subdir(dir_node* dir,int idx)
+inline fllapi dir_node* get_subdir(dir_node* dir,int idx)
 {
 	if(dir==NULL||dir->contents==NULL)
 		return NULL;
@@ -89,7 +90,7 @@ inline dir_node* get_subdir(dir_node* dir,int idx)
 		return NULL;
 	return &dir->contents->dirs[idx];
 }
-inline fnode* get_subfile(dir_node* dir,int idx)
+inline fllapi fnode* get_subfile(dir_node* dir,int idx)
 {
 	if(dir==NULL||dir->contents==NULL)
 		return NULL;
@@ -113,6 +114,34 @@ struct err_node_info:public node_info_base
 {
 	string err_desc;
 };
+inline fllapi uint get_errdir_cnt(dir_node* dir)
+{
+	if(dir==NULL||dir->contents==NULL||dir->contents->err_contents==NULL)
+		return 0;
+	return dir->contents->err_contents->err_dirs.size();
+}
+inline fllapi uint get_errfile_cnt(dir_node* dir)
+{
+	if(dir==NULL||dir->contents==NULL||dir->contents->err_contents==NULL)
+		return 0;
+	return dir->contents->err_contents->err_files.size();
+}
+inline fllapi efnode* get_errdir(dir_node* dir,int idx)
+{
+	if(dir==NULL||dir->contents==NULL||dir->contents->err_contents==NULL)
+		return NULL;
+	if(idx<0||idx>=(int)dir->contents->err_contents->err_dirs.size())
+		return NULL;
+	return &dir->contents->err_contents->err_dirs[idx];
+}
+inline fllapi efnode* get_errfile(dir_node* dir,int idx)
+{
+	if(dir==NULL||dir->contents==NULL||dir->contents->err_contents==NULL)
+		return NULL;
+	if(idx<0||idx>=(int)dir->contents->err_contents->err_files.size())
+		return NULL;
+	return &dir->contents->err_contents->err_files[idx];
+}
 struct ctx_flist_loader
 {
 	string listfile;

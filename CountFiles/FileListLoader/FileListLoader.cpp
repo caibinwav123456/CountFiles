@@ -359,16 +359,25 @@ int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cac
 	if(node==NULL)
 		return ERR_GENERIC;
 	int ret=0;
-	file_node_info* item=(file_node_info*)cache->get(&node->handle);
-	if(item==NULL)
+	node_info_base* item=(node_info_base*)cache->get(&node->handle);
+	file_node_info* pfinfo;
+	if(item!=NULL)
 	{
-		item=new file_node_info;
-		cache->put(item,&node->handle);
-		UInteger64 tmpoff=node->fl_end;
-		if(0!=(ret=RevReadNode(hlf,tmpoff,item)))
-			return ret;
+		pfinfo=dynamic_cast<file_node_info*>(item);
+		assert(pfinfo!=NULL);
 	}
-	*pinfo=*item;
+	else
+	{
+		item=pfinfo=new file_node_info;
+		UInteger64 tmpoff=node->fl_end;
+		if(0!=(ret=RevReadNode(hlf,tmpoff,pfinfo)))
+		{
+			delete pfinfo;
+			return ret;
+		}
+		cache->put(item,&node->handle);
+	}
+	*pinfo=*pfinfo;
 	return 0;
 }
 int expand_dir(dir_node* node,bool expand,void* hlf,void* hef)

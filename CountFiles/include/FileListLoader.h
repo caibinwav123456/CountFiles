@@ -12,6 +12,7 @@ public:
 
 	int ExpandNode(dir_node* node,bool expand);
 	int GetNodeInfo(fnode* node,file_node_info* pinfo);
+	int GetNodeErrInfo(efnode* node,err_node_info* peinfo);
 
 	dir_node* GetRootNode();
 

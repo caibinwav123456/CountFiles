@@ -50,6 +50,11 @@ int FileListLoader::GetNodeInfo(fnode* node,file_node_info* pinfo)
 	GET_DATA(data);
 	return retrieve_node_info(node,pinfo,data->ctx.hlf,&data->cache);
 }
+int FileListLoader::GetNodeErrInfo(efnode* node,err_node_info* peinfo)
+{
+	GET_DATA(data);
+	return retrieve_enode_info(node,peinfo,data->ctx.hef,&data->cache);
+}
 dir_node* FileListLoader::GetRootNode()
 {
 	GET_DATA(data);
