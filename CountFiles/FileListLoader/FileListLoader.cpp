@@ -1,7 +1,8 @@
 #define DLL_IMPORT
 #include "struct.h"
 #include "LRUCache.h"
-#include <assert.h>
+#include "FileListLoaderInternal.h"
+#include "utility.h"
 #define safe_fclose(hfile) \
 	if(VALID(hfile)) \
 	{ \
@@ -10,7 +11,7 @@
 	}
 void free_cache_item(void* item)
 {
-	delete (file_node_info*)item;
+	delete (node_info_base*)item;
 }
 static void free_flist_file_data(ctx_flist_loader* ctx)
 {
@@ -26,76 +27,26 @@ static void free_dir_node(dir_node* dir)
 	if(dir->contents==NULL)
 		return;
 	for(int i=0;i<(int)dir->contents->dirs.size();i++)
-	{
 		free_dir_node(&dir->contents->dirs[i]);
-	}
 	delete dir->contents;
 	dir->contents=NULL;
 }
-static inline uint forward_str(const byte*& ptr,uint& len,uint step)
+static void free_enode(err_dir_node* edir)
 {
-	uint cstep=0;
-	for(;cstep<step&&len>0;cstep++)
+	if(edir==NULL)
+		return;
+	if(edir->err_contents!=NULL)
 	{
-		if((*ptr)&0x80)
-		{
-			if(len>1)
-			{
-				ptr+=2;
-				len-=2;
-			}
-			else
-			{
-				ptr+=len;
-				len=0;
-			}
-		}
-		else
-		{
-			ptr++;
-			len--;
-		}
+		delete edir->err_contents;
+		edir->err_contents=NULL;
 	}
-	return cstep;
+	if(edir->subdirs==NULL)
+		return;
+	for(int i=0;i<(int)edir->subdirs->size();i++)
+		free_enode(&(edir->subdirs->at(i)));
+	delete edir->subdirs;
+	edir->subdirs=NULL;
 }
-static inline bool rev_str(const byte* ptr,const byte* start,const byte*& revout)
-{
-	assert(ptr>=start);
-	const byte* tmpptr;
-	for(tmpptr=ptr;tmpptr>start;tmpptr--)
-	{
-		if(*(tmpptr-1)&0x80)
-		{
-			tmpptr--;
-		}
-		else if(*tmpptr=='\n')
-		{
-			revout=tmpptr+1;
-			return true;
-		}
-	}
-	revout=tmpptr+1;
-	return false;
-}
-static inline bool find_byte(const byte*& ptr,uint& len,byte c)
-{
-	for(;len>0;forward_str(ptr,len,1))
-	{
-		if(*ptr==c)
-			return true;
-	}
-	return false;
-}
-#define advance_ptr(ptr,len,step) \
-	if(forward_str(ptr,len,step)<step) \
-		return ERR_BUFFER_OVERFLOW
-#define pass_byte(c) \
-	buf=ptr; \
-	advance_ptr(ptr,len,1); \
-	if(*buf!=(byte)(c)) \
-		return ERR_BAD_CONFIG_FORMAT; \
-	buf=ptr
-#define pass_space pass_byte(' ')
 static int RevFindLine(UInteger64& off,void* hlf)
 {
 	if(off<=UInteger64(1))
@@ -227,6 +178,179 @@ static int RevReadNode(void* hlf,UInteger64& off,file_node_info* pinfo=NULL)
 	off=prevoff;
 	return 0;
 }
+struct path_value_t
+{
+	string val;
+	string* pval;
+	path_value_t():pval(NULL){}
+};
+bool operator<(const path_value_t& a,const path_value_t& b)
+{
+	const string &stra=a.pval!=NULL?*a.pval:a.val,
+		&strb=b.pval!=NULL?*b.pval:b.val;
+	return compare_pathname(stra,strb)<0;
+}
+template<class T>
+struct iterator_base
+{
+	typename vector<T>::iterator it;
+	typename vector<T>::iterator end;
+	iterator_base(vector<T>& v)
+	{
+		it=v.begin();
+		end=v.end();
+	}
+	operator bool()
+	{
+		return it!=end;
+	}
+	void operator++(int)
+	{
+		if(it<end)
+			it++;
+	}
+};
+struct node_iterator:public iterator_base<dir_node>
+{
+	void* hlf;
+	node_iterator(vector<dir_node>& flist,void* _hlf):iterator_base<dir_node>(flist),hlf(_hlf){}
+	path_value_t operator*()
+	{
+		path_value_t v;
+		UInteger64 tmpoff=it->fl_start,off=it->fl_end,prevoff;
+		file_node_info info;
+		if(0!=RevFindLine(tmpoff,hlf))
+			return v;
+		if(0!=ReadRecContent(tmpoff,(off-tmpoff).low,prevoff,hlf,&info))
+			return v;
+		v.val=info.name;
+		return v;
+	}
+};
+struct err_node_iterator:public iterator_base<err_dir_node>
+{
+	err_node_iterator(vector<err_dir_node>& flist):iterator_base<err_dir_node>(flist){}
+	path_value_t operator*()
+	{
+		path_value_t v;
+		get_err_dir_node_name(&*it,v.val);
+		return v;
+	}
+};
+#define UNODE_ITERTYPE_DIR 0
+#define UNODE_ITERTYPE_ERR 1
+struct unode_iterator
+{
+	uint type;
+	union
+	{
+		node_iterator* dirit;
+		err_node_iterator* errit;
+	};
+	bool master;
+	unode_iterator(vector<dir_node>* flist,void* _hlf):type(UNODE_ITERTYPE_DIR),master(true)
+	{
+		dirit=new node_iterator(*flist,_hlf);
+	}
+	unode_iterator(vector<err_dir_node>* flist):type(UNODE_ITERTYPE_ERR),master(true)
+	{
+		errit=new err_node_iterator(*flist);
+	}
+	~unode_iterator()
+	{
+		if(!master)
+			return;
+		switch(type)
+		{
+		case UNODE_ITERTYPE_DIR:
+			delete dirit;
+			break;
+		case UNODE_ITERTYPE_ERR:
+			delete errit;
+			break;
+		}
+	}
+	unode_iterator(const unode_iterator& other):type(other.type),master(false)
+	{
+		switch(type)
+		{
+		case UNODE_ITERTYPE_DIR:
+			dirit=other.dirit;
+			break;
+		case UNODE_ITERTYPE_ERR:
+			errit=other.errit;
+			break;
+		}
+	}
+	path_value_t operator*()
+	{
+		switch(type)
+		{
+		case UNODE_ITERTYPE_DIR:
+			return **dirit;
+			break;
+		case UNODE_ITERTYPE_ERR:
+			return **errit;
+			break;
+		default:
+			assert(false);
+			return *(path_value_t*)NULL;
+		}
+	}
+	operator bool()
+	{
+		switch(type)
+		{
+		case UNODE_ITERTYPE_DIR:
+			return *dirit;
+			break;
+		case UNODE_ITERTYPE_ERR:
+			return *errit;
+			break;
+		default:
+			assert(false);
+			return false;
+		}
+	}
+	void operator++(int)
+	{
+		switch(type)
+		{
+		case UNODE_ITERTYPE_DIR:
+			(*dirit)++;
+			break;
+		case UNODE_ITERTYPE_ERR:
+			(*errit)++;
+			break;
+		default:
+			assert(false);
+		}
+	}
+};
+int merge_callback(unode_iterator it1,unode_iterator it2,E_MERGE_SIDE side,void* param)
+{
+	assert(it1.type==UNODE_ITERTYPE_DIR
+		&&it2.type==UNODE_ITERTYPE_ERR);
+	switch(side)
+	{
+	case eMSLeft:
+		break;
+	case eMSRight:
+		break;
+	case eMSBoth:
+		it1.dirit->it->enode=&*(it2.errit->it);
+		break;
+	default:
+		assert(false);
+	}
+	return 0;
+}
+static void merge_error_list(dir_node* node,void* hlf)
+{
+	unode_iterator itdir(&node->contents->dirs,hlf);
+	unode_iterator iterr(node->enode->subdirs);
+	merge_ordered_list(itdir,iterr,&merge_callback,(void*)NULL);
+}
 int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cache)
 {
 	if(node==NULL)
@@ -293,6 +417,13 @@ int expand_dir(dir_node* node,bool expand,void* hlf)
 	}
 	reverse(node->contents->dirs.begin(),node->contents->dirs.end());
 	reverse(node->contents->files.begin(),node->contents->files.end());
+
+	if(node->enode!=NULL)
+	{
+		node->contents->err_contents=node->enode->err_contents;
+		merge_error_list(node,hlf);
+	}
+
 	return 0;
 
 fail:
@@ -311,6 +442,17 @@ static int build_base_tree(dir_node*& base,void* hlf,const UInteger64& endrec)
 		return ret;
 	if(info.type!=FILE_TYPE_DIR)
 		return ERR_GENERIC;
+	return 0;
+}
+static int build_err_tree(err_dir_node*& ebase,void* hef,dir_node* base)
+{
+	int ret=0;
+	if(base==NULL)
+		return ERR_GENERIC;
+	ebase=new err_dir_node;
+	if(0!=(ret=load_error_list(ebase,hef)))
+		return ret;
+	base->enode=ebase;
 	return 0;
 }
 void unload_file_list(ctx_flist_loader* ctx,LRUCache* cache);
@@ -343,13 +485,27 @@ int load_file_list(ctx_flist_loader* ctx,LRUCache* cache)
 		unload_file_list(ctx,cache);
 		return ret;
 	}
+	if(VALID(ctx->hef)&&0!=(ret=build_err_tree(ctx->base_enode,ctx->hef,ctx->base_node)))
+	{
+		unload_file_list(ctx,cache);
+		return ret;
+	}
 	return 0;
 }
 void unload_file_list(ctx_flist_loader* ctx,LRUCache* cache)
 {
 	free_flist_file_data(ctx);
-	free_dir_node(ctx->base_node);
-	delete ctx->base_node;
-	ctx->base_node=NULL;
+	if(ctx->base_node!=NULL)
+	{
+		free_dir_node(ctx->base_node);
+		delete ctx->base_node;
+		ctx->base_node=NULL;
+	}
+	if(ctx->base_enode!=NULL)
+	{
+		free_enode(ctx->base_enode);
+		delete ctx->base_enode;
+		ctx->base_enode=NULL;
+	}
 	cache->clear();
 }

@@ -27,11 +27,13 @@
     <ClInclude Include="..\include\GenFileList.h" />
     <ClInclude Include="..\include\Integer64.h" />
     <ClInclude Include="..\include\sys.h" />
+    <ClInclude Include="..\include\utility.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ASTError.cpp" />
     <ClCompile Include="datetime.cpp" />
     <ClCompile Include="Integer64.cpp" />
+    <ClCompile Include="utility.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

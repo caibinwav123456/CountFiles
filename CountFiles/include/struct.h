@@ -35,18 +35,26 @@ struct fnode
 	fnode():flags(0),handle(NULL){}
 };
 struct dir_contents;
+struct err_dir_node;
 struct dir_node:public fnode
 {
 	dir_contents* contents;
-	dir_node():contents(NULL){}
+	err_dir_node* enode;
+	dir_node():contents(NULL),enode(NULL){}
 };
-//here base fnode member fl_start & fl_end represents non-standard records.
-//In subdir list, they only represent subdir name.
-//In err_contents, they represent error record with path & error description.
+//Here base fnode member fl_start & fl_end represents non-standard records.
+//In err_dir_node::fnode, they only represent the subdir name.
+//In err_contents members err_dirs & err_files, efnode::fnode represent file/dir name.
+//Members efnode::efl_start & efnode::efl_end represent offsets of an error description.
+struct efnode:public fnode
+{
+	UInteger64 efl_start;
+	UInteger64 efl_end;
+};
 struct dir_err_contents
 {
-	vector<fnode> err_dirs;
-	vector<fnode> err_files;
+	vector<efnode> err_dirs;
+	vector<efnode> err_files;
 };
 struct err_dir_node:public fnode
 {
@@ -94,6 +102,7 @@ struct node_info_base
 	string name;
 	dword type;
 	node_info_base():type(0){}
+	virtual ~node_info_base(){};
 };
 struct file_node_info:public node_info_base
 {
@@ -111,9 +120,11 @@ struct ctx_flist_loader
 	void* hlf;
 	void* hef;
 	dir_node* base_node;
+	err_dir_node* base_enode;
 	ctx_flist_loader()
 	{
 		base_node=NULL;
+		base_enode=NULL;
 		hlf=NULL;
 		hef=NULL;
 	}

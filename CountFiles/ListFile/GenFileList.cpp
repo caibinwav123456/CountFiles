@@ -2,16 +2,11 @@
 #include "struct.h"
 #include "datetime.h"
 #include "Integer64.h"
-#include <string.h>
+#include "utility.h"
 #include <string>
 #include <vector>
 #include <algorithm>
 using namespace std;
-#if !defined(BUILD_ON_WINDOWS)
-#define CmpNoCase strncasecmp
-#else
-#define CmpNoCase strnicmp
-#endif
 struct file_rec
 {
 	string name;
@@ -38,12 +33,7 @@ struct file_cnt_param
 };
 static bool less_rec(file_rec* a,file_rec* b)
 {
-	int ret=CmpNoCase(a->name.c_str(),b->name.c_str(),min(a->name.size(),b->name.size()));
-	if(ret!=0)
-		return ret<0;
-	if(a->name.size()!=b->name.size())
-		return a->name.size()<b->name.size();
-	return a->name<b->name;
+	return compare_pathname(a->name,b->name)<0;
 }
 static int init_param(file_cnt_param* param)
 {

@@ -1,13 +1,9 @@
 #include "FileListLoader.h"
 #include "LRUCache.h"
 #include <string>
+#include "FileListLoaderInternal.h"
 #define FLIST_CACHE_SIZE 500
 #define GET_DATA(data) FileListData* data=(FileListData*)priv
-void free_cache_item(void* item);
-int load_file_list(ctx_flist_loader* ctx,LRUCache* cache);
-void unload_file_list(ctx_flist_loader* ctx,LRUCache* cache);
-int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cache);
-int expand_dir(dir_node* node,bool expand,void* hlf);
 struct FileListData
 {
 	ctx_flist_loader ctx;
