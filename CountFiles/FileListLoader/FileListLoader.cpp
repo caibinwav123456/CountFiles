@@ -213,15 +213,13 @@ struct iterator_base
 struct node_iterator:public iterator_base<dir_node>
 {
 	void* hlf;
-	node_iterator(vector<dir_node>& flist,void* _hlf):iterator_base<dir_node>(flist),hlf(_hlf){}
+	LRUCache* cache;
+	node_iterator(vector<dir_node>& flist,void* _hlf,LRUCache* _cache):iterator_base<dir_node>(flist),hlf(_hlf),cache(_cache){}
 	path_value_t operator*()
 	{
 		path_value_t v;
-		UInteger64 tmpoff=it->fl_start,off=it->fl_end,prevoff;
 		file_node_info info;
-		if(0!=RevFindLine(tmpoff,hlf))
-			return v;
-		if(0!=ReadRecContent(tmpoff,(off-tmpoff).low,prevoff,hlf,&info))
+		if(0!=retrieve_node_info(&*it,&info,hlf,cache))
 			return v;
 		v.val=info.name;
 		return v;
@@ -242,16 +240,16 @@ struct err_node_iterator:public iterator_base<err_dir_node>
 #define UNODE_ITERTYPE_ERR 1
 struct unode_iterator
 {
-	uint type;
 	union
 	{
 		node_iterator* dirit;
 		err_node_iterator* errit;
 	};
+	uint type;
 	bool master;
-	unode_iterator(vector<dir_node>* flist,void* _hlf):type(UNODE_ITERTYPE_DIR),master(true)
+	unode_iterator(vector<dir_node>* flist,void* _hlf,LRUCache* _cache):type(UNODE_ITERTYPE_DIR),master(true)
 	{
-		dirit=new node_iterator(*flist,_hlf);
+		dirit=new node_iterator(*flist,_hlf,_cache);
 	}
 	unode_iterator(vector<err_dir_node>* flist,void* _hef):type(UNODE_ITERTYPE_ERR),master(true)
 	{
@@ -341,6 +339,7 @@ int merge_callback(unode_iterator it1,unode_iterator it2,E_MERGE_SIDE side,void*
 	case eMSLeft:
 		break;
 	case eMSRight:
+		assert(false);
 		break;
 	case eMSBoth:
 		it1.dirit->it->enode=&*(it2.errit->it);
@@ -350,11 +349,11 @@ int merge_callback(unode_iterator it1,unode_iterator it2,E_MERGE_SIDE side,void*
 	}
 	return 0;
 }
-static void merge_error_list(dir_node* node,void* hlf,void* hef)
+static void merge_error_list(dir_node* node,void* hlf,void* hef,LRUCache* cache)
 {
 	if(node->enode->subdirs==NULL)
 		return;
-	unode_iterator itdir(&node->contents->dirs,hlf);
+	unode_iterator itdir(&node->contents->dirs,hlf,cache);
 	unode_iterator iterr(node->enode->subdirs,hef);
 	merge_ordered_list(itdir,iterr,&merge_callback,(void*)NULL);
 }
@@ -384,7 +383,7 @@ int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cac
 	*pinfo=*pfinfo;
 	return 0;
 }
-int expand_dir(dir_node* node,bool expand,void* hlf,void* hef)
+int expand_dir(dir_node* node,bool expand,void* hlf,void* hef,LRUCache* cache)
 {
 	int ret=0;
 	if(node==NULL)
@@ -437,7 +436,7 @@ int expand_dir(dir_node* node,bool expand,void* hlf,void* hef)
 	if(node->enode!=NULL)
 	{
 		node->contents->err_contents=node->enode->err_contents;
-		merge_error_list(node,hlf,hef);
+		merge_error_list(node,hlf,hef,cache);
 	}
 
 	return 0;

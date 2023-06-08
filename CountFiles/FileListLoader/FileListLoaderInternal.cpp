@@ -43,7 +43,7 @@ void FileListLoader::Unload()
 int FileListLoader::ExpandNode(dir_node* node,bool expand)
 {
 	GET_DATA(data);
-	return expand_dir(node,expand,data->ctx.hlf,data->ctx.hef);
+	return expand_dir(node,expand,data->ctx.hlf,data->ctx.hef,&data->cache);
 }
 int FileListLoader::GetNodeInfo(fnode* node,file_node_info* pinfo)
 {
