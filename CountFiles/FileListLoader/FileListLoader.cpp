@@ -219,8 +219,9 @@ struct node_iterator:public iterator_base<dir_node>
 	{
 		path_value_t v;
 		file_node_info info;
-		if(0!=retrieve_node_info(&*it,&info,hlf,cache))
-			return v;
+		int ret=retrieve_node_info(&*it,&info,hlf,cache);
+		if(ret!=0)
+			throw ret;
 		v.val=info.name;
 		return v;
 	}
@@ -232,7 +233,9 @@ struct err_node_iterator:public iterator_base<err_dir_node>
 	path_value_t operator*()
 	{
 		path_value_t v;
-		get_err_dir_node_name(&*it,v.val,hef);
+		int ret=get_err_dir_node_name(&*it,v.val,hef);
+		if(ret!=0)
+			throw ret;
 		return v;
 	}
 };
@@ -349,13 +352,20 @@ int merge_callback(unode_iterator it1,unode_iterator it2,E_MERGE_SIDE side,void*
 	}
 	return 0;
 }
-static void merge_error_list(dir_node* node,void* hlf,void* hef,LRUCache* cache)
+static int merge_error_list(dir_node* node,void* hlf,void* hef,LRUCache* cache)
 {
 	if(node->enode->subdirs==NULL)
-		return;
+		return 0;
 	unode_iterator itdir(&node->contents->dirs,hlf,cache);
 	unode_iterator iterr(node->enode->subdirs,hef);
-	merge_ordered_list(itdir,iterr,&merge_callback,(void*)NULL);
+	try
+	{
+		merge_ordered_list(itdir,iterr,&merge_callback,(void*)NULL);
+	}catch(int err)
+	{
+		return err;
+	}
+	return 0;
 }
 int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cache)
 {
@@ -436,7 +446,8 @@ int expand_dir(dir_node* node,bool expand,void* hlf,void* hef,LRUCache* cache)
 	if(node->enode!=NULL)
 	{
 		node->contents->err_contents=node->enode->err_contents;
-		merge_error_list(node,hlf,hef,cache);
+		if(0!=(ret=merge_error_list(node,hlf,hef,cache)))
+			goto fail;
 	}
 
 	return 0;

@@ -75,6 +75,22 @@ void CChildView::OnDraw(CDC* pDC)
 /*
 static int test()
 {
+	struct fnode
+	{
+		dword flags;
+		UInteger64 fl_start;
+		UInteger64 fl_end;
+		void* handle;
+		fnode():flags(0),handle(NULL){}
+	};
+	struct dir_contents;
+	struct err_dir_node;
+	struct dir_node:public fnode
+	{
+		dir_contents* contents;
+		err_dir_node* enode;
+		dir_node():contents(NULL),enode(NULL){}
+	};
 	const char* listfile="E:\\Programs\\CountFiles\\CountFiles\\IPCIF.txt";
 	FileListLoader loader;
 	int ret=loader.Load(listfile);
@@ -100,9 +116,9 @@ static int test()
 		ret=loader.GetNodeInfo(get_subdir(loader.GetRootNode(),i),&info);
 	ret=loader.GetNodeInfo(get_subfile(loader.GetRootNode(),0),&info);
 
-	dir_node tmpnode=*get_subdir(loader.GetRootNode(),0);
+	dir_node tmpnode=*(dir_node*)get_subdir(loader.GetRootNode(),0);
 	ret=loader.GetNodeInfo(get_subdir(loader.GetRootNode(),0),&info);
-	ret=loader.GetNodeInfo(&tmpnode,&info);
+	ret=loader.GetNodeInfo((HDNODE)&tmpnode,&info);
 
 	return ret;
 }*/
