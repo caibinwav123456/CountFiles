@@ -93,13 +93,13 @@ int FileListLoader::Load(const char* listfile,const char* errfile)
 {
 	GET_DATA(data);
 	if(!(data->ctx.listfile.empty()&&data->ctx.errfile.empty()))
-		return ERR_GENERIC;
+		return ERR_INVALID_CALL;
 	data->ctx.listfile=listfile;
 	data->ctx.errfile=(errfile==NULL?"":errfile);
 	if(data->ctx.listfile.empty())
 	{
 		data->ctx.errfile.clear();
-		return ERR_GENERIC;
+		return ERR_INVALID_CALL;
 	}
 	return load_file_list(&data->ctx,&data->cache);
 }

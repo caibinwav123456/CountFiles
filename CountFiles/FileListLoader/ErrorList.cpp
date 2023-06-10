@@ -9,7 +9,7 @@ int load_error_list(err_dir_node* enode,void* hef)
 int retrieve_enode_info(efnode* node,err_node_info* pinfo,void* hef,LRUCache* cache)
 {
 	if(node==NULL)
-		return ERR_GENERIC;
+		return ERR_INVALID_PARAM;
 	int ret=0;
 	node_info_base* item=(node_info_base*)cache->get(&node->handle);
 	err_node_info* peinfo;

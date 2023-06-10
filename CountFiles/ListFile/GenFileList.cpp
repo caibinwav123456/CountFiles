@@ -188,7 +188,7 @@ static int recurse_cnt_file(const string& path,uint npos,const string& name,file
 int GenFileListInternal(const char* path,const intf_cntfile* callback,char dsym)
 {
 	if(callback==NULL)
-		return ERR_GENERIC;
+		return ERR_INVALID_PARAM;
 	int ret=0;
 	dword type;
 	string strpath=path;

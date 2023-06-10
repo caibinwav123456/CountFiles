@@ -1,6 +1,7 @@
 #ifndef _FILE_LIST_LOADER_INTERNAL_H_
 #define _FILE_LIST_LOADER_INTERNAL_H_
 #include <assert.h>
+#include <vector>
 #define FLAG_NODE_EXPANDED    1
 #define FLAG_NODE_DELETED     2
 #define FLAG_NODE_LOADERR     4

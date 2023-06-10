@@ -50,7 +50,7 @@ static void free_enode(err_dir_node* edir)
 static int RevFindLine(UInteger64& off,void* hlf)
 {
 	if(off<=UInteger64(1))
-		return ERR_GENERIC;
+		return ERR_CORRUPTED_FILE;
 	UInteger64 tmpoff=off-UInteger64(1);
 	UInteger64 start;
 	byte buf[64];
@@ -117,7 +117,7 @@ static int parse_rec(const byte* buf,uint len,file_node_info* pinfo,UInteger64& 
 	else if(memcmp(buf,TAG_TYPE_FILE,2)==0)
 		pinfo->type=FILE_TYPE_NORMAL;
 	else
-		return ERR_GENERIC;
+		return ERR_INVALID_TAG;
 
 	recsize=tmpsize;
 
@@ -370,7 +370,7 @@ static int merge_error_list(dir_node* node,void* hlf,void* hef,LRUCache* cache)
 int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cache)
 {
 	if(node==NULL)
-		return ERR_GENERIC;
+		return ERR_INVALID_PARAM;
 	int ret=0;
 	node_info_base* item=(node_info_base*)cache->get(&node->handle);
 	file_node_info* pfinfo;
@@ -397,7 +397,7 @@ int expand_dir(dir_node* node,bool expand,void* hlf,void* hef,LRUCache* cache)
 {
 	int ret=0;
 	if(node==NULL)
-		return ERR_GENERIC;
+		return ERR_INVALID_PARAM;
 	if(expand&&node_state_exp(node)
 		||((!expand)&&(!node_state_exp(node))))
 		return 0;
@@ -437,7 +437,7 @@ int expand_dir(dir_node* node,bool expand,void* hlf,void* hef,LRUCache* cache)
 	}
 	if(off<node->fl_start)
 	{
-		ret=ERR_GENERIC;
+		ret=ERR_CORRUPTED_FILE;
 		goto fail;
 	}
 	reverse(node->contents->dirs.begin(),node->contents->dirs.end());
@@ -467,14 +467,14 @@ static int build_base_tree(dir_node*& base,void* hlf,const UInteger64& endrec)
 	if(0!=(ret=RevReadNode(hlf,base->fl_start,&info)))
 		return ret;
 	if(info.type!=FILE_TYPE_DIR)
-		return ERR_GENERIC;
+		return ERR_CORRUPTED_FILE;
 	return 0;
 }
 static int build_err_tree(err_dir_node*& ebase,void* hef,dir_node* base)
 {
 	int ret=0;
 	if(base==NULL)
-		return ERR_GENERIC;
+		return ERR_INVALID_CALL;
 	ebase=new err_dir_node;
 	if(0!=(ret=load_error_list(ebase,hef)))
 		return ret;

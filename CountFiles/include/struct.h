@@ -3,7 +3,6 @@
 #include "common.h"
 #include "datetime.h"
 #include "Integer64.h"
-#include <vector>
 #include <string>
 #define fllapi DLL //FileListLoader API's
 #define FLL_DECLARE_HANDLE(M) typedef struct _ ## M{}*H ## M;

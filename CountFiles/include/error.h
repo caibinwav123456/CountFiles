@@ -1,5 +1,8 @@
 DEF_ERROR(ERR_NONE,                 "OK"),
 DEF_ERROR(ERR_GENERIC,              "Unknown Error"),
+DEF_ERROR(ERR_CORRUPTED_FILE,       "List file corrupted"),
+DEF_ERROR(ERR_INVALID_TAG,          "Invalid record tag"),
+DEF_ERROR(ERR_INVALID_CALL,         "Invalid function call"),
 DEF_ERROR(ERR_SEM_CREATE_FAILED,    "Creating semaphore failed"),
 DEF_ERROR(ERR_THREAD_CREATE_FAILED, "Creating thread failed"),
 DEF_ERROR(ERR_PROCESS_FAILED,       "Creating/Getting process failed"),
