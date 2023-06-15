@@ -23,7 +23,7 @@ int retrieve_enode_info(efnode* node,err_node_info* pinfo,void* hef,LRUCache* ca
 		item=peinfo=new err_node_info;
 		if(0!=(ret=get_err_dir_node_name(node,peinfo->name,hef)))
 			goto end;
-		{			
+		{
 			uint len=(node->efl_end-node->efl_start).low;
 			char* buf=new char[len+1];
 			if(0!=(ret=sys_fseek(hef,node->efl_start.low,&node->efl_start.high,SEEK_BEGIN)))

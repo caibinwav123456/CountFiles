@@ -361,7 +361,8 @@ static int merge_error_list(dir_node* node,void* hlf,void* hef,LRUCache* cache)
 	try
 	{
 		merge_ordered_list(itdir,iterr,&merge_callback,(void*)NULL);
-	}catch(int err)
+	}
+	catch(int err)
 	{
 		return err;
 	}
