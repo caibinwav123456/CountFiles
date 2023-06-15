@@ -114,7 +114,7 @@ int _tmain(int argc,TCHAR** argv)
 		return ret;
 	obj.hFile=sys_fopen((char*)obj.file,FILE_WRITE|FILE_CREATE_ALWAYS);
 	obj.hFileErr=NULL;
-	
+
 	if(!VALID(obj.hFile))
 	{
 		printf("\"%s\": can not open file for writing\n",obj.file);

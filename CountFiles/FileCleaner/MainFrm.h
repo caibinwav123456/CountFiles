@@ -7,7 +7,6 @@
 
 class CMainFrame : public CFrameWnd
 {
-	
 public:
 	CMainFrame() noexcept;
 protected: 
