@@ -10,7 +10,7 @@ uint fllapi get_errfile_cnt(HDNODE dir);
 HENODE fllapi get_errdir(HDNODE dir,int idx);
 HENODE fllapi get_errfile(HDNODE dir,int idx);
 bool fllapi get_dir_expand_state(HDNODE dir);
-class DLL FileListLoader
+class fllapi FileListLoader
 {
 public:
 	FileListLoader();
