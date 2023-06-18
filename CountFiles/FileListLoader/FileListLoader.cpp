@@ -76,14 +76,11 @@ static int RevFindLine(UInteger64& off,void* hlf)
 }
 static inline int match_tagged_size(const char* tag,UInteger64& size,const byte*& ptr,uint& len,byte* tmpbuf,uint tmpbuflen)
 {
-	const byte* buf=ptr;
-	uint taglen=strlen(tag);
+	int ret=0;
+	if(0!=(ret=pass_str(tag,ptr,len)))
+		return ret;
 	UInteger64 tmpsize;
-	advance_ptr(ptr,len,taglen);
-	if(memcmp(buf,tag,taglen)!=0)
-		return ERR_BAD_CONFIG_FORMAT;
-
-	buf=ptr;
+	const byte* buf=ptr;
 	if(!find_byte(ptr,len,' '))
 		return ERR_BAD_CONFIG_FORMAT;
 	uint tmplen=ptr-buf;
@@ -471,13 +468,13 @@ static int build_base_tree(dir_node*& base,void* hlf,const UInteger64& endrec)
 		return ERR_CORRUPTED_FILE;
 	return 0;
 }
-static int build_err_tree(err_dir_node*& ebase,void* hef,dir_node* base)
+static int build_err_tree(err_dir_node*& ebase,void* hef,const UInteger64& off,const UInteger64& end,dir_node* base)
 {
 	int ret=0;
 	if(base==NULL)
 		return ERR_INVALID_CALL;
 	ebase=new err_dir_node;
-	if(0!=(ret=load_error_list(ebase,hef)))
+	if(0!=(ret=load_error_list(ebase,off,end,hef)))
 		return ret;
 	base->enode=ebase;
 	return 0;
@@ -508,16 +505,18 @@ int load_file_list(ctx_flist_loader* ctx,LRUCache* cache)
 		return ret;
 	}
 	if(0!=(ret=build_base_tree(ctx->base_node,ctx->hlf,off)))
+		goto fail;
+	if(VALID(ctx->hef))
 	{
-		unload_file_list(ctx,cache);
-		return ret;
-	}
-	if(VALID(ctx->hef)&&0!=(ret=build_err_tree(ctx->base_enode,ctx->hef,ctx->base_node)))
-	{
-		unload_file_list(ctx,cache);
-		return ret;
+		if(0!=(ret=sys_get_file_size(ctx->hef,&off.low,&off.high)))
+			goto fail;
+		if(0!=(ret=build_err_tree(ctx->base_enode,ctx->hef,UInteger64(0),off,ctx->base_node)))
+			goto fail;
 	}
 	return 0;
+fail:
+	unload_file_list(ctx,cache);
+	return ret;
 }
 void unload_file_list(ctx_flist_loader* ctx,LRUCache* cache)
 {

@@ -131,12 +131,21 @@ static inline bool find_byte(const byte*& ptr,uint& len,byte c)
 		return ERR_BAD_CONFIG_FORMAT; \
 	buf=ptr
 #define pass_space pass_byte(' ')
+static inline int pass_str(const char* str,const byte*& ptr,uint& len)
+{
+	const byte* buf=ptr;
+	uint slen=strlen(str);
+	advance_ptr(ptr,len,slen);
+	if(memcmp(buf,str,slen)!=0)
+		return ERR_BAD_CONFIG_FORMAT;
+	return 0;
+}
 void free_cache_item(void* item);
 int load_file_list(ctx_flist_loader* ctx,LRUCache* cache);
 void unload_file_list(ctx_flist_loader* ctx,LRUCache* cache);
-int load_error_list(err_dir_node* enode,void* hef);
+int load_error_list(err_dir_node* enode,const UInteger64& off,const UInteger64& end,void* hef);
 int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cache);
 int retrieve_enode_info(efnode* node,err_node_info* pinfo,void* hef,LRUCache* cache);
-int get_err_dir_node_name(fnode* enode,string& name,void* hef);
+int get_err_dir_node_name(fnode* enode,string& name,void* hef,dword* type=NULL);
 int expand_dir(dir_node* node,bool expand,void* hlf,void* hef,LRUCache* cache);
 #endif
