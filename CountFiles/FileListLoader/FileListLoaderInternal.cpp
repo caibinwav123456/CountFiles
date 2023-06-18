@@ -109,11 +109,11 @@ void FileListLoader::Unload()
 	if(!(data->ctx.listfile.empty()&&data->ctx.errfile.empty()))
 		unload_file_list(&data->ctx,&data->cache);
 }
-int FileListLoader::ExpandNode(HDNODE node,bool expand)
+int FileListLoader::ExpandNode(HDNODE node,bool expand,bool release)
 {
 	GET_DATA(data);
 	dir_node* _node=(dir_node*)node;
-	return expand_dir(_node,expand,data->ctx.hlf,data->ctx.hef,&data->cache);
+	return expand_dir(_node,expand,release,data->ctx.hlf,data->ctx.hef,&data->cache);
 }
 int FileListLoader::GetNodeInfo(HFNODE node,file_node_info* pinfo)
 {

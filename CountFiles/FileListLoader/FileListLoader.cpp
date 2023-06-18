@@ -391,19 +391,20 @@ int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cac
 	*pinfo=*pfinfo;
 	return 0;
 }
-int expand_dir(dir_node* node,bool expand,void* hlf,void* hef,LRUCache* cache)
+int expand_dir(dir_node* node,bool expand,bool release,void* hlf,void* hef,LRUCache* cache)
 {
 	int ret=0;
 	if(node==NULL)
 		return ERR_INVALID_PARAM;
-	if(expand&&node_state_exp(node)
-		||((!expand)&&(!node_state_exp(node))))
-		return 0;
 	if(!expand)
 	{
 		node_foldup(node);
+		if(release)
+			free_dir_node(node);
 		return 0;
 	}
+	if(expand&&node_state_exp(node))
+		return 0;
 	node_expand(node);
 	if(node->contents!=NULL)
 		return 0;

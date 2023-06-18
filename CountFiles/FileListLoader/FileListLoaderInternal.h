@@ -147,5 +147,5 @@ int load_error_list(err_dir_node* enode,const UInteger64& off,const UInteger64& 
 int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cache);
 int retrieve_enode_info(efnode* node,err_node_info* pinfo,void* hef,LRUCache* cache);
 int get_err_dir_node_name(fnode* enode,string& name,void* hef,dword* type=NULL);
-int expand_dir(dir_node* node,bool expand,void* hlf,void* hef,LRUCache* cache);
+int expand_dir(dir_node* node,bool expand,bool release,void* hlf,void* hef,LRUCache* cache);
 #endif

@@ -19,7 +19,7 @@ public:
 	int Load(const char* listfile,const char* errfile=NULL);
 	void Unload();
 
-	int ExpandNode(HDNODE node,bool expand);
+	int ExpandNode(HDNODE node,bool expand,bool release=false);
 	int GetNodeInfo(HFNODE node,file_node_info* pinfo);
 	int GetNodeInfo(HDNODE node,file_node_info* pinfo);
 	int GetNodeErrInfo(HENODE node,err_node_info* peinfo);
