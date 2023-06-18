@@ -8,6 +8,9 @@
 #define node_state_exp(node) (!!((node)->flags&FLAG_NODE_EXPANDED))
 #define node_expand(node) ((node)->flags|=FLAG_NODE_EXPANDED)
 #define node_foldup(node) ((node)->flags&=~FLAG_NODE_EXPANDED)
+#define node_state_del(node) (!!((node)->flags&FLAG_NODE_DELETED))
+#define node_delete(node) ((node)->flags|=FLAG_NODE_DELETED)
+#define node_restore(node) ((node)->flags&=~FLAG_NODE_DELETED)
 struct fnode
 {
 	dword flags;
@@ -32,6 +35,10 @@ struct efnode:public fnode
 {
 	UInteger64 efl_start;
 	UInteger64 efl_end;
+	efnode()
+	{
+		flags|=FLAG_NODE_LOADERR;
+	}
 };
 struct dir_err_contents
 {
@@ -131,15 +138,21 @@ static inline bool find_byte(const byte*& ptr,uint& len,byte c)
 		return ERR_BAD_CONFIG_FORMAT; \
 	buf=ptr
 #define pass_space pass_byte(' ')
-static inline int pass_str(const char* str,const byte*& ptr,uint& len)
+static inline bool match_tag(const char* str,const byte*& ptr,uint& len)
 {
 	const byte* buf=ptr;
 	uint slen=strlen(str);
-	advance_ptr(ptr,len,slen);
+	if(len<slen)
+		return false;
+	ptr+=slen,len-=slen;
 	if(memcmp(buf,str,slen)!=0)
-		return ERR_BAD_CONFIG_FORMAT;
-	return 0;
+		return false;
+	return true;
 }
+#define pass_str(str) \
+	if(!match_tag(str,ptr,len)) \
+		return ERR_BAD_CONFIG_FORMAT; \
+	buf=ptr
 void free_cache_item(void* item);
 int load_file_list(ctx_flist_loader* ctx,LRUCache* cache);
 void unload_file_list(ctx_flist_loader* ctx,LRUCache* cache);

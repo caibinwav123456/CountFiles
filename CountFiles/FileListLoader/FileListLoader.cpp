@@ -76,11 +76,9 @@ static int RevFindLine(UInteger64& off,void* hlf)
 }
 static inline int match_tagged_size(const char* tag,UInteger64& size,const byte*& ptr,uint& len,byte* tmpbuf,uint tmpbuflen)
 {
-	int ret=0;
-	if(0!=(ret=pass_str(tag,ptr,len)))
-		return ret;
-	UInteger64 tmpsize;
 	const byte* buf=ptr;
+	pass_str(tag);
+	UInteger64 tmpsize;
 	if(!find_byte(ptr,len,' '))
 		return ERR_BAD_CONFIG_FORMAT;
 	uint tmplen=ptr-buf;

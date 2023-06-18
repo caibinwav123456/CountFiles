@@ -93,10 +93,7 @@ static int parse_error_rec(err_dir_node* enode,vector<string>& stack,const UInte
 	efnode* err_file_node=add_leaf_err_node(enode,errdir);
 	pass_byte('\"');
 	pass_byte(' ');
-	int ret=0;
-	if(0!=(ret=pass_str(TAG_ERR_DESC,ptr,len)))
-		return ret;
-	buf=ptr;
+	pass_str(TAG_ERR_DESC);
 	if(len<1)
 		return ERR_CORRUPTED_FILE;
 	ptr+=len-1;
