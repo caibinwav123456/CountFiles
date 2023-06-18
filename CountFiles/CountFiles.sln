@@ -15,6 +15,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ListFile", "ListFile\ListFi
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "common\common.vcxproj", "{A11C4C89-505C-4187-8E48-F807633CFCF5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B2724969-2133-470A-BFDC-4A67A26C3682} = {B2724969-2133-470A-BFDC-4A67A26C3682}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FileCleaner", "FileCleaner\FileCleaner.vcxproj", "{FCF9A9DD-2D9C-4772-AAFA-196CC3370A56}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -27,6 +30,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FileListLoader", "FileListL
 	ProjectSection(ProjectDependencies) = postProject
 		{A11C4C89-505C-4187-8E48-F807633CFCF5} = {A11C4C89-505C-4187-8E48-F807633CFCF5}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "syswin", "system\syswin.vcxproj", "{B2724969-2133-470A-BFDC-4A67A26C3682}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -76,6 +81,14 @@ Global
 		{E9718631-5C35-452C-A320-6A4189037F65}.Release|x64.Build.0 = Release|x64
 		{E9718631-5C35-452C-A320-6A4189037F65}.Release|x86.ActiveCfg = Release|Win32
 		{E9718631-5C35-452C-A320-6A4189037F65}.Release|x86.Build.0 = Release|Win32
+		{B2724969-2133-470A-BFDC-4A67A26C3682}.Debug|x64.ActiveCfg = Debug|x64
+		{B2724969-2133-470A-BFDC-4A67A26C3682}.Debug|x64.Build.0 = Debug|x64
+		{B2724969-2133-470A-BFDC-4A67A26C3682}.Debug|x86.ActiveCfg = Debug|Win32
+		{B2724969-2133-470A-BFDC-4A67A26C3682}.Debug|x86.Build.0 = Debug|Win32
+		{B2724969-2133-470A-BFDC-4A67A26C3682}.Release|x64.ActiveCfg = Release|x64
+		{B2724969-2133-470A-BFDC-4A67A26C3682}.Release|x64.Build.0 = Release|x64
+		{B2724969-2133-470A-BFDC-4A67A26C3682}.Release|x86.ActiveCfg = Release|Win32
+		{B2724969-2133-470A-BFDC-4A67A26C3682}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
