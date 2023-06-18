@@ -13,8 +13,10 @@ enum E_FOLDER_STATE
 	eFSSoloOld,
 	eFSNewSolo,
 	eFSNReady,
+	eFSError,
 	eFSMax,
 };
+#define eFSAnormal eFSNReady
 string ConvertTStrToAnsiStr(LPCTSTR from)
 {
 	USES_CONVERSION;
@@ -68,7 +70,7 @@ void TreeListCtrl::DrawFolder(CDrawer* drawer,POINT* pt,int state,BOOL expand)
 {
 	if(state<=0||state>=eFSMax)
 		return;
-	drawer->DrawBitmap(expand&&state!=eFSNReady?&m_bmpFolderExpMask:&m_bmpFolderMask,pt,SRCAND,
+	drawer->DrawBitmap(expand&&state<eFSAnormal?&m_bmpFolderExpMask:&m_bmpFolderMask,pt,SRCAND,
 		&CRect(0,0,LINE_HEIGHT,LINE_HEIGHT));
 	drawer->DrawBitmap(expand?&m_bmpFolderExp:&m_bmpFolder,pt,SRCPAINT,
 		&CRect(LINE_HEIGHT*(state-1),0,LINE_HEIGHT*state,LINE_HEIGHT));
@@ -82,7 +84,7 @@ void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 	drawer.DrawRect(&CRect(400,200,500,300),RGB(0,0,255),3);
 	drawer.FillRect(&CRect(200,400,300,500),RGB(0,255,0));
 	//drawer.DrawBitmap(&m_bmpFolder,&CPoint(100,100));
-	drawer.FillRect(&CRect(90,90,834,134),RGB(255,255,0));
+	drawer.FillRect(&CRect(90,90,934,134),RGB(255,255,0));
 	for(int i=eFSEqual;i<eFSMax;i++)
 		DrawFolder(&drawer,&CPoint(100*i,100),i,m_bExpand);
 	drawer.DrawText(&CPoint(200,200),_T("hello"),50,RGB(255,0,127));

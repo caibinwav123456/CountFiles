@@ -134,12 +134,12 @@ int _tmain(int argc,TCHAR** argv)
 	callback.cb_info=cb_wr_file_info;
 	callback.cb_error=(obj.err_file!=NULL?cb_wr_file_err:NULL);
 	callback.cb_rec=NULL;
-	ret=GenFileList(cnt_path,&callback,'\\');
-	clean_write_obj(&obj,false);
-	if(ret!=0)
+	if(0!=(ret=GenFileList(cnt_path,&callback)))
 	{
 		clean_write_obj(&obj,true);
 		printf("GenFileList failed: %s\n",get_error_desc(ret));
+		return ret;
 	}
-	return ret;
+	clean_write_obj(&obj,false);
+	return 0;
 }

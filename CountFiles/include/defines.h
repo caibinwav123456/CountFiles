@@ -9,4 +9,6 @@
 #define TAG_SIZE "Size: "
 #define TAG_ERR_DESC "error: "
 
+#define dir_symbol '\\'
+
 #endif

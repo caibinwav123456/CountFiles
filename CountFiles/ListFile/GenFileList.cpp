@@ -46,7 +46,8 @@ static int init_param(file_cnt_param* param)
 static inline void log_error(const char* path,dword type,int ret,const intf_cntfile* callback)
 {
 	char* errbuf=new char[strlen(path)+100];
-	sprintf(errbuf,"\"%s%s\" %s%s\n",path,type==FILE_TYPE_DIR?"\\":"",TAG_ERR_DESC,get_error_desc(ret));
+	char dsymbuf[2]={dir_symbol,'\0'};
+	sprintf(errbuf,"\"%s%s\" %s%s\n",path,type==FILE_TYPE_DIR?dsymbuf:"",TAG_ERR_DESC,get_error_desc(ret));
 	printf("%s",errbuf);
 	if(callback->cb_error!=NULL&&0!=(ret=callback->cb_error
 		((byte*)errbuf,strlen(errbuf),callback->param)))
@@ -143,16 +144,16 @@ static int cb_poll_file(char* filename,dword type,void* param,char dsym)
 	flist->list.push_back(rec);
 	return 0;
 }
-static int recurse_cnt_file(const string& path,uint npos,const string& name,file_cnt_param* param,dword type,char dsym,int recurse_lvl)
+static int recurse_cnt_file(const string& path,uint npos,const string& name,file_cnt_param* param,dword type,int recurse_lvl)
 {
 	int ret=0;
+	if(type==FILE_TYPE_NORMAL)
+		return log_file_info(path,npos,name,type,param,NULL);
 	file_list flist;
 	file_list_ref ref;
 	file_cnt_param next_param;
 	next_param.user_callback=param->user_callback;
 	init_param(&next_param);
-	if(type==FILE_TYPE_NORMAL)
-		return log_file_info(path,npos,name,type,param,NULL);
 	if(0!=(ret=sys_ftraverse((char*)(path).c_str(),cb_poll_file,&flist)))
 		return ret;
 	for(int i=0;i<(int)flist.list.size();i++)
@@ -173,28 +174,28 @@ static int recurse_cnt_file(const string& path,uint npos,const string& name,file
 	sort(ref.drefs.begin(),ref.drefs.end(),less_rec);
 	for(int i=0;i<(int)ref.frefs.size();i++)
 	{
-		if(0!=(ret=recurse_cnt_file(path+dsym+ref.frefs[i]->name,npos,ref.frefs[i]->name,&next_param,
-			ref.frefs[i]->type,dsym,recurse_lvl+1)))
+		if(0!=(ret=recurse_cnt_file(path+dir_symbol+ref.frefs[i]->name,npos,ref.frefs[i]->name,&next_param,
+			ref.frefs[i]->type,recurse_lvl+1)))
 			return ret;
 	}
 	for(int i=0;i<(int)ref.drefs.size();i++)
 	{
-		if(0!=(ret=recurse_cnt_file(path+dsym+ref.drefs[i]->name,npos,ref.drefs[i]->name,&next_param,
-			ref.drefs[i]->type,dsym,recurse_lvl+1)))
+		if(0!=(ret=recurse_cnt_file(path+dir_symbol+ref.drefs[i]->name,npos,ref.drefs[i]->name,&next_param,
+			ref.drefs[i]->type,recurse_lvl+1)))
 			return ret;
 	}
 	return log_file_info(path,npos,name,type,param,&next_param);
 }
-int GenFileListInternal(const char* path,const intf_cntfile* callback,char dsym)
+int GenFileListInternal(const char* path,const intf_cntfile* callback)
 {
 	if(callback==NULL)
 		return ERR_INVALID_PARAM;
 	int ret=0;
 	dword type;
 	string strpath=path;
-	if((!strpath.empty())&&strpath.back()==dsym)
+	if((!strpath.empty())&&strpath.back()==dir_symbol)
 		strpath=strpath.substr(0,strpath.size()-1);
-	uint pos=strpath.rfind(dsym);
+	uint pos=strpath.rfind(dir_symbol);
 	pos==string::npos?pos=0:pos++;
 	string name=strpath.substr(pos);
 	file_cnt_param cnt_param;
@@ -202,7 +203,7 @@ int GenFileListInternal(const char* path,const intf_cntfile* callback,char dsym)
 	init_param(&cnt_param);
 	if(0!=(ret=sys_fstat((char*)strpath.c_str(),&type)))
 		goto end;
-	if(0!=(ret=recurse_cnt_file(strpath,pos,name,&cnt_param,type,dsym,0)))
+	if(0!=(ret=recurse_cnt_file(strpath,pos,name,&cnt_param,type,0)))
 		goto end;
 end:
 	return ret;

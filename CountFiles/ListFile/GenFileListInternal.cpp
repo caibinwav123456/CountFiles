@@ -1,6 +1,6 @@
 #include "GenFileList.h"
-int GenFileListInternal(const char* path,const intf_cntfile* callback,char dsym);
-DLL int GenFileList(const char* path,const intf_cntfile* callback,char dsym)
+int GenFileListInternal(const char* path,const intf_cntfile* callback);
+DLL int GenFileList(const char* path,const intf_cntfile* callback)
 {
-	return GenFileListInternal(path,callback,dsym);
+	return GenFileListInternal(path,callback);
 }

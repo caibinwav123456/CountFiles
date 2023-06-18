@@ -67,7 +67,7 @@ static int parse_error_rec(err_dir_node* enode,vector<string>& stack,const UInte
 	UInteger64 startoff,endoff;
 	for(;;)
 	{
-		bool bfind=find_byte(ptr,namelen,'\\');
+		bool bfind=find_byte(ptr,namelen,dir_symbol);
 		if(ptr==buf)
 			return ERR_CORRUPTED_FILE;
 		if((!bfind)||namelen==1)
@@ -77,7 +77,7 @@ static int parse_error_rec(err_dir_node* enode,vector<string>& stack,const UInte
 			{
 				errdir=true;
 				endoff+=UInteger64(1);
-				pass_byte('\\');
+				pass_byte(dir_symbol);
 			}
 			break;
 		}
@@ -200,7 +200,7 @@ int get_err_dir_node_name(fnode* enode,string& name,void* hef,dword* type)
 end:
 	delete[] buf;
 	bool bdir=false;
-	if(name.size()>0&&name[name.size()-1]=='\\')
+	if(name.size()>0&&name.back()==dir_symbol)
 	{
 		name=name.substr(0,name.size()-1);
 		bdir=true;
