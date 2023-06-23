@@ -25,7 +25,8 @@ CPoint CScrollTreeList::GetScrollPos() const
 }
 void CScrollTreeList::SetScrollSizes(const CSize& size)
 {
-	((CScrollView*)m_pWnd)->SetScrollSizes(MM_TEXT,size);
+	((CScrollView*)m_pWnd)->SetScrollSizes(MM_TEXT,size,
+		CSize(LINE_HEIGHT,LINE_HEIGHT*3),CSize(LINE_HEIGHT,LINE_HEIGHT));
 }
 
 // CChildView

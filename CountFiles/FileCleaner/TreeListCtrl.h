@@ -5,8 +5,17 @@
 string ConvertTStrToAnsiStr(LPCTSTR from);
 CString ConvertAnsiStrToTStr(LPCSTR from);
 CString ConvertAnsiStrToTStr(const string& from);
+class TreeListCtrl;
+struct ListCtrlDrawIterator
+{
+	ListCtrlDrawIterator(TreeListCtrl* tl):m_pList(tl){}
+	operator bool(){return true;}
+	void operator++(int){}
+	TreeListCtrl* m_pList;
+};
 class TreeListCtrl
 {
+	friend struct ListCtrlDrawIterator;
 public:
 //Constructor/Destructor
 	TreeListCtrl(CWnd* pWnd);
@@ -44,14 +53,20 @@ private:
 //List data
 private:
 	FileListLoader m_ListLoader;
-	BOOL m_bExpand;
+	uint m_nTotalLine;
 
 //private functions
 private:
 	void Invalidate();
+	void GetCanvasRect(RECT* rc);
 
 //protected functions
 protected:
 	void DrawFolder(CDrawer* drawer,POINT* pt,int state,BOOL expand);
+	ListCtrlDrawIterator GetDrawIter();
+	int LineNumFromPt(POINT* pt);
+	bool EndOfDraw(int iline);
+	void DrawLine(CDrawer& drawer,int iline);
+	void DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter);
 };
 #endif

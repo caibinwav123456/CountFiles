@@ -32,13 +32,18 @@ CString ConvertAnsiStrToTStr(const string& from)
 	USES_CONVERSION;
 	return A2T(from.c_str());
 }
-TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_bExpand(FALSE)
+TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_nTotalLine(0)
 {
 
 }
 TreeListCtrl::~TreeListCtrl()
 {
 
+}
+inline void TreeListCtrl::GetCanvasRect(RECT* rc)
+{
+	m_pWnd->GetClientRect(rc);
+	((CRect*)rc)->MoveToXY(GetScrollPos());
 }
 int TreeListCtrl::Init()
 {
@@ -50,6 +55,7 @@ int TreeListCtrl::Init()
 		goto failed;
 	if(!m_bmpFolderExpMask.LoadBitmap(IDB_FOLDER_EXP_MASK))
 		goto failed;
+	SetScrollSizes(CSize(10*LINE_HEIGHT,LINE_HEIGHT));
 	return 0;
 failed:
 	Exit();
@@ -75,40 +81,74 @@ void TreeListCtrl::DrawFolder(CDrawer* drawer,POINT* pt,int state,BOOL expand)
 	drawer->DrawBitmap(expand?&m_bmpFolderExp:&m_bmpFolder,pt,SRCPAINT,
 		&CRect(LINE_HEIGHT*(state-1),0,LINE_HEIGHT*state,LINE_HEIGHT));
 }
+ListCtrlDrawIterator TreeListCtrl::GetDrawIter()
+{
+	return ListCtrlDrawIterator(this);
+}
+int TreeListCtrl::LineNumFromPt(POINT* pt)
+{
+	CRect rc;
+	GetCanvasRect(&rc);
+	int iline;
+	if(pt->x<0||pt->y<0)
+		return -1;
+	iline=pt->y/LINE_HEIGHT;
+	if(iline>=(int)m_nTotalLine)
+		return -1;
+	return iline;
+}
+bool TreeListCtrl::EndOfDraw(int iline)
+{
+	if(iline<0||iline>=(int)m_nTotalLine)
+		return true;
+	CRect rc;
+	GetCanvasRect(&rc);
+	return iline*LINE_HEIGHT>rc.bottom;
+}
+void TreeListCtrl::DrawLine(CDrawer& drawer,int iline)
+{
+	if(iline<0)
+		return;
+	CRect rcline(0,0,1000,LINE_HEIGHT);
+	int starty=iline*LINE_HEIGHT;
+	rcline.MoveToXY(0,starty);
+	bool grey=!!(iline%2);
+	drawer.FillRect(&rcline,grey?GREY_COLOR:RGB(255,255,255));
+}
+void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter)
+{
+
+}
 void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 {
 	CDCDraw canvas(m_pWnd,pClientDC,buffered);
 	CDrawer drawer(&canvas);
-	drawer.FillEllipse(&CRect(500,500,600,600),RGB(255,0,255));
-	drawer.DrawEllipse(&CRect(300,300,400,400),RGB(255,0,0),5);
-	drawer.DrawRect(&CRect(400,200,500,300),RGB(0,0,255),3);
-	drawer.FillRect(&CRect(200,400,300,500),RGB(0,255,0));
-	//drawer.DrawBitmap(&m_bmpFolder,&CPoint(100,100));
-	drawer.FillRect(&CRect(90,90,934,134),RGB(255,255,0));
-	for(int i=eFSEqual;i<eFSMax;i++)
-		DrawFolder(&drawer,&CPoint(100*i,100),i,m_bExpand);
-	drawer.DrawText(&CPoint(200,200),_T("hello"),50,RGB(255,0,127));
+	CRect rc;
+	GetCanvasRect(&rc);
+	for(int i=LineNumFromPt(&rc.TopLeft());!EndOfDraw(i);i++)
+	{
+		DrawLine(drawer,i);
+	}
 }
 void TreeListCtrl::OnLBDown(const CPoint& pt)
 {
-
+	Invalidate();
 }
 void TreeListCtrl::OnLBUp(const CPoint& pt)
 {
-
+	Invalidate();
 }
 void TreeListCtrl::OnLBDblClick(const CPoint& pt)
 {
-	m_bExpand=!m_bExpand;
 	Invalidate();
 }
 void TreeListCtrl::OnRBDown(const CPoint& pt)
 {
-
+	Invalidate();
 }
 void TreeListCtrl::OnRBUp(const CPoint& pt)
 {
-
+	Invalidate();
 }
 void TreeListCtrl::OnMMove(const CPoint& pt)
 {
