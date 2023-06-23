@@ -98,7 +98,6 @@ static int parse_rec(const byte* buf,uint len,file_node_info* pinfo,UInteger64& 
 	const char* tag_size=TAG_SIZE;
 	const byte* ptr=buf;
 	UInteger64 tmpsize(0);
-	uint tmplen;
 	advance_ptr(ptr,len,2);
 	byte tmpbuf[100];
 	if(memcmp(buf,TAG_TYPE_DIR,2)==0)
@@ -120,7 +119,7 @@ static int parse_rec(const byte* buf,uint len,file_node_info* pinfo,UInteger64& 
 	if(!find_byte(ptr,len,'\"'))
 		return ERR_BAD_CONFIG_FORMAT;
 	{
-		tmplen=ptr-buf;
+		uint tmplen=ptr-buf;
 		char* namebuf=new char[tmplen+1];
 		memcpy(namebuf,buf,tmplen);
 		namebuf[tmplen]=0;
