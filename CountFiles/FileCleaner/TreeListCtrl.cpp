@@ -93,7 +93,7 @@ bool TreeListCtrl::EndOfDraw(int iline)
 	GetCanvasRect(&rc);
 	return iline*LINE_HEIGHT>rc.bottom;
 }
-void TreeListCtrl::DrawLine(CDrawer& drawer,int iline)
+void TreeListCtrl::DrawLine(CDrawer& drawer,int iline,TLItem* pItem)
 {
 	if(iline<0)
 		return;
@@ -103,18 +103,21 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,int iline)
 	int starty=iline*LINE_HEIGHT;
 	rcline.MoveToXY(0,starty);
 	bool grey=!!(iline%2);
-	drawer.FillRect(&rcline,grey?GREY_COLOR:RGB(255,255,255));
+	COLORREF color=grey?GREY_COLOR:RGB(255,255,255);
+	if(pItem!=NULL&&pItem->issel)
+		color=SEL_COLOR;
+	drawer.FillRect(&rcline,color);
+	if(pItem!=NULL&&pItem==m_pItemSel)
+		drawer.DrawRect(&rcline,RGB(0,0,0),1,PS_DOT);
 }
 void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter)
 {
-	DrawLine(drawer,iter.m_iline);
+	DrawLine(drawer,iter.m_iline,iter.m_pStkItem==NULL?NULL:iter.m_pStkItem->m_pLItem);
 }
 void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 {
 	CDCDraw canvas(m_pWnd,pClientDC,buffered);
 	CDrawer drawer(&canvas);
-	CRect rc;
-	GetCanvasRect(&rc);
 	for(ListCtrlDrawIterator it=GetDrawIter();it;it++)
 	{
 		DrawLine(drawer,it);

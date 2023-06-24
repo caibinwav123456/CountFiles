@@ -7,7 +7,8 @@
 #define a2t(p) ConvertAnsiStrToTStr(p)
 enum E_FOLDER_STATE
 {
-	eFSEqual=1,
+	eFSNone,
+	eFSEqual,
 	eFSOld,
 	eFSNew,
 	eFSSolo,
@@ -22,29 +23,55 @@ enum E_FOLDER_STATE
 string ConvertTStrToAnsiStr(LPCTSTR from);
 CString ConvertAnsiStrToTStr(LPCSTR from);
 CString ConvertAnsiStrToTStr(const string& from);
+enum E_TREE_ITEM_TYPE
+{
+	eITypeNone,
+	eITypeDir,
+	eITypeFile,
+	eITypeErrDir,
+	eITypeErrFile,
+};
 struct TLItem
 {
-	HDNODE node;
+	E_TREE_ITEM_TYPE type;
+	E_FOLDER_STATE state;
+	union
+	{
+		void* node;
+		HDNODE dirnode;
+		HFNODE filenode;
+		HENODE errnode;
+	};
+	TLItem* parent;
+	int parentidx;
 	vector<TLItem*> subitems;
-	BOOL isopen;
-	BOOL issel;
+	bool isopen;
+	bool issel;
 	uint open_length;
 	TLItem* next_sel;
-	TLItem():node(NULL),isopen(FALSE),issel(FALSE),open_length(0),next_sel(NULL)
+	TLItem():type(eITypeNone),state(eFSNone),node(NULL),parent(NULL),parentidx(-1),isopen(false),issel(false),open_length(0),next_sel(NULL)
 	{
 	}
+};
+struct ItStkItem
+{
+	TLItem* m_pLItem;
+	ItStkItem* next;
 };
 struct ListCtrlDrawIterator
 {
 	friend class TreeListCtrl;
+	ListCtrlDrawIterator(ListCtrlDrawIterator& iter);
+	~ListCtrlDrawIterator();
 	operator bool();
 	void operator++(int);
 private:
-	ListCtrlDrawIterator(TreeListCtrl* tl):m_pList(tl),m_pItem(NULL),m_iline(-1)
+	ListCtrlDrawIterator(TreeListCtrl* tl):m_pList(tl),m_pStkItem(NULL),lvl(0),m_iline(-1)
 	{
 	}
 	TreeListCtrl* m_pList;
-	TLItem* m_pItem;
+	ItStkItem* m_pStkItem;
+	int lvl;
 	int m_iline;
 };
 class TreeListCtrl
@@ -102,7 +129,7 @@ protected:
 	ListCtrlDrawIterator GetDrawIter();
 	int LineNumFromPt(POINT* pt);
 	bool EndOfDraw(int iline);
-	void DrawLine(CDrawer& drawer,int iline);
+	void DrawLine(CDrawer& drawer,int iline,TLItem* pItem=NULL);
 	void DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter);
 };
 #endif

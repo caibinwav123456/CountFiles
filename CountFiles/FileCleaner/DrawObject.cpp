@@ -191,9 +191,9 @@ void CDrawer::FillEllipse(RECT* rc,COLORREF clr)
 	SelectDC()->SelectStockObject(NULL_PEN);
 	SelectDC()->Ellipse(rc);
 }
-void CDrawer::DrawRect(RECT* rc,COLORREF clr,int linew)
+void CDrawer::DrawRect(RECT* rc,COLORREF clr,int linew,int style)
 {
-	DrawPen pen(SelectDC(),clr,linew,PS_SOLID);
+	DrawPen pen(SelectDC(),clr,linew,style);
 	SelectDC()->SelectStockObject(NULL_BRUSH);
 	SelectDC()->Rectangle(rc);
 }
