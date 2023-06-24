@@ -211,6 +211,7 @@
     <ClCompile Include="ChildView.cpp" />
     <ClCompile Include="DrawObject.cpp" />
     <ClCompile Include="FileCleaner.cpp" />
+    <ClCompile Include="ItemData.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

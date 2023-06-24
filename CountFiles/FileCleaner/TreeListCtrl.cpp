@@ -1,22 +1,6 @@
 #include "pch.h"
 #include "TreeListCtrl.h"
 #include "resource.h"
-#define t2a(p) ConvertTStrToAnsiStr(p)
-#define a2t(p) ConvertAnsiStrToTStr(p)
-enum E_FOLDER_STATE
-{
-	eFSEqual=1,
-	eFSOld,
-	eFSNew,
-	eFSSolo,
-	eFSNewOld,
-	eFSSoloOld,
-	eFSNewSolo,
-	eFSNReady,
-	eFSError,
-	eFSMax,
-};
-#define eFSAnormal eFSNReady
 string ConvertTStrToAnsiStr(LPCTSTR from)
 {
 	USES_CONVERSION;
@@ -32,7 +16,7 @@ CString ConvertAnsiStrToTStr(const string& from)
 	USES_CONVERSION;
 	return A2T(from.c_str());
 }
-TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_nTotalLine(0)
+TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_nTotalLine(0),m_pRootItem(NULL),m_pItemSel(NULL)
 {
 
 }
@@ -83,7 +67,11 @@ void TreeListCtrl::DrawFolder(CDrawer* drawer,POINT* pt,int state,BOOL expand)
 }
 ListCtrlDrawIterator TreeListCtrl::GetDrawIter()
 {
-	return ListCtrlDrawIterator(this);
+	CRect rc;
+	GetCanvasRect(&rc);
+	ListCtrlDrawIterator it(this);
+	it.m_iline=LineNumFromPt(&rc.TopLeft());
+	return it;
 }
 int TreeListCtrl::LineNumFromPt(POINT* pt)
 {
@@ -109,7 +97,9 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,int iline)
 {
 	if(iline<0)
 		return;
-	CRect rcline(0,0,1000,LINE_HEIGHT);
+	CRect rcline(0,0,0,LINE_HEIGHT),rc;
+	GetCanvasRect(&rc);
+	rcline.right=rc.right;
 	int starty=iline*LINE_HEIGHT;
 	rcline.MoveToXY(0,starty);
 	bool grey=!!(iline%2);
@@ -117,7 +107,7 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,int iline)
 }
 void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter)
 {
-
+	DrawLine(drawer,iter.m_iline);
 }
 void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 {
@@ -125,9 +115,9 @@ void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 	CDrawer drawer(&canvas);
 	CRect rc;
 	GetCanvasRect(&rc);
-	for(int i=LineNumFromPt(&rc.TopLeft());!EndOfDraw(i);i++)
+	for(ListCtrlDrawIterator it=GetDrawIter();it;it++)
 	{
-		DrawLine(drawer,i);
+		DrawLine(drawer,it);
 	}
 }
 void TreeListCtrl::OnLBDown(const CPoint& pt)

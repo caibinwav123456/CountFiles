@@ -2,16 +2,50 @@
 #define _TREE_LIST_CTRL_H_
 #include "FileListLoader.h"
 #include "DrawObject.h"
+#include <vector>
+#define t2a(p) ConvertTStrToAnsiStr(p)
+#define a2t(p) ConvertAnsiStrToTStr(p)
+enum E_FOLDER_STATE
+{
+	eFSEqual=1,
+	eFSOld,
+	eFSNew,
+	eFSSolo,
+	eFSNewOld,
+	eFSSoloOld,
+	eFSNewSolo,
+	eFSNReady,
+	eFSError,
+	eFSMax,
+};
+#define eFSAnormal eFSNReady
 string ConvertTStrToAnsiStr(LPCTSTR from);
 CString ConvertAnsiStrToTStr(LPCSTR from);
 CString ConvertAnsiStrToTStr(const string& from);
-class TreeListCtrl;
+struct TLItem
+{
+	HDNODE node;
+	vector<TLItem*> subitems;
+	BOOL isopen;
+	BOOL issel;
+	uint open_length;
+	TLItem* next_sel;
+	TLItem():node(NULL),isopen(FALSE),issel(FALSE),open_length(0),next_sel(NULL)
+	{
+	}
+};
 struct ListCtrlDrawIterator
 {
-	ListCtrlDrawIterator(TreeListCtrl* tl):m_pList(tl){}
-	operator bool(){return true;}
-	void operator++(int){}
+	friend class TreeListCtrl;
+	operator bool();
+	void operator++(int);
+private:
+	ListCtrlDrawIterator(TreeListCtrl* tl):m_pList(tl),m_pItem(NULL),m_iline(-1)
+	{
+	}
 	TreeListCtrl* m_pList;
+	TLItem* m_pItem;
+	int m_iline;
 };
 class TreeListCtrl
 {
@@ -54,6 +88,8 @@ private:
 private:
 	FileListLoader m_ListLoader;
 	uint m_nTotalLine;
+	TLItem* m_pRootItem;
+	TLItem* m_pItemSel;
 
 //private functions
 private:
