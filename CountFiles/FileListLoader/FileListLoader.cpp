@@ -400,7 +400,7 @@ int expand_dir(dir_node* node,bool expand,bool release,void* hlf,void* hef,LRUCa
 			free_dir_node(node);
 		return 0;
 	}
-	if(expand&&node_state_exp(node))
+	if(node_state_exp(node))
 		return 0;
 	node_expand(node);
 	if(node->contents!=NULL)

@@ -50,30 +50,40 @@ struct TLItem
 	{
 	}
 	virtual ~TLItem(){}
-	virtual void Release(){}
+	virtual void Release()=0;
 	virtual uint GetDispLength()
 	{
 		return 1;
 	}
 };
-struct TLItemDir:public TLItem
-{
-	vector<TLItem*> subitems;
-	vector<TLItem*> subdirs;
-	vector<TLItem*> subfiles;
-	bool isopen;
-	uint open_length;
-	TLItemDir():isopen(false),open_length(0)
-	{
-	}
-	virtual uint GetDispLength();
-};
 struct TLItemFile:public TLItem
 {
+	virtual void Release(){};
 };
 typedef struct TLItemErrDir:public TLItem
 {
+	virtual void Release(){};
 }TLItemErrFile;
+struct TLItemDir:public TLItem
+{
+	vector<TLItem*> subitems;
+	vector<TLItemDir*> subdirs;
+	vector<TLItemFile*> subfiles;
+	vector<TLItemErrDir*> errdirs;
+	vector<TLItemErrFile*> errfiles;
+	bool isopen;
+	uint open_length;
+	FileListLoader* ctx;
+	TLItemDir(FileListLoader* loader):isopen(false),open_length(0),ctx(loader)
+	{
+	}
+	int OpenDir(bool open,bool release=false);
+	virtual void Release();
+	virtual uint GetDispLength();
+private:
+	void clear();
+	int construct_list();
+};
 struct ItStkItem
 {
 	TLItem* m_pLItem;
