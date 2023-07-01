@@ -91,7 +91,7 @@ bool TreeListCtrl::EndOfDraw(int iline)
 		return true;
 	CRect rc;
 	GetCanvasRect(&rc);
-	return iline*LINE_HEIGHT>rc.bottom;
+	return iline*LINE_HEIGHT>rc.bottom||(iline+1)*LINE_HEIGHT<rc.bottom;
 }
 void TreeListCtrl::DrawLine(CDrawer& drawer,int iline,TLItem* pItem)
 {

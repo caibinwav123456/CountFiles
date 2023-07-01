@@ -1,11 +1,15 @@
 #include "pch.h"
 #include "TreeListCtrl.h"
 #include "resource.h"
-ListCtrlDrawIterator::ListCtrlDrawIterator(ListCtrlDrawIterator& iter)
+uint TLItemDir::GetDispLength()
 {
-	memcpy(this,&iter,sizeof(*this));
-	iter.m_pStkItem=NULL;
-	iter.lvl=0;
+	return isopen?open_length:1;
+}
+ListCtrlDrawIterator::ListCtrlDrawIterator(ListCtrlDrawIterator& other)
+{
+	memcpy(this,&other,sizeof(*this));
+	other.m_pStkItem=NULL;
+	other.lvl=0;
 }
 ListCtrlDrawIterator::~ListCtrlDrawIterator()
 {
@@ -23,4 +27,13 @@ ListCtrlDrawIterator::operator bool()
 void ListCtrlDrawIterator::operator++(int)
 {
 	m_iline++;
+}
+void ListCtrlDrawIterator::operator--(int)
+{
+	if(m_iline>=0)
+		m_iline--;
+}
+bool ListCtrlDrawIterator::operator==(const ListCtrlDrawIterator& other) const
+{
+	return m_iline==other.m_iline;
 }

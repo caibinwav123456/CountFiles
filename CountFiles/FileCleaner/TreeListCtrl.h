@@ -44,15 +44,36 @@ struct TLItem
 	};
 	TLItem* parent;
 	int parentidx;
-	vector<TLItem*> subitems;
-	bool isopen;
 	bool issel;
-	uint open_length;
 	TLItem* next_sel;
-	TLItem():type(eITypeNone),state(eFSNone),node(NULL),parent(NULL),parentidx(-1),isopen(false),issel(false),open_length(0),next_sel(NULL)
+	TLItem():type(eITypeNone),state(eFSNone),node(NULL),parent(NULL),parentidx(-1),issel(false),next_sel(NULL)
 	{
 	}
+	virtual ~TLItem(){}
+	virtual void Release(){}
+	virtual uint GetDispLength()
+	{
+		return 1;
+	}
 };
+struct TLItemDir:public TLItem
+{
+	vector<TLItem*> subitems;
+	vector<TLItem*> subdirs;
+	vector<TLItem*> subfiles;
+	bool isopen;
+	uint open_length;
+	TLItemDir():isopen(false),open_length(0)
+	{
+	}
+	virtual uint GetDispLength();
+};
+struct TLItemFile:public TLItem
+{
+};
+typedef struct TLItemErrDir:public TLItem
+{
+}TLItemErrFile;
 struct ItStkItem
 {
 	TLItem* m_pLItem;
@@ -61,10 +82,12 @@ struct ItStkItem
 struct ListCtrlDrawIterator
 {
 	friend class TreeListCtrl;
-	ListCtrlDrawIterator(ListCtrlDrawIterator& iter);
+	ListCtrlDrawIterator(ListCtrlDrawIterator& other);
 	~ListCtrlDrawIterator();
 	operator bool();
 	void operator++(int);
+	void operator--(int);
+	bool operator==(const ListCtrlDrawIterator& other) const;
 private:
 	ListCtrlDrawIterator(TreeListCtrl* tl):m_pList(tl),m_pStkItem(NULL),lvl(0),m_iline(-1)
 	{
@@ -97,7 +120,7 @@ public:
 	void OnMMove(const CPoint& pt);
 
 protected:
-//Get scroll pos
+//Get scroll position
 	virtual CPoint GetScrollPos() const=0;
 //Set scroll sizes
 	virtual void SetScrollSizes(const CSize& size)=0;
