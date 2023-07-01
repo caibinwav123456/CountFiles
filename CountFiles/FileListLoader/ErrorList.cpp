@@ -105,11 +105,10 @@ static int parse_error_rec(err_dir_node* enode,vector<string>& stack,const UInte
 		return ERR_CORRUPTED_FILE;
 	return 0;
 }
-int load_error_list(err_dir_node* enode,const UInteger64& off,const UInteger64& end,void* hef)
+int FindLine(UInteger64& off,const UInteger64& end,void* hlf)
 {
-	UInteger64 tmpoff=off,tmpend,offstart=off,offend;
 	const UInteger64 buf_len(64);
-	vector<string> name_stack;
+	UInteger64 tmpoff=off,tmpend;
 	byte buf[64];
 	int ret=0;
 	while(tmpoff<end)
@@ -118,28 +117,42 @@ int load_error_list(err_dir_node* enode,const UInteger64& off,const UInteger64& 
 		if(tmpend>end)
 			tmpend=end;
 		uint len=(tmpend-tmpoff).low;
-		if(0!=(ret=sys_fseek(hef,tmpoff.low,&tmpoff.high,SEEK_BEGIN)))
+		if(0!=(ret=sys_fseek(hlf,tmpoff.low,&tmpoff.high,SEEK_BEGIN)))
 			return ret;
-		if(0!=(ret=sys_fread(hef,buf,len)))
+		if(0!=(ret=sys_fread(hlf,buf,len)))
 			return ret;
 		const byte* ptr=buf;
 		if(find_byte(ptr,len,'\n'))
 		{
-			offend=tmpoff+UInteger64(ptr+1-buf);
-			uint reclen=(offend-offstart).low;
-			byte* recbuf=new byte[reclen];
-			if(0!=(ret=sys_fseek(hef,offstart.low,&offstart.high,SEEK_BEGIN)))
-				goto end_read;
-			if(0!=(ret=sys_fread(hef,recbuf,reclen)))
-				goto end_read;
-			ret=parse_error_rec(enode,name_stack,offstart,recbuf,reclen);
-end_read:
-			delete[] recbuf;
-			if(ret!=0)
-				return ret;
-			offstart=offend;
+			off=tmpoff+UInteger64(ptr+1-buf);
+			return 0;
 		}
-		tmpoff=tmpend;
+	}
+	off=end;
+	return 0;
+}
+int load_error_list(err_dir_node* enode,const UInteger64& off,const UInteger64& end,void* hef)
+{
+	UInteger64 tmpoff=off,offstart=off,offend;
+	vector<string> name_stack;
+	int ret=0;
+	while(tmpoff<end)
+	{
+		if(0!=(ret=FindLine(tmpoff,end,hef)))
+			return ret;
+		offend=tmpoff;
+		uint reclen=(offend-offstart).low;
+		byte* recbuf=new byte[reclen];
+		if(0!=(ret=sys_fseek(hef,offstart.low,&offstart.high,SEEK_BEGIN)))
+			goto end_read;
+		if(0!=(ret=sys_fread(hef,recbuf,reclen)))
+			goto end_read;
+		ret=parse_error_rec(enode,name_stack,offstart,recbuf,reclen);
+end_read:
+		delete[] recbuf;
+		if(ret!=0)
+			return ret;
+		offstart=offend;
 	}
 	return 0;
 }

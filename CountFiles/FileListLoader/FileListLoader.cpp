@@ -47,7 +47,7 @@ static void free_enode(err_dir_node* edir)
 	delete edir->subdirs;
 	edir->subdirs=NULL;
 }
-static int RevFindLine(UInteger64& off,void* hlf)
+int RevFindLine(UInteger64& off,void* hlf)
 {
 	if(off<=UInteger64(1))
 		return ERR_CORRUPTED_FILE;

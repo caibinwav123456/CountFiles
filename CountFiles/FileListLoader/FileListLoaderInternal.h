@@ -104,9 +104,9 @@ static inline bool rev_str(const byte* ptr,const byte* start,const byte*& revout
 {
 	assert(ptr>=start);
 	const byte* tmpptr;
-	for(tmpptr=ptr;tmpptr>start;tmpptr--)
+	for(tmpptr=ptr;tmpptr>=start;tmpptr--)
 	{
-		if(*(tmpptr-1)&0x80)
+		if(tmpptr>start&&*(tmpptr-1)&0x80)
 		{
 			tmpptr--;
 		}
@@ -153,6 +153,8 @@ static inline bool match_tag(const char* str,const byte*& ptr,uint& len)
 	if(!match_tag(str,ptr,len)) \
 		return ERR_BAD_CONFIG_FORMAT; \
 	buf=ptr
+int FindLine(UInteger64& off,const UInteger64& end,void* hlf);
+int RevFindLine(UInteger64& off,void* hlf);
 void free_cache_item(void* item);
 int load_file_list(ctx_flist_loader* ctx,LRUCache* cache);
 void unload_file_list(ctx_flist_loader* ctx,LRUCache* cache);
