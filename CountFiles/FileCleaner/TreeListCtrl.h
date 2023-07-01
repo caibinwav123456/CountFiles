@@ -60,10 +60,14 @@ struct TLItemFile:public TLItem
 {
 	virtual void Release(){};
 };
-typedef struct TLItemErrDir:public TLItem
+struct TLItemErrDir:public TLItem
 {
 	virtual void Release(){};
-}TLItemErrFile;
+};
+struct TLItemErrFile:public TLItem
+{
+	virtual void Release(){};
+};
 struct TLItemDir:public TLItem
 {
 	vector<TLItem*> subitems;
@@ -73,8 +77,9 @@ struct TLItemDir:public TLItem
 	vector<TLItemErrFile*> errfiles;
 	bool isopen;
 	uint open_length;
+	uint dir_border;
 	FileListLoader* ctx;
-	TLItemDir(FileListLoader* loader):isopen(false),open_length(0),ctx(loader)
+	TLItemDir(FileListLoader* loader):isopen(false),open_length(0),dir_border(0),ctx(loader)
 	{
 	}
 	int OpenDir(bool open,bool release=false);
@@ -82,7 +87,7 @@ struct TLItemDir:public TLItem
 	virtual uint GetDispLength();
 private:
 	void clear();
-	int construct_list();
+	int construct_list(bool all=true);
 };
 struct ItStkItem
 {
