@@ -353,6 +353,7 @@ int TLItemDir::construct_list(bool all)
 		clear();
 		return err;
 	}
+	open_length=1+subitems.size();
 	return 0;
 }
 void TLItemDir::clear()
