@@ -4,8 +4,11 @@
 #define LINE_HEIGHT 24
 #define LINE_INDENT 24
 #define FOLDER_WIDTH 24
-#define FILE_WIDTH 12
-#define FILE_RECT CRect(6,8,12,16)
+#define CONN_START 12
+#define CONN_END 24
+#define CONN_COLOR RGB(128,128,128)
+#define FILE_WIDTH 9
+#define FILE_RECT CRect(1,10,6,16)
 #define GREY_COLOR RGB(248,250,249)
 #define SEL_COLOR RGB(204,255,204)
 #define SELN_COLOR RGB(226,246,226)

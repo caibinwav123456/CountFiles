@@ -168,13 +168,13 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter)
 			info.mod_time.Format(date,FORMAT_DATE|FORMAT_TIME|FORMAT_WEEKDAY);
 			strDate=a2t(date);
 			CSize txtsize=drawer.GetTextExtent(strName,LINE_HEIGHT);
-			drawer.DrawText(&pos,strName,LINE_HEIGHT);
+			drawer.DrawText(&pos,strName,LINE_HEIGHT,clr);
 			pos.x+=txtsize.cx+300;
 			txtsize=drawer.GetTextExtent(strSize,LINE_HEIGHT);
-			drawer.DrawText(&pos,strSize,LINE_HEIGHT);
+			drawer.DrawText(&pos,strSize,LINE_HEIGHT,clr);
 			pos.x+=txtsize.cx+300;
 			txtsize=drawer.GetTextExtent(strDate,LINE_HEIGHT);
-			drawer.DrawText(&pos,strDate,LINE_HEIGHT);
+			drawer.DrawText(&pos,strDate,LINE_HEIGHT,clr);
 			pos.x+=txtsize.cx+300;
 		}
 		break;
@@ -187,10 +187,10 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter)
 			strName=a2t(info.name);
 			strErrDesc=a2t(info.err_desc);
 			CSize txtsize=drawer.GetTextExtent(strName,LINE_HEIGHT);
-			drawer.DrawText(&pos,strName,LINE_HEIGHT,RGB(255,255,0));
+			drawer.DrawText(&pos,strName,LINE_HEIGHT,clr);
 			pos.x+=txtsize.cx+300;
 			txtsize=drawer.GetTextExtent(strErrDesc,LINE_HEIGHT);
-			drawer.DrawText(&pos,strErrDesc,LINE_HEIGHT,RGB(255,255,0));
+			drawer.DrawText(&pos,strErrDesc,LINE_HEIGHT,clr);
 			pos.x+=txtsize.cx+300;
 		}
 		break;

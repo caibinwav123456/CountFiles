@@ -196,21 +196,17 @@ void ListCtrlDrawIterator::operator--(int)
 {
 	if(m_pStkItem==NULL)
 		return;
-	bool pass=false;
-	if(end)
-	{
-		assert(lvl==0&&m_pStkItem->next==NULL);
-		end=false;
-		pass=true;
-		return;
-	}
 	if(m_iline<0)
 		return;
 	m_iline--;
 	if(m_iline<0)
 		return;
-	if(pass)
+	if(end)
+	{
+		assert(lvl==0&&m_pStkItem->next==NULL);
+		end=false;
 		goto second_phase;
+	}
 	for(;;)
 	{
 		if(m_pStkItem->parentidx>0)
