@@ -3,6 +3,7 @@
 
 #define LINE_HEIGHT 24
 #define LINE_INDENT 24
+#define TEXT_HEIGHT 20
 #define FOLDER_WIDTH 24
 #define CONN_START 12
 #define CONN_END 24

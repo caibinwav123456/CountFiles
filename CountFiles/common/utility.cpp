@@ -16,3 +16,13 @@ DLL int compare_pathname(const string& a,const string& b)
 		return a<b?-1:1;
 	return 0;
 }
+DLL string format_segmented_u64(const UInteger64& u64)
+{
+	string sz=FormatI64(u64),dispsz;
+	for(int i=0;i<(int)sz.size();i+=3)
+	{
+		string sec=((int)sz.size()>i+3?sz.substr(sz.size()-i-3,3):sz.substr(0,sz.size()-i));
+		dispsz=sec+(i==0?"":",")+dispsz;
+	}
+	return dispsz;
+}

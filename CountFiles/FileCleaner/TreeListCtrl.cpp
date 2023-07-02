@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "TreeListCtrl.h"
+#include "utility.h"
 #include "resource.h"
 #include <assert.h>
 string ConvertTStrToAnsiStr(LPCTSTR from)
@@ -143,6 +144,25 @@ void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlDrawIterator& iter)
 			drawer.DrawLine(&CPoint(xpos,ystart),&CPoint(xpos,ypos),CONN_COLOR,1,PS_DOT);
 	}
 }
+inline void DrawConfinedText(CDrawer& drawer,const string& text,const CRect& rc,COLORREF clr)
+{
+	CString txt=a2t(text);
+	CSize txtsize=drawer.GetTextExtent(txt,TEXT_HEIGHT);
+	if(txtsize.cx>rc.Width())
+	{
+		CString tmptxt=txt;
+		while((!tmptxt.IsEmpty())&&txtsize.cx>rc.Width())
+		{
+			tmptxt=tmptxt.Left(tmptxt.GetLength()-1);
+			txt=tmptxt+_T("...");
+			txtsize=drawer.GetTextExtent(txt,TEXT_HEIGHT);
+		}
+		if(tmptxt.IsEmpty())
+			txt.Empty();
+	}
+	CPoint pt(rc.left,rc.top+(rc.Height()-TEXT_HEIGHT)/2);
+	drawer.DrawText(&pt,txt,TEXT_HEIGHT,clr);
+}
 void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter)
 {
 	DrawLine(drawer,iter.m_iline,iter.m_pStkItem==NULL?NULL:iter.m_pStkItem->m_pLItem);
@@ -183,42 +203,25 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter)
 	case eITypeDir:
 	case eITypeFile:
 		{
-			CString strName,strSize,strDate;
 			file_node_info info;
 			string date;
 			if(item->type==eITypeDir)
 				m_ListLoader.GetNodeInfo(item->dirnode,&info);
 			else
 				m_ListLoader.GetNodeInfo(item->filenode,&info);
-			strName=a2t(info.name);
-			strSize=a2t(FormatI64(info.size));
 			info.mod_time.Format(date,FORMAT_DATE|FORMAT_TIME|FORMAT_WEEKDAY);
-			strDate=a2t(date);
-			CSize txtsize=drawer.GetTextExtent(strName,LINE_HEIGHT);
-			drawer.DrawText(&pos,strName,LINE_HEIGHT,clr);
-			pos.x+=txtsize.cx+300;
-			txtsize=drawer.GetTextExtent(strSize,LINE_HEIGHT);
-			drawer.DrawText(&pos,strSize,LINE_HEIGHT,clr);
-			pos.x+=txtsize.cx+300;
-			txtsize=drawer.GetTextExtent(strDate,LINE_HEIGHT);
-			drawer.DrawText(&pos,strDate,LINE_HEIGHT,clr);
-			pos.x+=txtsize.cx+300;
+			DrawConfinedText(drawer,info.name,CRect(pos,CPoint(400,pos.y+LINE_HEIGHT)),clr);
+			DrawConfinedText(drawer,format_segmented_u64(info.size),CRect(400,pos.y,500,pos.y+LINE_HEIGHT),clr);
+			DrawConfinedText(drawer,date,CRect(500,pos.y,600,pos.y+LINE_HEIGHT),clr);
 		}
 		break;
 	case eITypeErrDir:
 	case eITypeErrFile:
 		{
-			CString strName,strErrDesc;
 			err_node_info info;
 			m_ListLoader.GetNodeErrInfo(item->errnode,&info);
-			strName=a2t(info.name);
-			strErrDesc=a2t(info.err_desc);
-			CSize txtsize=drawer.GetTextExtent(strName,LINE_HEIGHT);
-			drawer.DrawText(&pos,strName,LINE_HEIGHT,clr);
-			pos.x+=txtsize.cx+300;
-			txtsize=drawer.GetTextExtent(strErrDesc,LINE_HEIGHT);
-			drawer.DrawText(&pos,strErrDesc,LINE_HEIGHT,clr);
-			pos.x+=txtsize.cx+300;
+			DrawConfinedText(drawer,info.name,CRect(pos,CPoint(400,pos.y+LINE_HEIGHT)),clr);
+			DrawConfinedText(drawer,info.err_desc,CRect(400,pos.y,500,pos.y+LINE_HEIGHT),clr);
 		}
 		break;
 	}

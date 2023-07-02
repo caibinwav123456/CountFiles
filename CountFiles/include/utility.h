@@ -4,8 +4,10 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include "Integer64.h"
 using namespace std;
 DLL int compare_pathname(const string& a,const string& b);
+DLL string format_segmented_u64(const UInteger64& u64);
 enum E_MERGE_SIDE
 {
 	eMSBoth,
