@@ -175,6 +175,7 @@ protected:
 	int LineNumFromPt(POINT* pt);
 	bool EndOfDraw(int iline);
 	void DrawLine(CDrawer& drawer,int iline,TLItem* pItem=NULL);
+	void DrawConn(CDrawer& drawer,const ListCtrlDrawIterator& iter);
 	void DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter);
 };
 #endif

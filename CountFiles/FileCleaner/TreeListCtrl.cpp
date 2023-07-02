@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "TreeListCtrl.h"
 #include "resource.h"
+#include <assert.h>
 string ConvertTStrToAnsiStr(LPCTSTR from)
 {
 	USES_CONVERSION;
@@ -117,14 +118,40 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,int iline,TLItem* pItem)
 	if(pItem!=NULL&&pItem==m_pItemSel)
 		drawer.DrawRect(&rcline,RGB(0,0,0),1,PS_DOT);
 }
+void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlDrawIterator& iter)
+{
+	if(iter.m_pStkItem==NULL)
+		return;
+	ItStkItem* pstk=iter.m_pStkItem;
+	int level=iter.lvl;
+	int ystart=iter.m_iline*LINE_HEIGHT;
+	int yend=ystart+LINE_HEIGHT;
+	int ypos=ystart+CONN_Y;
+	for(;pstk->next!=NULL;pstk=pstk->next,level--)
+	{
+		assert(level>0);
+		int xpos=LINE_INDENT*level+CONN_START;
+		bool last=pstk->parentidx==(int)pstk->m_pLItem->parent->subitems.size()-1;
+		if(level==iter.lvl)
+		{
+			int xposend=LINE_INDENT*level+CONN_END;
+			drawer.DrawLine(&CPoint(xpos,ypos),&CPoint(xposend,ypos),CONN_COLOR,1,PS_DOT);
+		}
+		if(!last)
+			drawer.DrawLine(&CPoint(xpos,ystart),&CPoint(xpos,yend),CONN_COLOR,1,PS_DOT);
+		else if(level==iter.lvl)
+			drawer.DrawLine(&CPoint(xpos,ystart),&CPoint(xpos,ypos),CONN_COLOR,1,PS_DOT);
+	}
+}
 void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter)
 {
 	DrawLine(drawer,iter.m_iline,iter.m_pStkItem==NULL?NULL:iter.m_pStkItem->m_pLItem);
+	DrawConn(drawer,iter);
 	CPoint pos(0,LINE_HEIGHT*iter.m_iline);
 	pos.x+=LINE_INDENT*iter.lvl;
 	TLItem* item=iter.m_pStkItem->m_pLItem;
 	bool err=item->type==eITypeErrDir||item->type==eITypeErrFile;
-	COLORREF clr=err?RGB(255,255,0):RGB(0,0,0);
+	COLORREF clr=err?YELLOW_COLOR:RGB(0,0,0);
 	switch(item->type)
 	{
 	case eITypeNone:
