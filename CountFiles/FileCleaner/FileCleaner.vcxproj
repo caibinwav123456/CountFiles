@@ -209,6 +209,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChildView.cpp" />
+    <ClCompile Include="ConstructList.cpp" />
     <ClCompile Include="DrawObject.cpp" />
     <ClCompile Include="FileCleaner.cpp" />
     <ClCompile Include="ItemData.cpp" />

@@ -231,3 +231,8 @@ void CDrawer::DrawText(POINT* pos,LPCTSTR text,int height,COLORREF clr,UINT back
 	SelectDC()->SetBkMode(backmode);
 	SelectDC()->TextOut(pos->x,pos->y,text);
 }
+CSize CDrawer::GetTextExtent(LPCTSTR text,int height,LPCTSTR ftname)
+{
+	DrawFont font(SelectDC(),height,ftname);
+	return SelectDC()->GetTextExtent(text,(int)_tcslen(text));
+}

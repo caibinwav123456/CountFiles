@@ -39,7 +39,7 @@ int TreeListCtrl::Init()
 		goto failed;
 	if(!m_bmpFolderExpMask.LoadBitmap(IDB_FOLDER_EXP_MASK))
 		goto failed;
-	SetScrollSizes(CSize(10*LINE_HEIGHT,LINE_HEIGHT));
+	SetScrollSizes(CSize(10*LINE_HEIGHT,m_nTotalLine*LINE_HEIGHT));
 	return 0;
 failed:
 	Exit();
@@ -65,12 +65,19 @@ void TreeListCtrl::DrawFolder(CDrawer* drawer,POINT* pt,int state,BOOL expand)
 	drawer->DrawBitmap(expand?&m_bmpFolderExp:&m_bmpFolder,pt,SRCPAINT,
 		&CRect(LINE_HEIGHT*(state-1),0,LINE_HEIGHT*state,LINE_HEIGHT));
 }
-ListCtrlDrawIterator TreeListCtrl::GetDrawIter()
+ListCtrlDrawIterator TreeListCtrl::GetDrawIter(POINT* pt)
 {
-	CRect rc;
-	GetCanvasRect(&rc);
+	POINT dummy,*ptrpt;
+	ptrpt=(pt!=NULL?pt:&dummy);
+	if(pt==NULL)
+	{
+		CRect rc;
+		GetCanvasRect(&rc);
+		dummy=rc.TopLeft();
+	}
 	ListCtrlDrawIterator it(this);
-	it.m_iline=LineNumFromPt(&rc.TopLeft());
+	it.m_iline=LineNumFromPt(ptrpt);
+	it.m_pStkItem=(m_pRootItem==NULL?NULL:m_pRootItem->FromLineNum(it.m_iline,it.lvl));
 	return it;
 }
 int TreeListCtrl::LineNumFromPt(POINT* pt)
@@ -113,6 +120,81 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,int iline,TLItem* pItem)
 void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter)
 {
 	DrawLine(drawer,iter.m_iline,iter.m_pStkItem==NULL?NULL:iter.m_pStkItem->m_pLItem);
+	CPoint pos(0,LINE_HEIGHT*iter.m_iline);
+	pos.x+=LINE_INDENT*iter.lvl;
+	TLItem* item=iter.m_pStkItem->m_pLItem;
+	bool err=item->type==eITypeErrDir||item->type==eITypeErrFile;
+	COLORREF clr=err?RGB(255,255,0):RGB(0,0,0);
+	switch(item->type)
+	{
+	case eITypeNone:
+		return;
+	case eITypeDir:
+	case eITypeErrDir:
+		{
+			BOOL exp=FALSE;
+			if(item->type==eITypeDir)
+			{
+				TLItemDir* dir=dynamic_cast<TLItemDir*>(item);
+				exp=(BOOL)dir->isopen;
+			}
+			DrawFolder(&drawer,&pos,err?eFSError:eFSEqual,exp);
+			pos.x+=FOLDER_WIDTH;
+		}
+		break;
+	case eITypeFile:
+	case eITypeErrFile:
+		{
+			CRect rcFile=FILE_RECT+pos;
+			drawer.FillRect(&rcFile,clr);
+			pos.x+=FILE_WIDTH;
+		}
+		break;
+	}
+	switch(item->type)
+	{
+	case eITypeDir:
+	case eITypeFile:
+		{
+			CString strName,strSize,strDate;
+			file_node_info info;
+			string date;
+			if(item->type==eITypeDir)
+				m_ListLoader.GetNodeInfo(item->dirnode,&info);
+			else
+				m_ListLoader.GetNodeInfo(item->filenode,&info);
+			strName=a2t(info.name);
+			strSize=a2t(FormatI64(info.size));
+			info.mod_time.Format(date,FORMAT_DATE|FORMAT_TIME|FORMAT_WEEKDAY);
+			strDate=a2t(date);
+			CSize txtsize=drawer.GetTextExtent(strName,LINE_HEIGHT);
+			drawer.DrawText(&pos,strName,LINE_HEIGHT);
+			pos.x+=txtsize.cx+300;
+			txtsize=drawer.GetTextExtent(strSize,LINE_HEIGHT);
+			drawer.DrawText(&pos,strSize,LINE_HEIGHT);
+			pos.x+=txtsize.cx+300;
+			txtsize=drawer.GetTextExtent(strDate,LINE_HEIGHT);
+			drawer.DrawText(&pos,strDate,LINE_HEIGHT);
+			pos.x+=txtsize.cx+300;
+		}
+		break;
+	case eITypeErrDir:
+	case eITypeErrFile:
+		{
+			CString strName,strErrDesc;
+			err_node_info info;
+			m_ListLoader.GetNodeErrInfo(item->errnode,&info);
+			strName=a2t(info.name);
+			strErrDesc=a2t(info.err_desc);
+			CSize txtsize=drawer.GetTextExtent(strName,LINE_HEIGHT);
+			drawer.DrawText(&pos,strName,LINE_HEIGHT,RGB(255,255,0));
+			pos.x+=txtsize.cx+300;
+			txtsize=drawer.GetTextExtent(strErrDesc,LINE_HEIGHT);
+			drawer.DrawText(&pos,strErrDesc,LINE_HEIGHT,RGB(255,255,0));
+			pos.x+=txtsize.cx+300;
+		}
+		break;
+	}
 }
 void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 {

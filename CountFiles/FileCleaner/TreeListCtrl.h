@@ -31,6 +31,8 @@ enum E_TREE_ITEM_TYPE
 	eITypeErrDir,
 	eITypeErrFile,
 };
+struct TLItemDir;
+struct ItStkItem;
 struct TLItem
 {
 	E_TREE_ITEM_TYPE type;
@@ -42,7 +44,7 @@ struct TLItem
 		HFNODE filenode;
 		HENODE errnode;
 	};
-	TLItem* parent;
+	TLItemDir* parent;
 	int parentidx;
 	bool issel;
 	TLItem* next_sel;
@@ -55,6 +57,7 @@ struct TLItem
 	{
 		return 1;
 	}
+	ItStkItem* FromLineNum(int iline,int& lvl);
 };
 struct TLItemFile:public TLItem
 {
@@ -88,11 +91,14 @@ struct TLItemDir:public TLItem
 private:
 	void clear();
 	int construct_list(bool all=true);
+	void update_displen(int diff);
 };
 struct ItStkItem
 {
 	TLItem* m_pLItem;
+	int parentidx;
 	ItStkItem* next;
+	ItStkItem(TLItem* pItem):m_pLItem(pItem),parentidx(-1),next(NULL){}
 };
 struct ListCtrlDrawIterator
 {
@@ -104,13 +110,14 @@ struct ListCtrlDrawIterator
 	void operator--(int);
 	bool operator==(const ListCtrlDrawIterator& other) const;
 private:
-	ListCtrlDrawIterator(TreeListCtrl* tl):m_pList(tl),m_pStkItem(NULL),lvl(0),m_iline(-1)
+	ListCtrlDrawIterator(TreeListCtrl* tl):m_pList(tl),m_pStkItem(NULL),lvl(0),m_iline(-1),end(false)
 	{
 	}
 	TreeListCtrl* m_pList;
 	ItStkItem* m_pStkItem;
 	int lvl;
 	int m_iline;
+	bool end;
 };
 class TreeListCtrl
 {
@@ -164,7 +171,7 @@ private:
 //protected functions
 protected:
 	void DrawFolder(CDrawer* drawer,POINT* pt,int state,BOOL expand);
-	ListCtrlDrawIterator GetDrawIter();
+	ListCtrlDrawIterator GetDrawIter(POINT* pt=NULL);
 	int LineNumFromPt(POINT* pt);
 	bool EndOfDraw(int iline);
 	void DrawLine(CDrawer& drawer,int iline,TLItem* pItem=NULL);
