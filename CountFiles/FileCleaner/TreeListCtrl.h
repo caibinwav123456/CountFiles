@@ -134,12 +134,12 @@ public:
 	void Draw(CDC* pClientDC,bool buffered);
 
 //Message handlers
-	void OnLBDown(const CPoint& pt);
-	void OnLBUp(const CPoint& pt);
-	void OnLBDblClick(const CPoint& pt);
-	void OnRBDown(const CPoint& pt);
-	void OnRBUp(const CPoint& pt);
-	void OnMMove(const CPoint& pt);
+	void OnLBDown(const CPoint& pt,UINT nFlags);
+	void OnLBUp(const CPoint& pt,UINT nFlags);
+	void OnLBDblClick(const CPoint& pt,UINT nFlags);
+	void OnRBDown(const CPoint& pt,UINT nFlags);
+	void OnRBUp(const CPoint& pt,UINT nFlags);
+	void OnMMove(const CPoint& pt,UINT nFlags);
 
 protected:
 //Get scroll position
@@ -173,6 +173,8 @@ protected:
 	void DrawFolder(CDrawer* drawer,POINT* pt,int state,BOOL expand);
 	ListCtrlDrawIterator GetDrawIter(POINT* pt=NULL);
 	int LineNumFromPt(POINT* pt);
+	void SetSel(TLItem* item);
+	void AddSel(TLItem* item);
 	bool EndOfDraw(int iline);
 	void DrawLine(CDrawer& drawer,int iline,TLItem* pItem=NULL);
 	void DrawConn(CDrawer& drawer,const ListCtrlDrawIterator& iter);
