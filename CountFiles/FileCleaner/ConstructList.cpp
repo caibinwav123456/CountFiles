@@ -295,29 +295,21 @@ int TLItemDir::construct_list(bool all)
 			new_errfile_item(this,get_errfile(dirnode,i));
 		}
 	}
-	unode_iterator itdir(&subdirs,ctx);
-	unode_iterator iterrdir(&errdirs,ctx);
 	try
 	{
+		unode_iterator itdir(&subdirs,ctx);
+		unode_iterator iterrdir(&errdirs,ctx);
 		merge_ordered_list(itdir,iterrdir,&merge_callback,(void*)&subitems);
-	}
-	catch(int err)
-	{
-		clear();
-		return err;
-	}
-	dir_border=subitems.size();
-	unode_iterator itfile(&subfiles,ctx);
-	unode_iterator iterrfile(&errfiles,ctx);
-	try
-	{
+		dir_border=subitems.size();
+		unode_iterator itfile(&subfiles,ctx);
+		unode_iterator iterrfile(&errfiles,ctx);
 		merge_ordered_list(itfile,iterrfile,&merge_callback,(void*)&subitems);
+		open_length=1+subitems.size();
 	}
 	catch(int err)
 	{
 		clear();
 		return err;
 	}
-	open_length=1+subitems.size();
 	return 0;
 }
