@@ -137,6 +137,10 @@ ItStkItem* TLItem::FromLineNum(int iline,int& lvl)
 		}
 	}
 }
+int TLItem::ToLineNum(TLItem* item)
+{
+	return -1;
+}
 ListCtrlDrawIterator::ListCtrlDrawIterator(ListCtrlDrawIterator& other)
 {
 	memcpy(this,&other,sizeof(*this));
@@ -240,4 +244,119 @@ second_phase:
 bool ListCtrlDrawIterator::operator==(const ListCtrlDrawIterator& other) const
 {
 	return m_iline==other.m_iline;
+}
+bool ListCtrlDrawIterator::operator!=(const ListCtrlDrawIterator& other) const
+{
+	return m_iline!=other.m_iline;
+}
+bool ListCtrlDrawIterator::operator>(const ListCtrlDrawIterator& other) const
+{
+	return m_iline>other.m_iline;
+}
+bool ListCtrlDrawIterator::operator<(const ListCtrlDrawIterator& other) const
+{
+	return m_iline<other.m_iline;
+}
+bool ListCtrlDrawIterator::operator>=(const ListCtrlDrawIterator& other) const
+{
+	return m_iline>=other.m_iline;
+}
+bool ListCtrlDrawIterator::operator<=(const ListCtrlDrawIterator& other) const
+{
+	return m_iline<=other.m_iline;
+}
+TLItem* ItemSelector::GetSel()
+{
+	return m_pItemSel;
+}
+bool ItemSelector::InDragRegion(int iline,bool* cancel)
+{
+	if(iline<0)
+		return false;
+	int start=m_iDragStart,end=m_iDragEnd;
+	if(start<end)
+		swap(start,end);
+	if(iline>=start&&iline<=end)
+	{
+		if(cancel!=NULL)
+			*cancel=m_bCancelRgn;
+		return true;
+	}
+	return false;
+}
+bool ItemSelector::IsSelected(TLItem* item,int iline)
+{
+	if(item==NULL)
+		return false;
+	if(InDragRegion(iline))
+		return !m_bCancelRgn;
+	return item==m_pItemSel;
+}
+void ItemSelector::SetSel(TLItem* item)
+{
+	for(set<TLItem*>::iterator it=m_setSel.begin();it!=m_setSel.end();it++)
+	{
+		(*it)->issel=false;
+	}
+	m_setSel.clear();
+	m_pItemSel=NULL;
+	m_pItemFocus=NULL;
+	if(item==NULL)
+		return;
+	AddSel(item);
+}
+void ItemSelector::AddSel(TLItem* item)
+{
+	if(item==NULL)
+		return;
+	assert(item->issel==false);
+	assert(m_setSel.find(item)==m_setSel.end());
+	item->issel=true;
+	m_setSel.insert(item);
+	m_pItemSel=item;
+	m_pItemFocus=item;
+}
+void ItemSelector::CancelSel(TLItem* item)
+{
+	if(item==NULL)
+		return;
+	assert(item->issel==true);
+	assert(m_setSel.find(item)!=m_setSel.end());
+	item->issel=false;
+	m_setSel.erase(item);
+	m_pItemSel=item;
+	m_pItemFocus=item;
+}
+void ItemSelector::ToggleSel(TLItem* item)
+{
+	if(item==NULL)
+		return;
+	if(item->issel)
+		CancelSel(item);
+	else
+		AddSel(item);
+}
+bool ItemSelector::BeginDragSel(int iline,bool bcancel)
+{
+	if(iline<0||iline>=(int)m_pOwner->m_nTotalLine)
+		return false;
+	m_iDragStart=iline;
+	return true;
+}
+bool ItemSelector::DragSelTo(int iline)
+{
+	if(iline<0||iline>=(int)m_pOwner->m_nTotalLine)
+		return false;
+	m_iDragEnd=iline;
+	return true;
+}
+void ItemSelector::EndDragSel(int iline)
+{
+	DragSelTo(iline);
+
+	m_iDragStart=m_iDragEnd=-1;
+}
+void ItemSelector::SortSelection()
+{
+
 }

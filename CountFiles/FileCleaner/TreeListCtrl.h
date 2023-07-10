@@ -3,6 +3,7 @@
 #include "FileListLoader.h"
 #include "DrawObject.h"
 #include <vector>
+#include <set>
 #define t2a(p) ConvertTStrToAnsiStr(p)
 #define a2t(p) ConvertAnsiStrToTStr(p)
 enum E_FOLDER_STATE
@@ -20,9 +21,6 @@ enum E_FOLDER_STATE
 	eFSMax,
 };
 #define eFSAnormal eFSNReady
-string ConvertTStrToAnsiStr(LPCTSTR from);
-CString ConvertAnsiStrToTStr(LPCSTR from);
-CString ConvertAnsiStrToTStr(const string& from);
 enum E_TREE_ITEM_TYPE
 {
 	eITypeNone,
@@ -31,8 +29,39 @@ enum E_TREE_ITEM_TYPE
 	eITypeErrDir,
 	eITypeErrFile,
 };
+string ConvertTStrToAnsiStr(LPCTSTR from);
+CString ConvertAnsiStrToTStr(LPCSTR from);
+CString ConvertAnsiStrToTStr(const string& from);
+COLORREF GetDispColor(E_FOLDER_STATE state);
+struct TLItem;
 struct TLItemDir;
 struct ItStkItem;
+struct ListCtrlDrawIterator;
+class TreeListCtrl;
+struct ItemSelector
+{
+	ItemSelector(TreeListCtrl* pOwner):m_pOwner(pOwner),m_pItemFocus(NULL),m_pItemSel(NULL),
+		m_iDragStart(-1),m_iDragEnd(-1),m_bCancelRgn(false){}
+	TLItem* GetSel();
+	bool IsSelected(TLItem* item,int iline);
+	bool InDragRegion(int iline,bool* cancel=NULL);
+	void SetSel(TLItem* item);
+	void AddSel(TLItem* item);
+	void CancelSel(TLItem* item);
+	void ToggleSel(TLItem* item);
+	bool BeginDragSel(int iline,bool bcancel);
+	bool DragSelTo(int iline);
+	void EndDragSel(int iline);
+	void SortSelection();
+private:
+	set<TLItem*> m_setSel;
+	TLItem* m_pItemFocus;
+	TLItem* m_pItemSel;
+	int m_iDragStart;
+	int m_iDragEnd;
+	TreeListCtrl* m_pOwner;
+	bool m_bCancelRgn;
+};
 struct TLItem
 {
 	E_TREE_ITEM_TYPE type;
@@ -47,8 +76,7 @@ struct TLItem
 	TLItemDir* parent;
 	int parentidx;
 	bool issel;
-	TLItem* next_sel;
-	TLItem():type(eITypeNone),state(eFSNone),node(NULL),parent(NULL),parentidx(-1),issel(false),next_sel(NULL)
+	TLItem():type(eITypeNone),state(eFSNone),node(NULL),parent(NULL),parentidx(-1),issel(false)
 	{
 	}
 	virtual ~TLItem(){}
@@ -58,6 +86,7 @@ struct TLItem
 		return 1;
 	}
 	ItStkItem* FromLineNum(int iline,int& lvl);
+	int ToLineNum(TLItem* item);
 };
 struct TLItemFile:public TLItem
 {
@@ -109,6 +138,11 @@ struct ListCtrlDrawIterator
 	void operator++(int);
 	void operator--(int);
 	bool operator==(const ListCtrlDrawIterator& other) const;
+	bool operator!=(const ListCtrlDrawIterator& other) const;
+	bool operator>(const ListCtrlDrawIterator& other) const;
+	bool operator<(const ListCtrlDrawIterator& other) const;
+	bool operator>=(const ListCtrlDrawIterator& other) const;
+	bool operator<=(const ListCtrlDrawIterator& other) const;
 private:
 	ListCtrlDrawIterator(TreeListCtrl* tl):m_pList(tl),m_pStkItem(NULL),lvl(0),m_iline(-1),end(false)
 	{
@@ -122,6 +156,7 @@ private:
 class TreeListCtrl
 {
 	friend struct ListCtrlDrawIterator;
+	friend struct ItemSelector;
 public:
 //Constructor/Destructor
 	TreeListCtrl(CWnd* pWnd);
@@ -161,7 +196,7 @@ private:
 	FileListLoader m_ListLoader;
 	uint m_nTotalLine;
 	TLItem* m_pRootItem;
-	TLItem* m_pItemSel;
+	ItemSelector m_ItemSel;
 
 //private functions
 private:
@@ -170,11 +205,9 @@ private:
 
 //protected functions
 protected:
-	void DrawFolder(CDrawer* drawer,POINT* pt,int state,BOOL expand);
+	void DrawFolder(CDrawer* drawer,POINT* pt,E_FOLDER_STATE state,BOOL expand);
 	ListCtrlDrawIterator GetDrawIter(POINT* pt=NULL);
 	int LineNumFromPt(POINT* pt);
-	void SetSel(TLItem* item);
-	void AddSel(TLItem* item);
 	bool EndOfDraw(int iline);
 	void DrawLine(CDrawer& drawer,int iline,TLItem* pItem=NULL);
 	void DrawConn(CDrawer& drawer,const ListCtrlDrawIterator& iter);

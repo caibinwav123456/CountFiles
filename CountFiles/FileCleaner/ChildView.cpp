@@ -181,6 +181,7 @@ static inline CPoint GetMousePos(const CPoint& pt,CScrollView* pView)
 void CChildView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+	SetCapture();
 	CPoint pt=GetMousePos(point,this);
 	if(pt.x>=0&&pt.y>=0)
 		m_TreeList.OnLBDown(pt,nFlags);
@@ -191,6 +192,7 @@ void CChildView::OnLButtonDown(UINT nFlags, CPoint point)
 void CChildView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+	ReleaseCapture();
 	CPoint pt=GetMousePos(point,this);
 	ASSERT(pt.x>=0&&pt.y>=0);
 	if(pt.x>=0&&pt.y>=0)

@@ -26,12 +26,14 @@ static inline void new_errdir_item(TLItemDir* parent,HENODE node)
 {
 	TLItemErrDir* dir=new TLItemErrDir;
 	init_new_item(dir,parent,eITypeErrDir,node,parent->errdirs.size());
+	dir->state=eFSError;
 	parent->errdirs.push_back(dir);
 }
 static inline void new_errfile_item(TLItemDir* parent,HENODE node)
 {
 	TLItemErrFile* file=new TLItemErrFile;
 	init_new_item(file,parent,eITypeErrFile,node,parent->errfiles.size());
+	file->state=eFSError;
 	parent->errfiles.push_back(file);
 }
 struct path_value_t
