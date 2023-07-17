@@ -139,7 +139,23 @@ ItStkItem* TLItem::FromLineNum(int iline,int& lvl)
 }
 int TLItem::ToLineNum(TLItem* item)
 {
-	return -1;
+	if(item==NULL)
+		return -1;
+	int iline=0;
+	for(TLItemDir* dir=item->parent;dir!=NULL;item=dir,dir=dir->parent)
+	{
+		int i;
+		for(i=0;i<(int)dir->subitems.size();i++)
+		{
+			if(item==dir->subitems[i])
+				break;
+			iline+=dir->subitems[i]->GetDispLength();
+		}
+		if(i==(int)dir->subitems.size())
+			return -1;
+		iline++;
+	}
+	return iline-1;
 }
 ListCtrlIterator::ListCtrlIterator(TLItem* root,int iline,TreeListCtrl* pList):m_pList(pList),m_pStkItem(NULL),lvl(0),m_iline(-1),end(false)
 {
@@ -425,7 +441,7 @@ end:
 	m_bCancelRgn=false;
 	m_iDragStart=m_iDragEnd=-1;
 }
-void ItemSelector::SortSelection()
+void ItemSelector::SortSelection(SortedSelItemNode& tree)
 {
 	EndDragSel();
 }

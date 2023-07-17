@@ -3,6 +3,7 @@
 #include "FileListLoader.h"
 #include "DrawObject.h"
 #include <vector>
+#include <map>
 #include <set>
 #define t2a(p) ConvertTStrToAnsiStr(p)
 #define a2t(p) ConvertAnsiStrToTStr(p)
@@ -38,6 +39,20 @@ struct TLItemDir;
 struct ItStkItem;
 class ListCtrlIterator;
 class TreeListCtrl;
+struct SortedSelItemNode
+{
+	TLItem* pItem;
+	int iline;
+	map<int,SortedSelItemNode*> map_sub;
+	SortedSelItemNode():pItem(NULL),iline(-1){}
+	~SortedSelItemNode()
+	{
+		for(map<int,SortedSelItemNode*>::iterator iter=map_sub.begin();iter!=map_sub.end();iter++)
+		{
+			delete iter->second;
+		}
+	}
+};
 class ItemSelector
 {
 public:
@@ -68,7 +83,7 @@ public:
 	bool BeginDragSel(int iline,bool cancel);
 	bool DragSelTo(int iline);
 	void EndDragSel();
-	void SortSelection();
+	void SortSelection(SortedSelItemNode& tree);
 private:
 	set<SelItem> m_setSel;
 	int m_iItemSel;
