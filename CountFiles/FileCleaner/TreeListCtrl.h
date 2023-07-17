@@ -47,11 +47,10 @@ struct SortedSelItemNode
 	SortedSelItemNode():pItem(NULL),iline(-1){}
 	~SortedSelItemNode()
 	{
-		for(map<int,SortedSelItemNode*>::iterator iter=map_sub.begin();iter!=map_sub.end();iter++)
-		{
-			delete iter->second;
-		}
+		clear();
 	}
+	void clear();
+	void extract();
 };
 class ItemSelector
 {

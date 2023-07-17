@@ -449,3 +449,23 @@ bool ItemSelector::valid(int iline)
 {
 	return iline>=0&&iline<(int)m_pOwner->m_nTotalLine;
 }
+void SortedSelItemNode::clear()
+{
+	for(map<int,SortedSelItemNode*>::iterator iter=map_sub.begin();iter!=map_sub.end();iter++)
+	{
+		delete iter->second;
+	}
+	map_sub.clear();
+}
+void SortedSelItemNode::extract()
+{
+	if(pItem->issel)
+	{
+		clear();
+		return;
+	}
+	for(map<int,SortedSelItemNode*>::iterator iter=map_sub.begin();iter!=map_sub.end();iter++)
+	{
+		iter->second->extract();
+	}
+}
