@@ -141,24 +141,33 @@ int TLItem::ToLineNum(TLItem* item)
 {
 	return -1;
 }
-ListCtrlDrawIterator::ListCtrlDrawIterator(ListCtrlDrawIterator& other)
+ListCtrlIterator::ListCtrlIterator(TLItem* root,int iline,TreeListCtrl* pList):m_pList(pList),m_pStkItem(NULL),lvl(0),m_iline(-1),end(false)
+{
+	if(root==NULL||iline<0)
+		return;
+	m_iline=iline;
+	m_pStkItem=root->FromLineNum(m_iline,lvl);
+	if(m_pStkItem==NULL)
+		m_iline=-1;
+}
+ListCtrlIterator::ListCtrlIterator(ListCtrlIterator& other)
 {
 	memcpy(this,&other,sizeof(*this));
 	other.m_pStkItem=NULL;
 	other.lvl=0;
 }
-ListCtrlDrawIterator::~ListCtrlDrawIterator()
+ListCtrlIterator::~ListCtrlIterator()
 {
 	free_item_stack(m_pStkItem);
 }
-ListCtrlDrawIterator::operator bool()
+ListCtrlIterator::operator bool()
 {
 	if(end)
 		return false;
-	end=(m_pStkItem==NULL||!m_pList->EndOfDraw(m_iline));
+	end=(m_pStkItem==NULL||m_pList==NULL||m_pList->EndOfDraw(m_iline));
 	return !end;
 }
-void ListCtrlDrawIterator::operator++(int)
+void ListCtrlIterator::operator++(int)
 {
 	if(end||m_pStkItem==NULL)
 		return;
@@ -196,7 +205,7 @@ void ListCtrlDrawIterator::operator++(int)
 		m_pStkItem=next;
 	}
 }
-void ListCtrlDrawIterator::operator--(int)
+void ListCtrlIterator::operator--(int)
 {
 	if(m_pStkItem==NULL)
 		return;
@@ -241,40 +250,56 @@ second_phase:
 		lvl++;
 	}
 }
-bool ListCtrlDrawIterator::operator==(const ListCtrlDrawIterator& other) const
+bool ListCtrlIterator::operator==(const ListCtrlIterator& other) const
 {
+	if(m_iline<0||other.m_iline<0)
+		return false;
 	return m_iline==other.m_iline;
 }
-bool ListCtrlDrawIterator::operator!=(const ListCtrlDrawIterator& other) const
+bool ListCtrlIterator::operator!=(const ListCtrlIterator& other) const
 {
+	if(m_iline<0||other.m_iline<0)
+		return false;
 	return m_iline!=other.m_iline;
 }
-bool ListCtrlDrawIterator::operator>(const ListCtrlDrawIterator& other) const
+bool ListCtrlIterator::operator>(const ListCtrlIterator& other) const
 {
+	if(m_iline<0||other.m_iline<0)
+		return false;
 	return m_iline>other.m_iline;
 }
-bool ListCtrlDrawIterator::operator<(const ListCtrlDrawIterator& other) const
+bool ListCtrlIterator::operator<(const ListCtrlIterator& other) const
 {
+	if(m_iline<0||other.m_iline<0)
+		return false;
 	return m_iline<other.m_iline;
 }
-bool ListCtrlDrawIterator::operator>=(const ListCtrlDrawIterator& other) const
+bool ListCtrlIterator::operator>=(const ListCtrlIterator& other) const
 {
+	if(m_iline<0||other.m_iline<0)
+		return false;
 	return m_iline>=other.m_iline;
 }
-bool ListCtrlDrawIterator::operator<=(const ListCtrlDrawIterator& other) const
+bool ListCtrlIterator::operator<=(const ListCtrlIterator& other) const
 {
+	if(m_iline<0||other.m_iline<0)
+		return false;
 	return m_iline<=other.m_iline;
 }
-TLItem* ItemSelector::GetSel()
+bool ItemSelector::IsFocus(int iline)
 {
-	return m_pItemSel;
+	if(m_iItemSel<0)
+		return false;
+	return iline==m_iItemSel;
 }
 bool ItemSelector::InDragRegion(int iline,bool* cancel)
 {
-	if(iline<0)
+	if(!valid(iline))
+		return false;
+	if(m_iDragStart<0||m_iDragEnd<0)
 		return false;
 	int start=m_iDragStart,end=m_iDragEnd;
-	if(start<end)
+	if(start>end)
 		swap(start,end);
 	if(iline>=start&&iline<=end)
 	{
@@ -290,73 +315,121 @@ bool ItemSelector::IsSelected(TLItem* item,int iline)
 		return false;
 	if(InDragRegion(iline))
 		return !m_bCancelRgn;
-	return item==m_pItemSel;
+	return item->issel;
 }
-void ItemSelector::SetSel(TLItem* item)
+void ItemSelector::SetSel(TLItem* item,int iline)
 {
-	for(set<TLItem*>::iterator it=m_setSel.begin();it!=m_setSel.end();it++)
+	for(set<SelItem>::iterator it=m_setSel.begin();it!=m_setSel.end();it++)
 	{
-		(*it)->issel=false;
+		(*it).item->issel=false;
 	}
 	m_setSel.clear();
-	m_pItemSel=NULL;
-	m_pItemFocus=NULL;
+	m_iItemSel=-1;
+	m_iDragStart=m_iDragEnd=-1;
+	m_bCancelRgn=false;
 	if(item==NULL)
 		return;
-	AddSel(item);
+	assert(valid(iline));
+	AddSel(item,iline);
+	BeginDragSel(iline,false);
+	m_iItemSel=iline;
 }
-void ItemSelector::AddSel(TLItem* item)
+void ItemSelector::AddSel(TLItem* item,int iline)
 {
 	if(item==NULL)
 		return;
+	assert(valid(iline));
 	assert(item->issel==false);
 	assert(m_setSel.find(item)==m_setSel.end());
 	item->issel=true;
-	m_setSel.insert(item);
-	m_pItemSel=item;
-	m_pItemFocus=item;
+	m_setSel.insert(SelItem(item,iline));
 }
-void ItemSelector::CancelSel(TLItem* item)
+void ItemSelector::CancelSel(TLItem* item,int iline)
 {
 	if(item==NULL)
 		return;
+	assert(valid(iline));
 	assert(item->issel==true);
 	assert(m_setSel.find(item)!=m_setSel.end());
 	item->issel=false;
-	m_setSel.erase(item);
-	m_pItemSel=item;
-	m_pItemFocus=item;
+	m_setSel.erase(SelItem(item,iline));
 }
-void ItemSelector::ToggleSel(TLItem* item)
+void ItemSelector::ToggleSel(TLItem* item,int iline)
 {
 	if(item==NULL)
 		return;
+	assert(valid(iline));
+	EndDragSel();
 	if(item->issel)
-		CancelSel(item);
+	{
+		CancelSel(item,iline);
+		BeginDragSel(iline,true);
+	}
 	else
-		AddSel(item);
+	{
+		AddSel(item,iline);
+		BeginDragSel(iline,false);
+	}
+	m_iItemSel=iline;
 }
-bool ItemSelector::BeginDragSel(int iline,bool bcancel)
+bool ItemSelector::BeginDragSel(int iline,bool cancel)
 {
-	if(iline<0||iline>=(int)m_pOwner->m_nTotalLine)
+	if(!valid(iline))
 		return false;
 	m_iDragStart=iline;
+	m_bCancelRgn=cancel;
 	return true;
 }
 bool ItemSelector::DragSelTo(int iline)
 {
-	if(iline<0||iline>=(int)m_pOwner->m_nTotalLine)
+	if(!valid(iline))
+		return false;
+	if(m_iDragStart<0)
 		return false;
 	m_iDragEnd=iline;
+	m_iItemSel=iline;
 	return true;
 }
-void ItemSelector::EndDragSel(int iline)
+void ItemSelector::EndDragSel()
 {
-	DragSelTo(iline);
-
+	if(m_iDragStart<0||m_iDragEnd<0)
+		goto end;
+	bool bRev=m_iDragStart>m_iDragEnd;
+	if(m_bCancelRgn)
+	{
+		ListCtrlIterator itstart(m_pOwner->m_pRootItem,m_iDragStart),
+			itend(m_pOwner->m_pRootItem,m_iDragEnd);
+		for(;bRev?itstart>=itend:itstart<=itend;bRev?itstart--:itstart++)
+		{
+			ItStkItem* stk=itstart.m_pStkItem;
+			if(stk==NULL)
+				continue;
+			if(stk->m_pLItem->issel)
+				CancelSel(stk->m_pLItem,itstart.m_iline);
+		}
+	}
+	else
+	{
+		ListCtrlIterator itstart(m_pOwner->m_pRootItem,m_iDragStart),
+			itend(m_pOwner->m_pRootItem,m_iDragEnd);
+		for(;bRev?itstart>=itend:itstart<=itend;bRev?itstart--:itstart++)
+		{
+			ItStkItem* stk=itstart.m_pStkItem;
+			if(stk==NULL)
+				continue;
+			if(!stk->m_pLItem->issel)
+				AddSel(stk->m_pLItem,itstart.m_iline);
+		}
+	}
+end:
+	m_bCancelRgn=false;
 	m_iDragStart=m_iDragEnd=-1;
 }
 void ItemSelector::SortSelection()
 {
-
+	EndDragSel();
+}
+bool ItemSelector::valid(int iline)
+{
+	return iline>=0&&iline<(int)m_pOwner->m_nTotalLine;
 }

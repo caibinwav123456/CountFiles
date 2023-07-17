@@ -36,31 +36,47 @@ COLORREF GetDispColor(E_FOLDER_STATE state);
 struct TLItem;
 struct TLItemDir;
 struct ItStkItem;
-struct ListCtrlDrawIterator;
+class ListCtrlIterator;
 class TreeListCtrl;
-struct ItemSelector
+class ItemSelector
 {
-	ItemSelector(TreeListCtrl* pOwner):m_pOwner(pOwner),m_pItemFocus(NULL),m_pItemSel(NULL),
+public:
+	struct SelItem
+	{
+		TLItem* item;
+		int iline;
+		SelItem(TLItem* p=NULL,int i=-1):item(p),iline(i){}
+		void clear()
+		{
+			item=NULL;
+			iline=-1;
+		}
+		bool operator<(const SelItem& other) const
+		{
+			return iline<other.iline;
+		}
+	};
+	ItemSelector(TreeListCtrl* pOwner):m_pOwner(pOwner),m_iItemSel(-1),
 		m_iDragStart(-1),m_iDragEnd(-1),m_bCancelRgn(false){}
-	TLItem* GetSel();
+	bool IsFocus(int iline);
 	bool IsSelected(TLItem* item,int iline);
 	bool InDragRegion(int iline,bool* cancel=NULL);
-	void SetSel(TLItem* item);
-	void AddSel(TLItem* item);
-	void CancelSel(TLItem* item);
-	void ToggleSel(TLItem* item);
-	bool BeginDragSel(int iline,bool bcancel);
+	void SetSel(TLItem* item,int iline);
+	void AddSel(TLItem* item,int iline);
+	void CancelSel(TLItem* item,int iline);
+	void ToggleSel(TLItem* item,int iline);
+	bool BeginDragSel(int iline,bool cancel);
 	bool DragSelTo(int iline);
-	void EndDragSel(int iline);
+	void EndDragSel();
 	void SortSelection();
 private:
-	set<TLItem*> m_setSel;
-	TLItem* m_pItemFocus;
-	TLItem* m_pItemSel;
+	set<SelItem> m_setSel;
+	int m_iItemSel;
 	int m_iDragStart;
 	int m_iDragEnd;
 	TreeListCtrl* m_pOwner;
 	bool m_bCancelRgn;
+	bool valid(int iline);
 };
 struct TLItem
 {
@@ -129,34 +145,32 @@ struct ItStkItem
 	ItStkItem* next;
 	ItStkItem(TLItem* pItem):m_pLItem(pItem),parentidx(-1),next(NULL){}
 };
-struct ListCtrlDrawIterator
+class ListCtrlIterator
 {
-	friend class TreeListCtrl;
-	ListCtrlDrawIterator(ListCtrlDrawIterator& other);
-	~ListCtrlDrawIterator();
+public:
+	ListCtrlIterator(TLItem* root,int iline,TreeListCtrl* pList=NULL);
+	ListCtrlIterator(ListCtrlIterator& other);
+	~ListCtrlIterator();
 	operator bool();
 	void operator++(int);
 	void operator--(int);
-	bool operator==(const ListCtrlDrawIterator& other) const;
-	bool operator!=(const ListCtrlDrawIterator& other) const;
-	bool operator>(const ListCtrlDrawIterator& other) const;
-	bool operator<(const ListCtrlDrawIterator& other) const;
-	bool operator>=(const ListCtrlDrawIterator& other) const;
-	bool operator<=(const ListCtrlDrawIterator& other) const;
-private:
-	ListCtrlDrawIterator(TreeListCtrl* tl):m_pList(tl),m_pStkItem(NULL),lvl(0),m_iline(-1),end(false)
-	{
-	}
-	TreeListCtrl* m_pList;
+	bool operator==(const ListCtrlIterator& other) const;
+	bool operator!=(const ListCtrlIterator& other) const;
+	bool operator>(const ListCtrlIterator& other) const;
+	bool operator<(const ListCtrlIterator& other) const;
+	bool operator>=(const ListCtrlIterator& other) const;
+	bool operator<=(const ListCtrlIterator& other) const;
 	ItStkItem* m_pStkItem;
 	int lvl;
 	int m_iline;
+private:
+	TreeListCtrl* m_pList;
 	bool end;
 };
 class TreeListCtrl
 {
-	friend struct ListCtrlDrawIterator;
-	friend struct ItemSelector;
+	friend class ListCtrlIterator;
+	friend class ItemSelector;
 public:
 //Constructor/Destructor
 	TreeListCtrl(CWnd* pWnd);
@@ -206,11 +220,11 @@ private:
 //protected functions
 protected:
 	void DrawFolder(CDrawer* drawer,POINT* pt,E_FOLDER_STATE state,BOOL expand);
-	ListCtrlDrawIterator GetDrawIter(POINT* pt=NULL);
+	ListCtrlIterator GetDrawIter(POINT* pt=NULL);
 	int LineNumFromPt(POINT* pt);
 	bool EndOfDraw(int iline);
 	void DrawLine(CDrawer& drawer,int iline,TLItem* pItem=NULL);
-	void DrawConn(CDrawer& drawer,const ListCtrlDrawIterator& iter);
-	void DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter);
+	void DrawConn(CDrawer& drawer,const ListCtrlIterator& iter);
+	void DrawLine(CDrawer& drawer,const ListCtrlIterator& iter);
 };
 #endif

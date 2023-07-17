@@ -87,7 +87,7 @@ void TreeListCtrl::DrawFolder(CDrawer* drawer,POINT* pt,E_FOLDER_STATE state,BOO
 	drawer->DrawBitmap(expand?&m_bmpFolderExp:&m_bmpFolder,pt,SRCPAINT,
 		&CRect(LINE_HEIGHT*(state-1),0,LINE_HEIGHT*state,LINE_HEIGHT));
 }
-ListCtrlDrawIterator TreeListCtrl::GetDrawIter(POINT* pt)
+ListCtrlIterator TreeListCtrl::GetDrawIter(POINT* pt)
 {
 	POINT dummy,*ptrpt;
 	ptrpt=(pt!=NULL?pt:&dummy);
@@ -97,15 +97,11 @@ ListCtrlDrawIterator TreeListCtrl::GetDrawIter(POINT* pt)
 		GetCanvasRect(&rc);
 		dummy=rc.TopLeft();
 	}
-	ListCtrlDrawIterator it(this);
-	it.m_iline=LineNumFromPt(ptrpt);
-	it.m_pStkItem=(m_pRootItem==NULL?NULL:m_pRootItem->FromLineNum(it.m_iline,it.lvl));
+	ListCtrlIterator it(m_pRootItem,LineNumFromPt(ptrpt),this);
 	return it;
 }
 int TreeListCtrl::LineNumFromPt(POINT* pt)
 {
-	CRect rc;
-	GetCanvasRect(&rc);
 	int iline;
 	if(pt->x<0||pt->y<0)
 		return -1;
@@ -136,10 +132,10 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,int iline,TLItem* pItem)
 	if(m_ItemSel.IsSelected(pItem,iline))
 		color=SEL_COLOR;
 	drawer.FillRect(&rcline,color);
-	if(pItem!=NULL&&pItem==m_ItemSel.GetSel())
+	if(pItem!=NULL&&m_ItemSel.IsFocus(iline))
 		drawer.DrawRect(&rcline,RGB(0,0,0),1,PS_DOT);
 }
-void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlDrawIterator& iter)
+void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter)
 {
 	if(iter.m_pStkItem==NULL)
 		return;
@@ -183,7 +179,7 @@ inline void DrawConfinedText(CDrawer& drawer,const string& text,const CRect& rc,
 	CPoint pt(rc.left,rc.top+(rc.Height()-TEXT_HEIGHT)/2);
 	drawer.DrawText(&pt,txt,TEXT_HEIGHT,clr);
 }
-void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlDrawIterator& iter)
+void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 {
 	DrawLine(drawer,iter.m_iline,iter.m_pStkItem==NULL?NULL:iter.m_pStkItem->m_pLItem);
 	DrawConn(drawer,iter);
@@ -249,7 +245,7 @@ void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 {
 	CDCDraw canvas(m_pWnd,pClientDC,buffered);
 	CDrawer drawer(&canvas);
-	for(ListCtrlDrawIterator it=GetDrawIter();it;it++)
+	for(ListCtrlIterator it=GetDrawIter();it;it++)
 	{
 		DrawLine(drawer,it);
 	}
