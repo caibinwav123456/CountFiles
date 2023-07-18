@@ -137,12 +137,13 @@ ItStkItem* TLItem::FromLineNum(int iline,int& lvl)
 		}
 	}
 }
-int TLItem::ToLineNum(TLItem* item)
+int TLItem::ToLineNum(TLItem* base)
 {
+	TLItem *item=this,*pp=base==NULL?NULL:base->parent;
 	if(item==NULL)
 		return -1;
 	int iline=0;
-	for(TLItemDir* dir=item->parent;dir!=NULL;item=dir,dir=dir->parent)
+	for(TLItemDir* dir=item->parent;dir!=pp;item=dir,dir=dir->parent)
 	{
 		int i;
 		for(i=0;i<(int)dir->subitems.size();i++)
@@ -420,21 +421,16 @@ void ItemSelector::EndDragSel()
 			ItStkItem* stk=itstart.m_pStkItem;
 			if(stk==NULL)
 				continue;
-			if(stk->m_pLItem->issel)
-				CancelSel(stk->m_pLItem,itstart.m_iline);
-		}
-	}
-	else
-	{
-		ListCtrlIterator itstart(m_pOwner->m_pRootItem,m_iDragStart),
-			itend(m_pOwner->m_pRootItem,m_iDragEnd);
-		for(;bRev?itstart>=itend:itstart<=itend;bRev?itstart--:itstart++)
-		{
-			ItStkItem* stk=itstart.m_pStkItem;
-			if(stk==NULL)
-				continue;
-			if(!stk->m_pLItem->issel)
-				AddSel(stk->m_pLItem,itstart.m_iline);
+			if(m_bCancelRgn)
+			{
+				if(stk->m_pLItem->issel)
+					CancelSel(stk->m_pLItem,itstart.m_iline);
+			}
+			else
+			{
+				if(!stk->m_pLItem->issel)
+					AddSel(stk->m_pLItem,itstart.m_iline);
+			}
 		}
 	}
 end:
@@ -444,6 +440,45 @@ end:
 void ItemSelector::SortSelection(SortedSelItemNode& tree)
 {
 	EndDragSel();
+	map<int,SortedSelItemNode*> cache;
+	tree.clear();
+	for(set<SelItem>::iterator it=m_setSel.begin();it!=m_setSel.end();it++)
+	{
+		TLItem* item=it->item;
+		int iline=it->iline;
+		SortedSelItemNode* pcnode=NULL;
+		while(item!=NULL)
+		{
+			map<int,SortedSelItemNode*>::iterator itmap=cache.find(iline);
+			if(itmap!=cache.end())
+			{
+				assert(itmap->first==iline&&itmap->second->pItem==item);
+				if(pcnode==NULL)
+					continue;
+				assert(itmap->second->map_sub.find(pcnode->iline)==
+					itmap->second->map_sub.end());
+				itmap->second->map_sub[pcnode->iline]=pcnode;
+				break;
+			}
+			else
+			{
+				SortedSelItemNode* node;
+				if(item->parent==NULL)
+					node=&tree;
+				else
+					node=new SortedSelItemNode;
+				node->pItem=item;
+				node->iline=iline;
+				if(pcnode!=NULL)
+					node->map_sub[pcnode->iline]=pcnode;
+				cache[iline]=node;
+				pcnode=node;
+			}
+			assert(item->parent==NULL||item->parent->isopen);
+			item=item->parent;
+			iline=item->ToLineNum(m_pOwner->m_pRootItem);
+		}
+	}
 }
 bool ItemSelector::valid(int iline)
 {

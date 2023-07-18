@@ -116,7 +116,7 @@ struct TLItem
 		return 1;
 	}
 	ItStkItem* FromLineNum(int iline,int& lvl);
-	int ToLineNum(TLItem* item);
+	int ToLineNum(TLItem* base=NULL);
 };
 struct TLItemFile:public TLItem
 {
