@@ -116,7 +116,7 @@ struct TLItem
 		return 1;
 	}
 	ItStkItem* FromLineNum(int iline,int& lvl);
-	int ToLineNum(TLItem* base=NULL);
+	int ToLineNum();
 };
 struct TLItemFile:public TLItem
 {
@@ -149,7 +149,7 @@ struct TLItemDir:public TLItem
 	virtual uint GetDispLength();
 private:
 	void clear();
-	int construct_list(bool all=true);
+	int construct_list();
 	void update_displen(int diff);
 };
 struct ItStkItem

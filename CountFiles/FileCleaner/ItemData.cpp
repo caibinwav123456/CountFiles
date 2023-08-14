@@ -137,13 +137,13 @@ ItStkItem* TLItem::FromLineNum(int iline,int& lvl)
 		}
 	}
 }
-int TLItem::ToLineNum(TLItem* base)
+int TLItem::ToLineNum()
 {
-	TLItem *item=this,*pp=base==NULL?NULL:base->parent;
+	TLItem *item=this;
 	if(item==NULL)
 		return -1;
 	int iline=0;
-	for(TLItemDir* dir=item->parent;dir!=pp;item=dir,dir=dir->parent)
+	for(TLItemDir* dir=item->parent;dir!=NULL;item=dir,dir=dir->parent)
 	{
 		int i;
 		for(i=0;i<(int)dir->subitems.size();i++)
@@ -411,9 +411,8 @@ void ItemSelector::EndDragSel()
 {
 	if(m_iDragStart<0||m_iDragEnd<0)
 		goto end;
-	bool bRev=m_iDragStart>m_iDragEnd;
-	if(m_bCancelRgn)
 	{
+		bool bRev=m_iDragStart>m_iDragEnd;
 		ListCtrlIterator itstart(m_pOwner->m_pRootItem,m_iDragStart),
 			itend(m_pOwner->m_pRootItem,m_iDragEnd);
 		for(;bRev?itstart>=itend:itstart<=itend;bRev?itstart--:itstart++)
@@ -476,7 +475,7 @@ void ItemSelector::SortSelection(SortedSelItemNode& tree)
 			}
 			assert(item->parent==NULL||item->parent->isopen);
 			item=item->parent;
-			iline=item->ToLineNum(m_pOwner->m_pRootItem);
+			iline=item->ToLineNum();
 		}
 	}
 }

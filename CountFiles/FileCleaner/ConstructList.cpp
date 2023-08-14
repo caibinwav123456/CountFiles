@@ -264,17 +264,22 @@ static int merge_callback(unode_iterator it1,unode_iterator it2,E_MERGE_SIDE sid
 	}
 	return 0;
 }
-int TLItemDir::construct_list(bool all)
+int TLItemDir::construct_list()
 {
 	int ret=0;
-	assert(open_length==0&&dir_border==0);
-	assert(subitems.empty());
-	if(all)
+	bool construct_all=open_length==0;
+	if(construct_all)
 	{
+		assert(open_length==0&&dir_border==0);
+		assert(subitems.empty());
 		assert(subdirs.empty());
 		assert(subfiles.empty());
 		assert(errdirs.empty());
 		assert(errfiles.empty());
+	}
+	subitems.clear();
+	if(construct_all)
+	{
 		int cnt=0;
 		cnt=get_subdir_cnt(dirnode);
 		for(int i=0;i<cnt;i++)
