@@ -116,8 +116,11 @@ static int log_file_info(const string& path,uint npos,const string& name,dword t
 	}
 	else
 	{
-		if(query_file_info(path,npos,size,date,callback)!=0)
+		if(0!=(ret=query_file_info(path,npos,size,date,callback)))
+		{
+			log_error(path.c_str()+npos,type,ret,callback);
 			return 0;
+		}
 	}
 
 	if(0!=(ret=log_rec(path,npos,(byte*)Tag,strlen((const char*)Tag),callback,param)))
