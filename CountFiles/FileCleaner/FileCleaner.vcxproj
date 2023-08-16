@@ -197,6 +197,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BaseBar.h" />
     <ClInclude Include="ChildView.h" />
     <ClInclude Include="DrawObject.h" />
     <ClInclude Include="FileCleaner.h" />
@@ -208,6 +209,7 @@
     <ClInclude Include="TreeListCtrl.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BaseBar.cpp" />
     <ClCompile Include="ChildView.cpp" />
     <ClCompile Include="ConstructList.cpp" />
     <ClCompile Include="DrawObject.cpp" />

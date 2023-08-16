@@ -4,6 +4,7 @@
 
 #pragma once
 #include "ChildView.h"
+#include "BaseBar.h"
 
 class CMainFrame : public CFrameWnd
 {
@@ -34,6 +35,7 @@ public:
 
 protected:  // control bar embedded members
 	CToolBar          m_wndToolBar;
+	CBaseBar          m_wndBaseBar;
 	CStatusBar        m_wndStatusBar;
 	CChildView*       m_pWndView;
 
@@ -42,7 +44,6 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	DECLARE_MESSAGE_MAP()
-
 };
 
 
