@@ -31,9 +31,10 @@ static UINT indicators[] =
 
 // CMainFrame construction/destruction
 
-CMainFrame::CMainFrame() noexcept:m_pWndView(NULL)
+CMainFrame::CMainFrame() noexcept:m_pWndView(NULL),m_wndBaseBar(this)
 {
 	// TODO: add member initialization code here
+	m_hIcon=0;
 }
 
 CMainFrame::~CMainFrame()
@@ -66,17 +67,23 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
+	// TODO: Delete these three lines if you don't want the toolbar to be dockable
+	m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
+	EnableDocking(CBRS_ALIGN_ANY);
+	DockControlBar(&m_wndToolBar);
+
+	if (!m_wndBaseBar.CreateBar(this))
+	{
+		TRACE0("Failed to create base bar\n");
+		return -1;      // fail to create
+	}
+
 	if (!m_wndStatusBar.Create(this))
 	{
 		TRACE0("Failed to create status bar\n");
 		return -1;      // fail to create
 	}
 	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
-
-	// TODO: Delete these three lines if you don't want the toolbar to be dockable
-	m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
-	EnableDocking(CBRS_ALIGN_ANY);
-	DockControlBar(&m_wndToolBar);
 
 
 	return 0;
