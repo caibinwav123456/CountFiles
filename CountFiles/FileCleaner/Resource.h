@@ -14,7 +14,7 @@
 #define IDB_FOLDER_EXP                  312
 #define IDB_BITMAP4                     313
 #define IDB_FOLDER_EXP_MASK             313
-#define IDC_COMBO1                      1000
+#define IDC_COMBO_BASE_PATH             1000
 #define IDC_BUTTON_GO                   1001
 #define IDC_BUTTON_OPEN                 1002
 #define IDC_BUTTON_FOLD                 1003

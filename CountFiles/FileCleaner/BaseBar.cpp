@@ -28,6 +28,7 @@ BOOL CBaseBar::CreateBar(CWnd* pParentWnd)
 void CBaseBar::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_COMBO_BASE_PATH, m_comboBasePath);
 }
 
 
@@ -36,6 +37,8 @@ BEGIN_MESSAGE_MAP(CBaseBar, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_GO, &CBaseBar::OnBnClickedButtonGo)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN, &CBaseBar::OnBnClickedButtonOpen)
 	ON_BN_CLICKED(IDC_BUTTON_FOLD, &CBaseBar::OnBnClickedButtonFold)
+	ON_COMMAND(IDOK, &CBaseBar::OnIdok)
+	ON_COMMAND(IDCANCEL, &CBaseBar::OnIdcancel)
 END_MESSAGE_MAP()
 
 
@@ -71,4 +74,16 @@ void CBaseBar::OnBnClickedButtonOpen()
 void CBaseBar::OnBnClickedButtonFold()
 {
 	// TODO: Add your control notification handler code here
+}
+
+
+void CBaseBar::OnIdok()
+{
+	// TODO: Add your command handler code here
+}
+
+
+void CBaseBar::OnIdcancel()
+{
+	// TODO: Add your command handler code here
 }

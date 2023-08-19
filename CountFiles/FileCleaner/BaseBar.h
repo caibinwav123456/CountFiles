@@ -31,4 +31,7 @@ public:
 	afx_msg void OnBnClickedButtonGo();
 	afx_msg void OnBnClickedButtonOpen();
 	afx_msg void OnBnClickedButtonFold();
+	CComboBox m_comboBasePath;
+	afx_msg void OnIdok();
+	afx_msg void OnIdcancel();
 };
