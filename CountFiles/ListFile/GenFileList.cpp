@@ -169,8 +169,11 @@ static int recurse_cnt_file(const string& path,uint npos,const string& name,file
 	file_cnt_param next_param;
 	next_param.user_callback=param->user_callback;
 	init_param(&next_param);
-	if(type==FILE_TYPE_NORMAL)
-		return log_file_info(path,npos,name,type,param,NULL);
+	if(0!=(ret=sys_fstat((char*)path.c_str(),NULL)))
+	{
+		log_error(path.c_str()+npos,type,ret,param->user_callback);
+		return 0;
+	}
 	if(0!=(ret=sys_ftraverse((char*)(path).c_str(),cb_poll_file,&flist)))
 		return ret;
 	for(int i=0;i<(int)flist.list.size();i++)
