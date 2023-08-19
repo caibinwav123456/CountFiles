@@ -54,6 +54,11 @@ void TLItemDir::clear()
 	open_length=0;
 	dir_border=0;
 	subitems.clear();
+	if(subpairs!=NULL)
+	{
+		delete subpairs;
+		subpairs=NULL;
+	}
 	for(int i=0;i<(int)subfiles.size();i++)
 	{
 		subfiles[i]->Release();

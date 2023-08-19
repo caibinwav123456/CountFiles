@@ -8,7 +8,8 @@ static inline void init_new_item(TLItem* item,TLItemDir* parent,E_TREE_ITEM_TYPE
 	item->state=eFSEqual;
 	item->node=node;
 	item->parent=parent;
-	item->parentidx=idx;
+	item->org=idx;
+	item->parentidx=-1;
 }
 static inline void new_dir_item(TLItemDir* parent,HDNODE node)
 {
@@ -251,13 +252,18 @@ static int merge_callback(unode_iterator it1,unode_iterator it2,E_MERGE_SIDE sid
 	assert((it1.type==UNODE_ITERTYPE_DIR&&it2.type==UNODE_ITERTYPE_ERRDIR)
 		||(it1.type==UNODE_ITERTYPE_FILE&&it2.type==UNODE_ITERTYPE_ERRFILE));
 	vector<TLItem*>* plist=(vector<TLItem*>*)param;
+	TLItem *element1,*element2;
 	switch(side)
 	{
 	case eMSLeft:
-		plist->push_back(it1.type==UNODE_ITERTYPE_DIR?(TLItem*)*(it1.dirit->it):(TLItem*)*(it1.fileit->it));
+		element1=(it1.type==UNODE_ITERTYPE_DIR?(TLItem*)*(it1.dirit->it):(TLItem*)*(it1.fileit->it));
+		element1->parentidx=plist->size();
+		plist->push_back(element1);
 		break;
 	case eMSRight:
-		plist->push_back(it1.type==UNODE_ITERTYPE_DIR?(TLItem*)*(it2.errdirit->it):(TLItem*)*(it1.errfileit->it));
+		element2=(it2.type==UNODE_ITERTYPE_DIR?(TLItem*)*(it2.errdirit->it):(TLItem*)*(it2.errfileit->it));
+		element2->parentidx=plist->size();
+		plist->push_back(element2);
 		break;
 	default:
 		assert(false);
@@ -276,8 +282,14 @@ int TLItemDir::construct_list()
 		assert(subfiles.empty());
 		assert(errdirs.empty());
 		assert(errfiles.empty());
+		assert(subpairs==NULL);
 	}
 	subitems.clear();
+	if(subpairs!=NULL)
+	{
+		delete subpairs;
+		subpairs=NULL;
+	}
 	if(construct_all)
 	{
 		int cnt=0;
@@ -300,6 +312,25 @@ int TLItemDir::construct_list()
 		for(int i=0;i<cnt;i++)
 		{
 			new_errfile_item(this,get_errfile(dirnode,i));
+		}
+	}
+	else
+	{
+		for(int i=0;i<(int)subdirs.size();i++)
+		{
+			subdirs[i]->parentidx=-1;
+		}
+		for(int i=0;i<(int)subfiles.size();i++)
+		{
+			subfiles[i]->parentidx=-1;
+		}
+		for(int i=0;i<(int)errdirs.size();i++)
+		{
+			errdirs[i]->parentidx=-1;
+		}
+		for(int i=0;i<(int)errfiles.size();i++)
+		{
+			errfiles[i]->parentidx=-1;
 		}
 	}
 	try

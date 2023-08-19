@@ -105,8 +105,9 @@ struct TLItem
 	};
 	TLItemDir* parent;
 	int parentidx;
+	int org;
 	bool issel;
-	TLItem():type(eITypeNone),state(eFSNone),node(NULL),parent(NULL),parentidx(-1),issel(false)
+	TLItem():type(eITypeNone),state(eFSNone),node(NULL),parent(NULL),parentidx(-1),org(-1),issel(false)
 	{
 	}
 	virtual ~TLItem(){}
@@ -117,6 +118,15 @@ struct TLItem
 	}
 	ItStkItem* FromLineNum(int iline,int& lvl);
 	int ToLineNum();
+};
+struct TLItemPair
+{
+	TLItem* left;
+	TLItem* right;
+};
+struct TLItemSplice
+{
+	vector<TLItemPair> map;
 };
 struct TLItemFile:public TLItem
 {
@@ -137,11 +147,12 @@ struct TLItemDir:public TLItem
 	vector<TLItemFile*> subfiles;
 	vector<TLItemErrDir*> errdirs;
 	vector<TLItemErrFile*> errfiles;
+	TLItemSplice* subpairs;
 	bool isopen;
 	uint open_length;
 	uint dir_border;
 	FileListLoader* ctx;
-	TLItemDir(FileListLoader* loader):isopen(false),open_length(0),dir_border(0),ctx(loader)
+	TLItemDir(FileListLoader* loader):subpairs(NULL),isopen(false),open_length(0),dir_border(0),ctx(loader)
 	{
 	}
 	int OpenDir(bool open,bool release=false);

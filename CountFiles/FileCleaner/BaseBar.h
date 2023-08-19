@@ -27,4 +27,8 @@ private:
 	afx_msg LRESULT OnSizeParent(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedButtonGo();
+	afx_msg void OnBnClickedButtonOpen();
+	afx_msg void OnBnClickedButtonFold();
 };
