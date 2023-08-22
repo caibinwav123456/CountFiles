@@ -2,6 +2,38 @@
 #include "TreeListCtrl.h"
 #include "utility.h"
 #include <assert.h>
+void TLItemDir::clear()
+{
+	open_length=0;
+	dir_border=0;
+	subitems.clear();
+	subpairs->clear();
+	for(int i=0;i<(int)subfiles.size();i++)
+	{
+		subfiles[i]->Release();
+		delete subfiles[i];
+	}
+	subfiles.clear();
+	for(int i=0;i<(int)errfiles.size();i++)
+	{
+		errfiles[i]->Release();
+		delete errfiles[i];
+	}
+	errfiles.clear();
+	for(int i=0;i<(int)errdirs.size();i++)
+	{
+		errdirs[i]->Release();
+		delete errdirs[i];
+	}
+	errdirs.clear();
+	for(int i=0;i<(int)subdirs.size();i++)
+	{
+		subdirs[i]->Detach();
+		subdirs[i]->Release();
+		delete subdirs[i];
+	}
+	subdirs.clear();
+}
 static inline void init_new_item(TLItem* item,TLItemDir* parent,E_TREE_ITEM_TYPE type,void* node,int idx)
 {
 	item->type=type;
@@ -285,11 +317,7 @@ int TLItemDir::construct_list()
 		assert(subpairs==NULL);
 	}
 	subitems.clear();
-	if(subpairs!=NULL)
-	{
-		delete subpairs;
-		subpairs=NULL;
-	}
+	subpairs->clear();
 	if(construct_all)
 	{
 		int cnt=0;
