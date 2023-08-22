@@ -64,6 +64,16 @@ private:
 	bool m_bCancelRgn;
 	bool valid(int iline);
 };
+struct TLItemPair
+{
+	TLItem* left;
+	TLItem* right;
+};
+struct TLItemSplice
+{
+	vector<TLItemPair> map;
+	void clear();
+};
 struct TLItem
 {
 	E_TREE_ITEM_TYPE type;
@@ -88,17 +98,9 @@ struct TLItem
 	{
 		return 1;
 	}
+	TLItem** GetPeerItem(TLItem*** _this=NULL);
 	ItStkItem* FromLineNum(int iline,int& lvl);
 	int ToLineNum();
-};
-struct TLItemPair
-{
-	TLItem* left;
-	TLItem* right;
-};
-struct TLItemSplice
-{
-	vector<TLItemPair> map;
 };
 struct TLItemFile:public TLItem
 {
@@ -128,6 +130,7 @@ struct TLItemDir:public TLItem
 	{
 	}
 	int OpenDir(bool open,bool release=false);
+	void Detach();
 	virtual void Release();
 	virtual uint GetDispLength();
 private:

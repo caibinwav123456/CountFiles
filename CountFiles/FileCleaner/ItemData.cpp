@@ -1,6 +1,58 @@
 #include "pch.h"
 #include "TreeListCtrl.h"
 #include <assert.h>
+TLItem** TLItem::GetPeerItem(TLItem*** _this)
+{
+	if(parent==NULL||parent->subpairs==NULL)
+		return NULL;
+	TLItemPair* tuple=&parent->subpairs->map[parentidx];
+	assert(!(tuple->left==NULL&&tuple->right==NULL));
+	assert(tuple->left==this||tuple->right==this);
+	if(tuple->left==this)
+	{
+		if(_this!=NULL)
+			*_this=&tuple->left;
+		return &tuple->right;
+	}
+	else //tuple->right==this
+	{
+		if(_this!=NULL)
+			*_this=&tuple->right;
+		return &tuple->left;
+	}
+}
+void TLItemSplice::clear()
+{
+	if(this==NULL)
+		return;
+#define restore_parentidx(pair,domain,ptr) if(pair.domain!=NULL)pair.domain->parentidx=-1;
+	for(int i=0;i<(int)map.size();i++)
+	{
+		restore_parentidx(map[i],left,this);
+		restore_parentidx(map[i],right,this);
+	}
+	map.clear();
+}
+bool assert_peer_diritem(TLItem* item)
+{
+	TLItem** peer=item->GetPeerItem();
+	return peer==NULL||*peer==NULL||dynamic_cast<TLItemDir*>(*peer)!=NULL;
+}
+void TLItemDir::Detach()
+{
+	assert(this!=NULL);
+	if(this==NULL)
+		return;
+	subpairs->clear();
+	assert(assert_peer_diritem(this));
+	TLItem **_this,**_other;
+	_other=GetPeerItem(&_this);
+	if(_other==NULL||*_other==NULL)
+		delete subpairs;
+	else if(_this!=NULL)
+		*_this=NULL;
+	subpairs=NULL;
+}
 uint TLItemDir::GetDispLength()
 {
 	return isopen?open_length:1;
@@ -54,11 +106,7 @@ void TLItemDir::clear()
 	open_length=0;
 	dir_border=0;
 	subitems.clear();
-	if(subpairs!=NULL)
-	{
-		delete subpairs;
-		subpairs=NULL;
-	}
+	subpairs->clear();
 	for(int i=0;i<(int)subfiles.size();i++)
 	{
 		subfiles[i]->Release();
@@ -79,6 +127,7 @@ void TLItemDir::clear()
 	errdirs.clear();
 	for(int i=0;i<(int)subdirs.size();i++)
 	{
+		subdirs[i]->Detach();
 		subdirs[i]->Release();
 		delete subdirs[i];
 	}
