@@ -101,38 +101,6 @@ fail:
 	update_displen(GetDispLength()-oldlen);
 	return ret;
 }
-void TLItemDir::clear()
-{
-	open_length=0;
-	dir_border=0;
-	subitems.clear();
-	subpairs->clear();
-	for(int i=0;i<(int)subfiles.size();i++)
-	{
-		subfiles[i]->Release();
-		delete subfiles[i];
-	}
-	subfiles.clear();
-	for(int i=0;i<(int)errfiles.size();i++)
-	{
-		errfiles[i]->Release();
-		delete errfiles[i];
-	}
-	errfiles.clear();
-	for(int i=0;i<(int)errdirs.size();i++)
-	{
-		errdirs[i]->Release();
-		delete errdirs[i];
-	}
-	errdirs.clear();
-	for(int i=0;i<(int)subdirs.size();i++)
-	{
-		subdirs[i]->Detach();
-		subdirs[i]->Release();
-		delete subdirs[i];
-	}
-	subdirs.clear();
-}
 void TLItemDir::Release()
 {
 	OpenDir(false,true);
