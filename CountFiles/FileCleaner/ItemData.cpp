@@ -47,7 +47,7 @@ void TLItemDir::Detach()
 	assert(assert_peer_diritem(this));
 	TLItem **_this,**_other;
 	_other=GetPeerItem(&_this);
-	if(_other==NULL||*_other==NULL)
+	if(subpairs!=NULL&&(_other==NULL||*_other==NULL))
 		delete subpairs;
 	else if(_this!=NULL)
 		*_this=NULL;
