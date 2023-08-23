@@ -32,10 +32,10 @@ public:
 	afx_msg void OnBnClickedButtonOpen();
 	afx_msg void OnBnClickedButtonFold();
 	CComboBox m_comboBasePath;
-	afx_msg void OnIdok();
-	afx_msg void OnIdcancel();
 	CBitmapButton m_btnGo;
 	CBitmapButton m_btnOpen;
 	CBitmapButton m_btnFold;
 	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+	virtual void OnCancel();
 };

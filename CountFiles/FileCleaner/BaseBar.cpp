@@ -40,8 +40,6 @@ BEGIN_MESSAGE_MAP(CBaseBar, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_GO, &CBaseBar::OnBnClickedButtonGo)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN, &CBaseBar::OnBnClickedButtonOpen)
 	ON_BN_CLICKED(IDC_BUTTON_FOLD, &CBaseBar::OnBnClickedButtonFold)
-	ON_COMMAND(IDOK, &CBaseBar::OnIdok)
-	ON_COMMAND(IDCANCEL, &CBaseBar::OnIdcancel)
 END_MESSAGE_MAP()
 
 
@@ -80,18 +78,6 @@ void CBaseBar::OnBnClickedButtonFold()
 }
 
 
-void CBaseBar::OnIdok()
-{
-	// TODO: Add your command handler code here
-}
-
-
-void CBaseBar::OnIdcancel()
-{
-	// TODO: Add your command handler code here
-}
-
-
 BOOL CBaseBar::OnInitDialog()
 {
 	CDialog::OnInitDialog();
@@ -105,4 +91,20 @@ BOOL CBaseBar::OnInitDialog()
 	m_btnFold.SizeToContent();
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+
+void CBaseBar::OnOK()
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	//CDialog::OnOK();
+}
+
+
+void CBaseBar::OnCancel()
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	//CDialog::OnCancel();
 }
