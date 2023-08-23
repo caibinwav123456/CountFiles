@@ -48,6 +48,9 @@ BEGIN_MESSAGE_MAP(CChildView, CScrollView)
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_RBUTTONUP()
+	ON_WM_VSCROLL()
+	ON_WM_MOUSEWHEEL()
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 IMPLEMENT_DYNCREATE(CChildView, CScrollView)
@@ -152,4 +155,33 @@ void CChildView::OnRButtonUp(UINT nFlags, CPoint point)
 	pt.Offset(CSize(GetScrollPosition()));
 	m_TreeList.OnRBUp(pt);
 	CScrollView::OnRButtonUp(nFlags, point);
+}
+
+
+void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	// TODO: Add your message handler code here and/or call default
+	CScrollView::OnVScroll(nSBCode, nPos, pScrollBar);
+	CPoint point=GetMousePos(this);
+	if(point.x>=0&&point.y>=0)
+		m_TreeList.OnMMove(point,GetKey());
+}
+
+
+BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	// TODO: Add your message handler code here and/or call default
+	BOOL ret=CScrollView::OnMouseWheel(nFlags, zDelta, pt);
+	CPoint point=GetMousePos(this);
+	if(point.x>=0&&point.y>=0)
+		m_TreeList.OnMMove(point,GetKey());
+	return ret;
+}
+
+
+BOOL CChildView::OnEraseBkgnd(CDC* pDC)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	return TRUE;//CScrollView::OnEraseBkgnd(pDC);
 }

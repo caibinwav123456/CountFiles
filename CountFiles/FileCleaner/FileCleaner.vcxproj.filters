@@ -104,5 +104,53 @@
     <Image Include="res\folder_exp_mask.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\go_click.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\go_disable.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\go_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\go_normal.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\fold_click.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\fold_disable.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\fold_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\fold_normal.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\open_click.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\open_disable.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\open_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\open_normal.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\dfold_click.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\dfold_disable.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\dfold_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\dfold_normal.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

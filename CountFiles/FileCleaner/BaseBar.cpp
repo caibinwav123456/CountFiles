@@ -29,6 +29,9 @@ void CBaseBar::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO_BASE_PATH, m_comboBasePath);
+	DDX_Control(pDX, IDC_BUTTON_GO, m_btnGo);
+	DDX_Control(pDX, IDC_BUTTON_OPEN, m_btnOpen);
+	DDX_Control(pDX, IDC_BUTTON_FOLD, m_btnFold);
 }
 
 
@@ -86,4 +89,20 @@ void CBaseBar::OnIdok()
 void CBaseBar::OnIdcancel()
 {
 	// TODO: Add your command handler code here
+}
+
+
+BOOL CBaseBar::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+
+	// TODO:  Add extra initialization here
+	m_btnGo.LoadBitmaps(IDB_BMP_GO_N, IDB_BMP_GO_C, IDB_BMP_GO_H, IDB_BMP_GO_D);
+	m_btnGo.SizeToContent();
+	m_btnOpen.LoadBitmaps(IDB_BMP_OPEN_N, IDB_BMP_OPEN_C, IDB_BMP_OPEN_H, IDB_BMP_OPEN_D);
+	m_btnOpen.SizeToContent();
+	m_btnFold.LoadBitmaps(IDB_BMP_FOLD_N, IDB_BMP_FOLD_C, IDB_BMP_FOLD_H, IDB_BMP_FOLD_D);
+	m_btnFold.SizeToContent();
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
