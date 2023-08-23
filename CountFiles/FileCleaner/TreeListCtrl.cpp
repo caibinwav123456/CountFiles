@@ -3,21 +3,6 @@
 #include "utility.h"
 #include "resource.h"
 #include <assert.h>
-string ConvertTStrToAnsiStr(LPCTSTR from)
-{
-	USES_CONVERSION;
-	return T2A(from);
-}
-CString ConvertAnsiStrToTStr(LPCSTR from)
-{
-	USES_CONVERSION;
-	return A2T(from);
-}
-CString ConvertAnsiStrToTStr(const string& from)
-{
-	USES_CONVERSION;
-	return A2T(from.c_str());
-}
 COLORREF GetDispColor(E_FOLDER_STATE state)
 {
 	switch(state)
@@ -61,7 +46,7 @@ int TreeListCtrl::Init()
 		goto failed;
 	if(!m_bmpFolderExpMask.LoadBitmap(IDB_FOLDER_EXP_MASK))
 		goto failed;
-	SetScrollSizes(CSize(10*LINE_HEIGHT,m_nTotalLine*LINE_HEIGHT));
+	SetScrollSizes(CSize(-1,m_nTotalLine*LINE_HEIGHT));
 	return 0;
 failed:
 	Exit();

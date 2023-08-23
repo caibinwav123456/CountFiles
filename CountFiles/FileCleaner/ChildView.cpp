@@ -7,6 +7,7 @@
 #include "FileCleaner.h"
 #include "ChildView.h"
 #include "DrawObject.h"
+#include "DlgLoad.h"
 
 #include "GenFileList.h"
 #include "FileListLoader.h"
@@ -16,7 +17,7 @@
 #endif
 
 // CScrollTreeList
-CScrollTreeList::CScrollTreeList(CWnd* pWnd):TreeListCtrl(pWnd)
+CScrollTreeList::CScrollTreeList(CWnd* pWnd):TreeListCtrl(pWnd),m_sizeScl(MIN_SCROLL_WIDTH,1)
 {
 }
 CPoint CScrollTreeList::GetScrollPos() const
@@ -25,8 +26,15 @@ CPoint CScrollTreeList::GetScrollPos() const
 }
 void CScrollTreeList::SetScrollSizes(const CSize& size)
 {
-	((CScrollView*)m_pWnd)->SetScrollSizes(MM_TEXT,size,
+	size.cx>0?(m_sizeScl.cx=max(size.cx,MIN_SCROLL_WIDTH))
+		:(size.cx==0?(m_sizeScl.cx=MIN_SCROLL_WIDTH):0);
+	size.cy>0?(m_sizeScl.cy=size.cy):(size.cy==0?m_sizeScl.cy=1:0);
+	((CScrollView*)m_pWnd)->SetScrollSizes(MM_TEXT,m_sizeScl,
 		CSize(LINE_HEIGHT,LINE_HEIGHT*3),CSize(LINE_HEIGHT,LINE_HEIGHT));
+}
+CSize CScrollTreeList::GetScrollSizes()
+{
+	return m_sizeScl;
 }
 
 // CChildView
@@ -41,6 +49,7 @@ CChildView::~CChildView()
 
 
 BEGIN_MESSAGE_MAP(CChildView, CScrollView)
+	ON_MESSAGE(WM_FILE_LIST_START_LOAD,OnStartLoadList)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
@@ -51,9 +60,12 @@ BEGIN_MESSAGE_MAP(CChildView, CScrollView)
 	ON_WM_RBUTTONUP()
 	ON_WM_VSCROLL()
 	ON_WM_MOUSEWHEEL()
+	ON_WM_ERASEBKGND()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 IMPLEMENT_DYNCREATE(CChildView, CScrollView)
+IMPLEMENT_ID2WND_MAP(CChildView, IDW_MAIN_VIEW)
 
 // CChildView message handlers
 
@@ -146,6 +158,28 @@ void CChildView::OnDestroy()
 
 	// TODO: Add your message handler code here
 	m_TreeList.Exit();
+}
+
+LRESULT CChildView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
+{
+	FListLoadData* lpData=(FListLoadData*)wParam;
+	if(lpData->mask&FILE_LIST_ATTRIB_MAIN)
+	{
+		dword type=0;
+		if(sys_fstat((char*)t2a(lpData->left).c_str(),&type)!=0)
+			return FALSE;
+
+		if(type==FILE_TYPE_DIR)
+		{
+			CDlgLoad dlg(NULL,lpData->left);
+			if(dlg.DoModal()==IDOK)
+			{
+				CString strList=a2t(dlg.GetCacheFilePath());
+				CString strErrList=a2t(dlg.GetCacheErrFilePath());
+			}
+		}
+	}
+	return TRUE;
 }
 
 static inline UINT GetKey()
@@ -260,4 +294,20 @@ BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	if(point.x>=0&&point.y>=0)
 		m_TreeList.OnMMove(point,GetKey());
 	return ret;
+}
+
+
+BOOL CChildView::OnEraseBkgnd(CDC* pDC)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	return TRUE;//CScrollView::OnEraseBkgnd(pDC);
+}
+
+
+void CChildView::OnSize(UINT nType, int cx, int cy)
+{
+	CScrollView::OnSize(nType, cx, cy);
+	m_TreeList.SetScrollSizes(CSize(cx,-1));
+	// TODO: Add your message handler code here
 }

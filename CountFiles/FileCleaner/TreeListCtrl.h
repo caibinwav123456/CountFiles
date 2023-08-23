@@ -5,8 +5,6 @@
 #include <vector>
 #include <map>
 #include <set>
-#define t2a(p) ConvertTStrToAnsiStr(p)
-#define a2t(p) ConvertAnsiStrToTStr(p)
 enum E_FOLDER_STATE
 {
 	eFSNone,
@@ -30,9 +28,6 @@ enum E_TREE_ITEM_TYPE
 	eITypeErrDir,
 	eITypeErrFile,
 };
-string ConvertTStrToAnsiStr(LPCTSTR from);
-CString ConvertAnsiStrToTStr(LPCSTR from);
-CString ConvertAnsiStrToTStr(const string& from);
 COLORREF GetDispColor(E_FOLDER_STATE state);
 struct TLItem;
 struct TLItemDir;
@@ -218,11 +213,13 @@ public:
 	void OnRBUp(const CPoint& pt,UINT nFlags);
 	void OnMMove(const CPoint& pt,UINT nFlags);
 
-protected:
+public:
 //Get scroll position
 	virtual CPoint GetScrollPos() const=0;
 //Set scroll sizes
 	virtual void SetScrollSizes(const CSize& size)=0;
+//Get scroll sizes
+	virtual CSize GetScrollSizes()=0;
 
 protected:
 	CWnd* m_pWnd;
@@ -234,7 +231,7 @@ private:
 	CBitmap m_bmpFolderExpMask;
 
 //List data
-private:
+protected:
 	FileListLoader m_ListLoader;
 	uint m_nTotalLine;
 	TLItem* m_pRootItem;

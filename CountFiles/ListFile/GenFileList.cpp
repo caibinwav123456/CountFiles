@@ -43,16 +43,18 @@ static int init_param(file_cnt_param* param)
 	param->rec_len=0;
 	return 0;
 }
-static inline void log_error(const char* path,dword type,int ret,const intf_cntfile* callback)
+static inline int log_error(const char* path,dword type,int retcode,const intf_cntfile* callback)
 {
+	int ret=0;
 	char* errbuf=new char[strlen(path)+100];
 	char dsymbuf[2]={dir_symbol,'\0'};
-	sprintf(errbuf,"\"%s%s\" %s%s\n",path,type==FILE_TYPE_DIR?dsymbuf:"",TAG_ERR_DESC,get_error_desc(ret));
-	printf("%s",errbuf);
+	sprintf(errbuf,"\"%s%s\" %s%s\n",path,type==FILE_TYPE_DIR?dsymbuf:"",TAG_ERR_DESC,get_error_desc(retcode));
+	//printf("%s",errbuf);
 	if(callback->cb_error!=NULL&&0!=(ret=callback->cb_error
 		((byte*)errbuf,strlen(errbuf),callback->param)))
 		printf("log error failed: %s\n",get_error_desc(ret));
 	delete[] errbuf;
+	return ret;
 }
 static inline int log_end_rec(const string& path,uint npos,const intf_cntfile* callback)
 {
@@ -100,10 +102,7 @@ static int log_file_info(const string& path,uint npos,const string& name,dword t
 	else
 	{
 		if(0!=(ret=query_file_info(path,npos,size,date,callback)))
-		{
-			log_error(path.c_str()+npos,type,ret,callback);
-			return 0;
-		}
+			return log_error(path.c_str()+npos,type,ret,callback);
 	}
 
 	if(0!=(ret=log_rec(path,npos,type,(byte*)Tag,strlen((const char*)Tag),callback,param)))
@@ -155,10 +154,7 @@ static int recurse_cnt_file(const string& path,uint npos,const string& name,file
 	next_param.user_callback=param->user_callback;
 	init_param(&next_param);
 	if(0!=(ret=sys_fstat((char*)path.c_str(),NULL)))
-	{
-		log_error(path.c_str()+npos,type,ret,param->user_callback);
-		return 0;
-	}
+		return log_error(path.c_str()+npos,type,ret,param->user_callback);
 	if(0!=(ret=sys_ftraverse((char*)(path).c_str(),cb_poll_file,&flist)))
 		return ret;
 	for(int i=0;i<(int)flist.list.size();i++)

@@ -4,9 +4,14 @@
 TLItem** TLItem::GetPeerItem(TLItem*** _this)
 {
 	if(parent==NULL||parent->subpairs==NULL)
+	{
+		if(_this!=NULL)
+			*_this=NULL;
 		return NULL;
+	}
 	TLItemPair* tuple=&parent->subpairs->map[parentidx];
 	assert(!(tuple->left==NULL&&tuple->right==NULL));
+	assert(tuple->left!=tuple->right);
 	assert(tuple->left==this||tuple->right==this);
 	if(tuple->left==this)
 	{
@@ -25,11 +30,11 @@ void TLItemSplice::clear()
 {
 	if(this==NULL)
 		return;
-#define restore_parentidx(pair,domain,ptr) if(pair.domain!=NULL)pair.domain->parentidx=-1;
+#define restore_parentidx(pair,domain) if(pair.domain!=NULL)pair.domain->parentidx=-1;
 	for(int i=0;i<(int)map.size();i++)
 	{
-		restore_parentidx(map[i],left,this);
-		restore_parentidx(map[i],right,this);
+		restore_parentidx(map[i],left);
+		restore_parentidx(map[i],right);
 	}
 	map.clear();
 }
@@ -47,7 +52,7 @@ void TLItemDir::Detach()
 	assert(assert_peer_diritem(this));
 	TLItem **_this,**_other;
 	_other=GetPeerItem(&_this);
-	if(_other==NULL||*_other==NULL)
+	if(subpairs!=NULL&&(_other==NULL||*_other==NULL))
 		delete subpairs;
 	else if(_this!=NULL)
 		*_this=NULL;

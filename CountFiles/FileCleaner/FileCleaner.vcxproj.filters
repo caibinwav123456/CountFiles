@@ -45,6 +45,24 @@
     <ClInclude Include="BaseBar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BaseCombo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MyBmpButton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MsgID.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgramData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgLoad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileCleaner.cpp">
@@ -72,6 +90,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BaseBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseCombo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MyBmpButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgramData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgLoad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -102,6 +132,66 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\folder_exp_mask.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\go_click.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\go_disable.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\go_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\go_normal.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\fold_click.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\fold_disable.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\fold_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\fold_normal.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\open_click.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\open_disable.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\open_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\open_normal.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\dfold_click.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\dfold_disable.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\dfold_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\dfold_normal.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\arrow_click.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\arrow_disable.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\arrow_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\arrow_normal.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

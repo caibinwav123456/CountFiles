@@ -31,7 +31,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -39,14 +39,14 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -54,7 +54,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -198,30 +198,40 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BaseBar.h" />
+    <ClInclude Include="BaseCombo.h" />
     <ClInclude Include="ChildView.h" />
+    <ClInclude Include="CommonStruct.h" />
+    <ClInclude Include="DlgLoad.h" />
     <ClInclude Include="DrawObject.h" />
     <ClInclude Include="FileCleaner.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="MsgID.h" />
+    <ClInclude Include="MyBmpButton.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="ProgramData.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TreeListCtrl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseBar.cpp" />
+    <ClCompile Include="BaseCombo.cpp" />
     <ClCompile Include="ChildView.cpp" />
     <ClCompile Include="ConstructList.cpp" />
+    <ClCompile Include="DlgLoad.cpp" />
     <ClCompile Include="DrawObject.cpp" />
     <ClCompile Include="FileCleaner.cpp" />
     <ClCompile Include="ItemData.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="MyBmpButton.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ProgramData.cpp" />
     <ClCompile Include="TreeListCtrl.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -231,11 +241,31 @@
     <None Include="res\FileCleaner.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\arrow_click.bmp" />
+    <Image Include="res\arrow_disable.bmp" />
+    <Image Include="res\arrow_hover.bmp" />
+    <Image Include="res\arrow_normal.bmp" />
+    <Image Include="res\dfold_click.bmp" />
+    <Image Include="res\dfold_disable.bmp" />
+    <Image Include="res\dfold_hover.bmp" />
+    <Image Include="res\dfold_normal.bmp" />
     <Image Include="res\FileCleaner.ico" />
     <Image Include="res\folder.bmp" />
     <Image Include="res\folder_exp.bmp" />
     <Image Include="res\folder_exp_mask.bmp" />
     <Image Include="res\folder_mask.bmp" />
+    <Image Include="res\fold_click.bmp" />
+    <Image Include="res\fold_disable.bmp" />
+    <Image Include="res\fold_hover.bmp" />
+    <Image Include="res\fold_normal.bmp" />
+    <Image Include="res\go_click.bmp" />
+    <Image Include="res\go_disable.bmp" />
+    <Image Include="res\go_hover.bmp" />
+    <Image Include="res\go_normal.bmp" />
+    <Image Include="res\open_click.bmp" />
+    <Image Include="res\open_disable.bmp" />
+    <Image Include="res\open_hover.bmp" />
+    <Image Include="res\open_normal.bmp" />
     <Image Include="res\Toolbar.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
