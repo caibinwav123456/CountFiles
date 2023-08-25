@@ -4,6 +4,7 @@
 CMyBmpButton::CMyBmpButton()
 {
 	m_iBtnState=0;
+	m_bDisabled=FALSE;
 }
 
 BEGIN_MESSAGE_MAP(CMyBmpButton,CBitmapButton)
@@ -13,9 +14,19 @@ BEGIN_MESSAGE_MAP(CMyBmpButton,CBitmapButton)
 	ON_WM_MOUSELEAVE()
 END_MESSAGE_MAP()
 
+void CMyBmpButton::EnableButton(BOOL bEnable)
+{
+	EnableWindow(bEnable);
+	m_bDisabled=!bEnable;
+	m_iBtnState=0;
+	Invalidate(FALSE);
+}
+
 void CMyBmpButton::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+	if(m_bDisabled)
+		return;
 	if(m_iBtnState==0)
 	{
 		m_iBtnState=ODS_FOCUS;
@@ -34,7 +45,7 @@ void CMyBmpButton::OnMouseMove(UINT nFlags, CPoint point)
 void CMyBmpButton::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	// TODO:  Add your code to draw the specified item
-	lpDrawItemStruct->itemState = m_iBtnState;
+	lpDrawItemStruct->itemState = (m_bDisabled?ODS_DISABLED:m_iBtnState);
 	CBitmapButton::DrawItem(lpDrawItemStruct);
 }
 
@@ -42,6 +53,8 @@ void CMyBmpButton::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 void CMyBmpButton::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+	if(m_bDisabled)
+		return;
 	m_iBtnState=ODS_SELECTED;
 	Invalidate(FALSE);
 	CBitmapButton::OnLButtonDown(nFlags, point);
@@ -51,6 +64,8 @@ void CMyBmpButton::OnLButtonDown(UINT nFlags, CPoint point)
 void CMyBmpButton::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+	if(m_bDisabled)
+		return;
 	m_iBtnState=ODS_FOCUS;
 	Invalidate(FALSE);
 	CBitmapButton::OnLButtonUp(nFlags, point);
@@ -60,6 +75,8 @@ void CMyBmpButton::OnLButtonUp(UINT nFlags, CPoint point)
 void CMyBmpButton::OnMouseLeave()
 {
 	// TODO: Add your message handler code here and/or call default
+	if(m_bDisabled)
+		return;
 	m_iBtnState=0;
 	Invalidate(FALSE);
 	CBitmapButton::OnMouseLeave();

@@ -1,4 +1,5 @@
 #pragma once
+#include "BaseCombo.h"
 #include "MyBmpButton.h"
 
 // CBaseBar dialog
@@ -31,7 +32,8 @@ public:
 	afx_msg void OnBnClickedButtonGo();
 	afx_msg void OnBnClickedButtonOpen();
 	afx_msg void OnBnClickedButtonFold();
-	CComboBox m_comboBasePath;
+	afx_msg LRESULT OnEnableBtnGo(WPARAM wParam, LPARAM lParam);
+	CBaseCombo m_comboBasePath;
 	CMyBmpButton m_btnGo;
 	CMyBmpButton m_btnOpen;
 	CMyBmpButton m_btnFold;

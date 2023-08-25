@@ -45,6 +45,9 @@
     <ClInclude Include="BaseBar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BaseCombo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="MyBmpButton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -75,6 +78,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BaseBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseCombo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MyBmpButton.cpp">

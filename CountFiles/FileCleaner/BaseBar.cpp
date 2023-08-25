@@ -40,6 +40,7 @@ BEGIN_MESSAGE_MAP(CBaseBar, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_GO, &CBaseBar::OnBnClickedButtonGo)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN, &CBaseBar::OnBnClickedButtonOpen)
 	ON_BN_CLICKED(IDC_BUTTON_FOLD, &CBaseBar::OnBnClickedButtonFold)
+	ON_MESSAGE(WM_ENABLE_BTN_GO, &CBaseBar::OnEnableBtnGo)
 END_MESSAGE_MAP()
 
 
@@ -63,6 +64,7 @@ LRESULT CBaseBar::OnSizeParent(WPARAM wParam, LPARAM lParam)
 void CBaseBar::OnBnClickedButtonGo()
 {
 	// TODO: Add your control notification handler code here
+	m_btnGo.EnableButton(FALSE);
 }
 
 
@@ -89,6 +91,9 @@ BOOL CBaseBar::OnInitDialog()
 	m_btnOpen.SizeToContent();
 	m_btnFold.LoadBitmaps(IDB_BMP_FOLD_N, IDB_BMP_FOLD_C, IDB_BMP_FOLD_H, IDB_BMP_FOLD_D);
 	m_btnFold.SizeToContent();
+
+	m_btnGo.EnableButton(FALSE);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -99,6 +104,7 @@ void CBaseBar::OnOK()
 	// TODO: Add your specialized code here and/or call the base class
 
 	//CDialog::OnOK();
+	m_btnGo.EnableButton(FALSE);
 }
 
 
@@ -107,4 +113,11 @@ void CBaseBar::OnCancel()
 	// TODO: Add your specialized code here and/or call the base class
 
 	//CDialog::OnCancel();
+}
+
+
+LRESULT CBaseBar::OnEnableBtnGo(WPARAM wParam, LPARAM lParam)
+{
+	m_btnGo.EnableButton(TRUE);
+	return 0;
 }

@@ -198,6 +198,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BaseBar.h" />
+    <ClInclude Include="BaseCombo.h" />
     <ClInclude Include="ChildView.h" />
     <ClInclude Include="DrawObject.h" />
     <ClInclude Include="FileCleaner.h" />
@@ -211,6 +212,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseBar.cpp" />
+    <ClCompile Include="BaseCombo.cpp" />
     <ClCompile Include="ChildView.cpp" />
     <ClCompile Include="DrawObject.cpp" />
     <ClCompile Include="FileCleaner.cpp" />
