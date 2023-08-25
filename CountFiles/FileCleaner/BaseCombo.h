@@ -1,5 +1,5 @@
 #pragma once
-#define WM_ENABLE_BTN_GO (WM_USER+1000)
+#define WM_ENABLE_BTN_GO (WM_USER+2000)
 class CBaseCombo :
 	public CComboBox
 {
