@@ -2,6 +2,19 @@
 #include "BaseCombo.h"
 #include "MyBmpButton.h"
 
+struct BarRelayoutObject
+{
+	CRect rect;
+	CWnd* wndCombo;
+	CWnd* btnGo;
+	CWnd* btnOpen;
+	CWnd* btnFold;
+	BarRelayoutObject(CWnd* combo,CWnd* go,CWnd* open,CWnd* fold)
+	{
+		wndCombo=combo,btnGo=go,btnOpen=open,btnFold=fold;
+	}
+};
+
 // CBaseBar dialog
 
 class CBaseBar : public CDialog
@@ -30,6 +43,7 @@ private:
 	virtual void OnCancel();
 
 	void RelayoutBarCtrl(CRect* rc);
+	void RelayoutCtrlGroup(BarRelayoutObject* layout);
 
 	//class data
 private:
@@ -42,6 +56,8 @@ private:
 	CMyBmpButton m_btnOpen2;
 	CMyBmpButton m_btnFold2;
 	CMyBmpButton m_btnDFold;
+
+	BOOL m_bInited;
 
 	//message handlers
 private:
