@@ -25,8 +25,8 @@ void CMyBmpButton::OnMouseMove(UINT nFlags, CPoint point)
 		tme.dwFlags=TME_LEAVE;
 		tme.hwndTrack=m_hWnd;
 		TrackMouseEvent(&tme);
+		Invalidate(FALSE);
 	}
-	Invalidate(FALSE);
 	CBitmapButton::OnMouseMove(nFlags, point);
 }
 
