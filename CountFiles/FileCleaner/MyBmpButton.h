@@ -1,24 +1,26 @@
 #pragma once
 #include <afxext.h>
 class CMyBmpButton :
-    public CBitmapButton
+	public CBitmapButton
 {
 public:
-    CMyBmpButton();
+	CMyBmpButton();
+
+	void EnableButton(BOOL bEnable);
 
 private:
-    UINT m_iBtnState;
+	UINT m_iBtnState;
+	BOOL m_bDisabled;
 
 protected:
-    virtual void DrawItem(LPDRAWITEMSTRUCT /*lpDrawItemStruct*/);
+	virtual void DrawItem(LPDRAWITEMSTRUCT /*lpDrawItemStruct*/);
 
 private:
-    afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 
-    DECLARE_MESSAGE_MAP()
+	DECLARE_MESSAGE_MAP()
 public:
-    afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-    afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-    afx_msg void OnMouseLeave();
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnMouseLeave();
 };
-
