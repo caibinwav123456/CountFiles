@@ -9,7 +9,7 @@ END_MESSAGE_MAP()
 void CBaseCombo::OnCbnEditchange()
 {
 	// TODO: Add your control notification handler code here
-	GetParent()->SendMessage(WM_ENABLE_BTN_GO);
+	GetParent()->SendMessage(WM_ENABLE_BTN_GO,m_eComboID);
 }
 
 

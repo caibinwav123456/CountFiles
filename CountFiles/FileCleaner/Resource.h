@@ -34,6 +34,12 @@
 #define IDC_BUTTON_GO                   1001
 #define IDC_BUTTON_OPEN                 1002
 #define IDC_BUTTON_FOLD                 1003
+#define IDC_COMBO_BASE_PATH2            1008
+#define IDC_BUTTON_GO2                  1009
+#define IDC_BUTTON_OPEN2                1010
+#define IDC_BUTTON_FOLD2                1011
+#define IDC_BUTTON_W                    1012
+#define IDC_BUTTON_DFOLD                1012
 
 // Next default values for new objects
 // 
@@ -41,7 +47,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        330
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1004
+#define _APS_NEXT_CONTROL_VALUE         1013
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif
