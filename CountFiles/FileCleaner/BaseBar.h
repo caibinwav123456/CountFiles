@@ -1,5 +1,5 @@
 #pragma once
-
+#include "MyBmpButton.h"
 
 // CBaseBar dialog
 
@@ -32,9 +32,9 @@ public:
 	afx_msg void OnBnClickedButtonOpen();
 	afx_msg void OnBnClickedButtonFold();
 	CComboBox m_comboBasePath;
-	CBitmapButton m_btnGo;
-	CBitmapButton m_btnOpen;
-	CBitmapButton m_btnFold;
+	CMyBmpButton m_btnGo;
+	CMyBmpButton m_btnOpen;
+	CMyBmpButton m_btnFold;
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	virtual void OnCancel();

@@ -4,9 +4,14 @@
 TLItem** TLItem::GetPeerItem(TLItem*** _this)
 {
 	if(parent==NULL||parent->subpairs==NULL)
+	{
+		if(_this!=NULL)
+			*_this=NULL;
 		return NULL;
+	}
 	TLItemPair* tuple=&parent->subpairs->map[parentidx];
 	assert(!(tuple->left==NULL&&tuple->right==NULL));
+	assert(tuple->left!=tuple->right);
 	assert(tuple->left==this||tuple->right==this);
 	if(tuple->left==this)
 	{
