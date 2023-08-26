@@ -12,8 +12,11 @@ IMPLEMENT_DYNAMIC(CBaseBar, CDialog)
 
 CBaseBar::CBaseBar(CWnd* pParent /*=nullptr*/)
 	: CDialog(IDD_DIALOGBAR, pParent),m_comboBasePath(eBComboMain), m_comboBasePath2(eBComboRef)
+	, m_strComboBasePath(_T(""))
+	, m_strComboBasePathRef(_T(""))
 {
 	m_bInited=FALSE;
+	m_nBasePathBufLen=100;
 }
 
 CBaseBar::~CBaseBar()
@@ -23,6 +26,13 @@ CBaseBar::~CBaseBar()
 BOOL CBaseBar::CreateBar(CWnd* pParentWnd)
 {
 	return Create(IDD_DIALOGBAR, pParentWnd);
+}
+
+void CBaseBar::SetBackPathMaxCount(UINT nmax)
+{
+	if(nmax>1000)
+		nmax=1000;
+	m_nBasePathBufLen=nmax;
 }
 
 void CBaseBar::DoDataExchange(CDataExchange* pDX)
@@ -37,6 +47,8 @@ void CBaseBar::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_OPEN2, m_btnOpen2);
 	DDX_Control(pDX, IDC_BUTTON_FOLD2, m_btnFold2);
 	DDX_Control(pDX, IDC_BUTTON_DFOLD, m_btnDFold);
+	DDX_CBString(pDX, IDC_COMBO_BASE_PATH, m_strComboBasePath);
+	DDX_CBString(pDX, IDC_COMBO_BASE_PATH2, m_strComboBasePathRef);
 }
 
 
@@ -114,10 +126,32 @@ void CBaseBar::RelayoutCtrlGroup(BarRelayoutObject* layout)
 	layout->btnFold->MoveWindow(rc3);
 }
 
+inline void UpdateComboStrings(CBaseCombo& combo,const CString& str,UINT maxcnt)
+{
+	if(str.IsEmpty())
+		return;
+	int idx=combo.FindString(0,str);
+	if(idx>=0)
+		combo.DeleteString(idx);
+	combo.InsertString(0,str);
+	if(combo.GetCount()>(int)maxcnt)
+		combo.DeleteString(maxcnt);
+}
+
+void CBaseBar::UpdateBaseBackBuffer(const CString& left,const CString& right)
+{
+	UpdateComboStrings(m_comboBasePath,left,m_nBasePathBufLen);
+	UpdateComboStrings(m_comboBasePath2,right,m_nBasePathBufLen);
+}
+
 void CBaseBar::OnBnClickedButtonGo()
 {
 	// TODO: Add your control notification handler code here
+	CString strBase=m_strComboBasePathRef;
+	UpdateData(TRUE);
+	m_strComboBasePathRef=strBase;
 	m_btnGo.EnableButton(FALSE);
+	UpdateBaseBackBuffer(m_strComboBasePath,m_strComboBasePathRef);
 }
 
 
@@ -136,7 +170,11 @@ void CBaseBar::OnBnClickedButtonFold()
 void CBaseBar::OnBnClickedButtonGo2()
 {
 	// TODO: Add your control notification handler code here
+	CString strBase=m_strComboBasePath;
+	UpdateData(TRUE);
+	m_strComboBasePath=strBase;
 	m_btnGo2.EnableButton(FALSE);
+	UpdateBaseBackBuffer(m_strComboBasePath,m_strComboBasePathRef);
 }
 
 
@@ -196,8 +234,10 @@ void CBaseBar::OnOK()
 	// TODO: Add your specialized code here and/or call the base class
 
 	//CDialog::OnOK();
+	UpdateData(TRUE);
 	m_btnGo.EnableButton(FALSE);
 	m_btnGo2.EnableButton(FALSE);
+	UpdateBaseBackBuffer(m_strComboBasePath,m_strComboBasePathRef);
 }
 
 

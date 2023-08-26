@@ -27,6 +27,7 @@ public:
 
 public:
 	BOOL CreateBar(CWnd* pParentWnd);
+	void SetBackPathMaxCount(UINT nmax);
 
 	// Dialog Data
 #ifdef AFX_DESIGN_TIME
@@ -45,6 +46,8 @@ private:
 	void RelayoutBarCtrl(CRect* rc);
 	void RelayoutCtrlGroup(BarRelayoutObject* layout);
 
+	void UpdateBaseBackBuffer(const CString& left,const CString& right);
+
 	//class data
 private:
 	CBaseCombo m_comboBasePath;
@@ -56,8 +59,11 @@ private:
 	CMyBmpButton m_btnOpen2;
 	CMyBmpButton m_btnFold2;
 	CMyBmpButton m_btnDFold;
+	CString m_strComboBasePath;
+	CString m_strComboBasePathRef;
 
 	BOOL m_bInited;
+	UINT m_nBasePathBufLen;
 
 	//message handlers
 private:
