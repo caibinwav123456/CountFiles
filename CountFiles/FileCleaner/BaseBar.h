@@ -46,7 +46,7 @@ private:
 	void RelayoutBarCtrl(CRect* rc);
 	void RelayoutCtrlGroup(BarRelayoutObject* layout);
 
-	void UpdateBaseBackBuffer(const CString& left,const CString& right);
+	void UpdateBaseBackBuffer(LPCTSTR left,LPCTSTR right);
 
 	//class data
 private:
@@ -65,6 +65,9 @@ private:
 	BOOL m_bInited;
 	UINT m_nBasePathBufLen;
 
+	CString m_strBasePath;
+	CString m_strBasePathRef;
+
 	//message handlers
 private:
 	afx_msg LRESULT OnSizeParent(WPARAM wParam, LPARAM lParam);
@@ -77,6 +80,8 @@ private:
 	afx_msg void OnBnClickedButtonOpen2();
 	afx_msg void OnBnClickedButtonFold2();
 	afx_msg void OnBnClickedButtonDfold();
+	afx_msg void OnCbnSelchangeComboBasePath();
+	afx_msg void OnCbnSelchangeComboBasePath2();
 
 	DECLARE_MESSAGE_MAP()
 };

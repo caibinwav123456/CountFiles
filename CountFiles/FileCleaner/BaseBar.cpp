@@ -63,6 +63,8 @@ BEGIN_MESSAGE_MAP(CBaseBar, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN2, &CBaseBar::OnBnClickedButtonOpen2)
 	ON_BN_CLICKED(IDC_BUTTON_FOLD2, &CBaseBar::OnBnClickedButtonFold2)
 	ON_BN_CLICKED(IDC_BUTTON_DFOLD, &CBaseBar::OnBnClickedButtonDfold)
+	ON_CBN_SELCHANGE(IDC_COMBO_BASE_PATH, &CBaseBar::OnCbnSelchangeComboBasePath)
+	ON_CBN_SELCHANGE(IDC_COMBO_BASE_PATH2, &CBaseBar::OnCbnSelchangeComboBasePath2)
 END_MESSAGE_MAP()
 
 
@@ -126,32 +128,46 @@ void CBaseBar::RelayoutCtrlGroup(BarRelayoutObject* layout)
 	layout->btnFold->MoveWindow(rc3);
 }
 
+int FindComboContent(CBaseCombo& combo,const CString& strItem)
+{
+	for(int i=0;i<combo.GetCount();i++)
+	{
+		CString str;
+		combo.GetLBText(i,str);
+		if(str==strItem)
+			return i;
+	}
+	return -1;
+}
+
 inline void UpdateComboStrings(CBaseCombo& combo,const CString& str,UINT maxcnt)
 {
 	if(str.IsEmpty())
 		return;
-	int idx=combo.FindString(0,str);
+	int idx=FindComboContent(combo,str);
 	if(idx>=0)
 		combo.DeleteString(idx);
 	combo.InsertString(0,str);
-	if(combo.GetCount()>(int)maxcnt)
-		combo.DeleteString(maxcnt);
+	while(combo.GetCount()>(int)maxcnt)
+		combo.DeleteString(combo.GetCount()-1);
 }
 
-void CBaseBar::UpdateBaseBackBuffer(const CString& left,const CString& right)
+void CBaseBar::UpdateBaseBackBuffer(LPCTSTR left,LPCTSTR right)
 {
-	UpdateComboStrings(m_comboBasePath,left,m_nBasePathBufLen);
-	UpdateComboStrings(m_comboBasePath2,right,m_nBasePathBufLen);
+	if(left!=NULL)
+		UpdateComboStrings(m_comboBasePath,left,m_nBasePathBufLen);
+	if(right!=NULL)
+		UpdateComboStrings(m_comboBasePath2,right,m_nBasePathBufLen);
+	UpdateData(FALSE);
 }
 
 void CBaseBar::OnBnClickedButtonGo()
 {
 	// TODO: Add your control notification handler code here
-	CString strBase=m_strComboBasePathRef;
 	UpdateData(TRUE);
-	m_strComboBasePathRef=strBase;
+	m_strBasePath=m_strComboBasePath;
 	m_btnGo.EnableButton(FALSE);
-	UpdateBaseBackBuffer(m_strComboBasePath,m_strComboBasePathRef);
+	UpdateBaseBackBuffer(m_strComboBasePath,NULL);
 }
 
 
@@ -170,11 +186,10 @@ void CBaseBar::OnBnClickedButtonFold()
 void CBaseBar::OnBnClickedButtonGo2()
 {
 	// TODO: Add your control notification handler code here
-	CString strBase=m_strComboBasePath;
 	UpdateData(TRUE);
-	m_strComboBasePath=strBase;
+	m_strBasePathRef=m_strComboBasePathRef;
 	m_btnGo2.EnableButton(FALSE);
-	UpdateBaseBackBuffer(m_strComboBasePath,m_strComboBasePathRef);
+	UpdateBaseBackBuffer(NULL,m_strComboBasePathRef);
 }
 
 
@@ -235,6 +250,8 @@ void CBaseBar::OnOK()
 
 	//CDialog::OnOK();
 	UpdateData(TRUE);
+	m_strBasePath=m_strComboBasePath;
+	m_strBasePathRef=m_strComboBasePathRef;
 	m_btnGo.EnableButton(FALSE);
 	m_btnGo2.EnableButton(FALSE);
 	UpdateBaseBackBuffer(m_strComboBasePath,m_strComboBasePathRef);
@@ -270,4 +287,30 @@ void CBaseBar::OnSize(UINT nType, int cx, int cy)
 	CRect rc(0,0,cx,cy);
 	if(m_bInited)
 		RelayoutBarCtrl(&rc);
+}
+
+
+void CBaseBar::OnCbnSelchangeComboBasePath()
+{
+	// TODO: Add your control notification handler code here
+	UpdateData(TRUE);
+	int sel=m_comboBasePath.GetCurSel();
+	if(sel>=0)
+		m_comboBasePath.GetLBText(sel,m_strComboBasePath);
+	m_strBasePath=m_strComboBasePath;
+	m_btnGo.EnableButton(FALSE);
+	UpdateBaseBackBuffer(m_strComboBasePath,NULL);
+}
+
+
+void CBaseBar::OnCbnSelchangeComboBasePath2()
+{
+	// TODO: Add your control notification handler code here
+	UpdateData(TRUE);
+	int sel=m_comboBasePath2.GetCurSel();
+	if(sel>=0)
+		m_comboBasePath2.GetLBText(sel,m_strComboBasePathRef);
+	m_strBasePathRef=m_strComboBasePathRef;
+	m_btnGo2.EnableButton(FALSE);
+	UpdateBaseBackBuffer(NULL,m_strComboBasePathRef);
 }
