@@ -80,8 +80,7 @@ LRESULT CBaseBar::OnSizeParent(WPARAM wParam, LPARAM lParam)
 	GetWindowRect(&rect);
 	rect.OffsetRect(-rect.TopLeft());
 	rect.OffsetRect(lpLayout->rect.left,lpLayout->rect.top);
-	CWnd* pParent=GetParent();
-	pParent->GetClientRect(&rcParent);
+	GetParent()->GetClientRect(&rcParent);
 	rect.right=rcParent.right;
 	AfxRepositionWindow(lpLayout,m_hWnd,&rect);
 	lpLayout->rect.top+=rect.Height();

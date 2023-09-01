@@ -30,11 +30,11 @@ void TLItemSplice::clear()
 {
 	if(this==NULL)
 		return;
-#define restore_parentidx(pair,domain,ptr) if(pair.domain!=NULL)pair.domain->parentidx=-1;
+#define restore_parentidx(pair,domain) if(pair.domain!=NULL)pair.domain->parentidx=-1;
 	for(int i=0;i<(int)map.size();i++)
 	{
-		restore_parentidx(map[i],left,this);
-		restore_parentidx(map[i],right,this);
+		restore_parentidx(map[i],left);
+		restore_parentidx(map[i],right);
 	}
 	map.clear();
 }
