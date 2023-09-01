@@ -42,7 +42,6 @@
 #define IDC_BUTTON_GO2                  1009
 #define IDC_BUTTON_OPEN2                1010
 #define IDC_BUTTON_FOLD2                1011
-#define IDC_BUTTON_W                    1012
 #define IDC_BUTTON_DFOLD                1012
 #define IDC_BUTTON_DROP                 1013
 #define IDC_BUTTON_DROP2                1014
