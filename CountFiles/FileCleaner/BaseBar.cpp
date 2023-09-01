@@ -40,11 +40,13 @@ void CBaseBar::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO_BASE_PATH, m_comboBasePath);
 	DDX_Control(pDX, IDC_BUTTON_GO, m_btnGo);
-	DDX_Control(pDX, IDC_BUTTON_OPEN, m_btnOpen);
+	DDX_Control(pDX, IDC_BUTTON_OPEN, m_btnOpen.m_btnMain);
+	DDX_Control(pDX, IDC_BUTTON_DROP, m_btnOpen.m_btnDrop);
 	DDX_Control(pDX, IDC_BUTTON_FOLD, m_btnFold);
 	DDX_Control(pDX, IDC_COMBO_BASE_PATH2, m_comboBasePath2);
 	DDX_Control(pDX, IDC_BUTTON_GO2, m_btnGo2);
-	DDX_Control(pDX, IDC_BUTTON_OPEN2, m_btnOpen2);
+	DDX_Control(pDX, IDC_BUTTON_OPEN2, m_btnOpen2.m_btnMain);
+	DDX_Control(pDX, IDC_BUTTON_DROP2, m_btnOpen2.m_btnDrop);
 	DDX_Control(pDX, IDC_BUTTON_FOLD2, m_btnFold2);
 	DDX_Control(pDX, IDC_BUTTON_DFOLD, m_btnDFold);
 	DDX_CBString(pDX, IDC_COMBO_BASE_PATH, m_strComboBasePath);
@@ -58,9 +60,11 @@ BEGIN_MESSAGE_MAP(CBaseBar, CDialog)
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_BUTTON_GO, &CBaseBar::OnBnClickedButtonGo)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN, &CBaseBar::OnBnClickedButtonOpen)
+	ON_BN_CLICKED(IDC_BUTTON_DROP, &CBaseBar::OnBnClickedButtonDrop)
 	ON_BN_CLICKED(IDC_BUTTON_FOLD, &CBaseBar::OnBnClickedButtonFold)
 	ON_BN_CLICKED(IDC_BUTTON_GO2, &CBaseBar::OnBnClickedButtonGo2)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN2, &CBaseBar::OnBnClickedButtonOpen2)
+	ON_BN_CLICKED(IDC_BUTTON_DROP2, &CBaseBar::OnBnClickedButtonDrop2)
 	ON_BN_CLICKED(IDC_BUTTON_FOLD2, &CBaseBar::OnBnClickedButtonFold2)
 	ON_BN_CLICKED(IDC_BUTTON_DFOLD, &CBaseBar::OnBnClickedButtonDfold)
 	ON_CBN_SELCHANGE(IDC_COMBO_BASE_PATH, &CBaseBar::OnCbnSelchangeComboBasePath)
@@ -128,7 +132,7 @@ void CBaseBar::RelayoutCtrlGroup(BarRelayoutObject* layout)
 	layout->btnFold->MoveWindow(rc3);
 }
 
-int FindComboContent(CBaseCombo& combo,const CString& strItem)
+inline int FindComboContent(CBaseCombo& combo,const CString& strItem)
 {
 	for(int i=0;i<combo.GetCount();i++)
 	{
@@ -177,6 +181,12 @@ void CBaseBar::OnBnClickedButtonOpen()
 }
 
 
+void CBaseBar::OnBnClickedButtonDrop()
+{
+	// TODO: Add your control notification handler code here
+}
+
+
 void CBaseBar::OnBnClickedButtonFold()
 {
 	// TODO: Add your control notification handler code here
@@ -194,6 +204,12 @@ void CBaseBar::OnBnClickedButtonGo2()
 
 
 void CBaseBar::OnBnClickedButtonOpen2()
+{
+	// TODO: Add your control notification handler code here
+}
+
+
+void CBaseBar::OnBnClickedButtonDrop2()
 {
 	// TODO: Add your control notification handler code here
 }
@@ -218,8 +234,10 @@ BOOL CBaseBar::OnInitDialog()
 	// TODO:  Add extra initialization here
 	m_btnGo.LoadBitmaps(IDB_BMP_GO_N, IDB_BMP_GO_C, IDB_BMP_GO_H, IDB_BMP_GO_D);
 	m_btnGo.SizeToContent();
-	m_btnOpen.LoadBitmaps(IDB_BMP_OPEN_N, IDB_BMP_OPEN_C, IDB_BMP_OPEN_H, IDB_BMP_OPEN_D);
-	m_btnOpen.SizeToContent();
+	m_btnOpen.m_btnMain.LoadBitmaps(IDB_BMP_OPEN_N, IDB_BMP_OPEN_C, IDB_BMP_OPEN_H, IDB_BMP_OPEN_D);
+	m_btnOpen.m_btnMain.SizeToContent();
+	m_btnOpen.m_btnDrop.LoadBitmaps(IDB_BMP_DROP_N, IDB_BMP_DROP_C, IDB_BMP_DROP_H, IDB_BMP_DROP_D);
+	m_btnOpen.m_btnDrop.SizeToContent();
 	m_btnFold.LoadBitmaps(IDB_BMP_FOLD_N, IDB_BMP_FOLD_C, IDB_BMP_FOLD_H, IDB_BMP_FOLD_D);
 	m_btnFold.SizeToContent();
 
@@ -227,8 +245,10 @@ BOOL CBaseBar::OnInitDialog()
 
 	m_btnGo2.LoadBitmaps(IDB_BMP_GO_N, IDB_BMP_GO_C, IDB_BMP_GO_H, IDB_BMP_GO_D);
 	m_btnGo2.SizeToContent();
-	m_btnOpen2.LoadBitmaps(IDB_BMP_OPEN_N, IDB_BMP_OPEN_C, IDB_BMP_OPEN_H, IDB_BMP_OPEN_D);
-	m_btnOpen2.SizeToContent();
+	m_btnOpen2.m_btnMain.LoadBitmaps(IDB_BMP_OPEN_N, IDB_BMP_OPEN_C, IDB_BMP_OPEN_H, IDB_BMP_OPEN_D);
+	m_btnOpen2.m_btnMain.SizeToContent();
+	m_btnOpen2.m_btnDrop.LoadBitmaps(IDB_BMP_DROP_N, IDB_BMP_DROP_C, IDB_BMP_DROP_H, IDB_BMP_DROP_D);
+	m_btnOpen2.m_btnDrop.SizeToContent();
 	m_btnFold2.LoadBitmaps(IDB_BMP_FOLD_N, IDB_BMP_FOLD_C, IDB_BMP_FOLD_H, IDB_BMP_FOLD_D);
 	m_btnFold2.SizeToContent();
 

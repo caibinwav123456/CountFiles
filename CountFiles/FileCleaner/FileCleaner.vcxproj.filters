@@ -164,5 +164,17 @@
     <Image Include="res\dfold_normal.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\arrow_click.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\arrow_disable.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\arrow_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\arrow_normal.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

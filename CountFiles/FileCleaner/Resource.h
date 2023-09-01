@@ -30,6 +30,10 @@
 #define IDB_BMP_DFOLD_D                 327
 #define IDB_BMP_DFOLD_H                 328
 #define IDB_BMP_DFOLD_N                 329
+#define IDB_BMP_DROP_C                  330
+#define IDB_BMP_DROP_D                  331
+#define IDB_BMP_DROP_H                  332
+#define IDB_BMP_DROP_N                  333
 #define IDC_COMBO_BASE_PATH             1000
 #define IDC_BUTTON_GO                   1001
 #define IDC_BUTTON_OPEN                 1002
@@ -40,14 +44,16 @@
 #define IDC_BUTTON_FOLD2                1011
 #define IDC_BUTTON_W                    1012
 #define IDC_BUTTON_DFOLD                1012
+#define IDC_BUTTON_DROP                 1013
+#define IDC_BUTTON_DROP2                1014
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        330
+#define _APS_NEXT_RESOURCE_VALUE        334
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1013
+#define _APS_NEXT_CONTROL_VALUE         1015
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif

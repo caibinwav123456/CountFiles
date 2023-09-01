@@ -7,9 +7,9 @@ struct BarRelayoutObject
 	CRect rect;
 	CWnd* wndCombo;
 	CWnd* btnGo;
-	CWnd* btnOpen;
+	DropDownButton* btnOpen;
 	CWnd* btnFold;
-	BarRelayoutObject(CWnd* combo,CWnd* go,CWnd* open,CWnd* fold)
+	BarRelayoutObject(CWnd* combo,CWnd* go,DropDownButton* open,CWnd* fold)
 	{
 		wndCombo=combo,btnGo=go,btnOpen=open,btnFold=fold;
 	}
@@ -52,11 +52,11 @@ private:
 private:
 	CBaseCombo m_comboBasePath;
 	CMyBmpButton m_btnGo;
-	CMyBmpButton m_btnOpen;
+	DropDownButton m_btnOpen;
 	CMyBmpButton m_btnFold;
 	CBaseCombo m_comboBasePath2;
 	CMyBmpButton m_btnGo2;
-	CMyBmpButton m_btnOpen2;
+	DropDownButton m_btnOpen2;
 	CMyBmpButton m_btnFold2;
 	CMyBmpButton m_btnDFold;
 	CString m_strComboBasePath;
@@ -75,9 +75,11 @@ private:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnBnClickedButtonGo();
 	afx_msg void OnBnClickedButtonOpen();
+	afx_msg void OnBnClickedButtonDrop();
 	afx_msg void OnBnClickedButtonFold();
 	afx_msg void OnBnClickedButtonGo2();
 	afx_msg void OnBnClickedButtonOpen2();
+	afx_msg void OnBnClickedButtonDrop2();
 	afx_msg void OnBnClickedButtonFold2();
 	afx_msg void OnBnClickedButtonDfold();
 	afx_msg void OnCbnSelchangeComboBasePath();

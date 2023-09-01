@@ -233,6 +233,10 @@
     <None Include="res\FileCleaner.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\arrow_click.bmp" />
+    <Image Include="res\arrow_disable.bmp" />
+    <Image Include="res\arrow_hover.bmp" />
+    <Image Include="res\arrow_normal.bmp" />
     <Image Include="res\dfold_click.bmp" />
     <Image Include="res\dfold_disable.bmp" />
     <Image Include="res\dfold_hover.bmp" />
