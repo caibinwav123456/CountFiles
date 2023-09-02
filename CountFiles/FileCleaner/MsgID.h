@@ -2,5 +2,6 @@
 #define _MSG_ID_H_
 
 #define WM_ENABLE_BTN_GO (WM_USER+2000)
+#define WM_FILE_LIST_START_LOAD (WM_USER+2001)
 
 #endif

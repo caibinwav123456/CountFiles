@@ -200,6 +200,7 @@
     <ClInclude Include="BaseBar.h" />
     <ClInclude Include="BaseCombo.h" />
     <ClInclude Include="ChildView.h" />
+    <ClInclude Include="CommonStruct.h" />
     <ClInclude Include="DrawObject.h" />
     <ClInclude Include="FileCleaner.h" />
     <ClInclude Include="framework.h" />

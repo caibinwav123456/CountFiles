@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseCombo.h"
 #include "MyBmpButton.h"
+#include "CommonStruct.h"
 
 struct BarRelayoutObject
 {
@@ -49,6 +50,8 @@ private:
 	void UpdateBaseBackBuffer(LPCTSTR left,LPCTSTR right);
 	CString GetImpFileName(const CString& path);
 	void RestoreCtrlState();
+
+	BOOL StartListLoad(const FListLoadData& path,UINT accept_type);
 
 	//class data
 private:

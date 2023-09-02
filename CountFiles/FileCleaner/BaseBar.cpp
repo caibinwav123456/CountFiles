@@ -7,6 +7,9 @@
 #include "MsgID.h"
 #include "common.h"
 
+#define ACC_PATH_TYPE_FILE 1
+#define ACC_PATH_TYPE_DIR  2
+
 // CBaseBar dialog
 
 IMPLEMENT_DYNAMIC(CBaseBar, CDialog)
@@ -211,6 +214,8 @@ void CBaseBar::OnBnClickedButtonGo()
 	m_strBasePath=m_strComboBasePath;
 	m_btnGo.EnableButton(FALSE);
 	UpdateBaseBackBuffer(m_strComboBasePath,NULL);
+	FListLoadData data(m_strBasePath,_T(""),FILE_LIST_ATTRIB_MAIN);
+	StartListLoad(data,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
 }
 
 
@@ -252,6 +257,8 @@ void CBaseBar::OnBnClickedButtonOpen()
 	m_strBasePath=m_strComboBasePath=strPath;
 	m_btnGo.EnableButton(FALSE);
 	UpdateBaseBackBuffer(m_strComboBasePath,NULL);
+	FListLoadData data(m_strBasePath,_T(""),FILE_LIST_ATTRIB_MAIN);
+	StartListLoad(data,ACC_PATH_TYPE_DIR);
 }
 
 
@@ -279,6 +286,8 @@ void CBaseBar::OnBnClickedButtonGo2()
 	m_strBasePathRef=m_strComboBasePathRef;
 	m_btnGo2.EnableButton(FALSE);
 	UpdateBaseBackBuffer(NULL,m_strComboBasePathRef);
+	FListLoadData data(_T(""),m_strBasePathRef,FILE_LIST_ATTRIB_REF);
+	StartListLoad(data,0);
 }
 
 
@@ -349,6 +358,37 @@ BOOL CBaseBar::OnInitDialog()
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+inline UINT AcceptPathType(const CString& path,UINT accept_type)
+{
+	if(!PathFileExists(path))
+		return 0;
+	if((accept_type&ACC_PATH_TYPE_DIR)&&PathIsDirectory(path))
+		return ACC_PATH_TYPE_DIR;
+	if(accept_type&ACC_PATH_TYPE_FILE)
+		return ACC_PATH_TYPE_FILE;
+	return 0;
+}
+
+inline BOOL ValidatePaths(const FListLoadData& path,UINT accept_type)
+{
+	if(path.mask==0)
+		return FALSE;
+	if((path.mask&FILE_LIST_ATTRIB_MAIN)&&AcceptPathType(path.left,accept_type)==0)
+		return FALSE;
+	if((path.mask&FILE_LIST_ATTRIB_REF)&&AcceptPathType(path.right,ACC_PATH_TYPE_FILE)==0)
+		return FALSE;
+	return TRUE;
+}
+
+BOOL CBaseBar::StartListLoad(const FListLoadData& path,UINT accept_type)
+{
+	if(!ValidatePaths(path,accept_type))
+	{
+		MessageBox(_T("Invalid Paths"));
+		return FALSE;
+	}
+	return AfxGetMainWnd()->SendMessage(WM_FILE_LIST_START_LOAD,(WPARAM)&path);
+}
 
 void CBaseBar::OnOK()
 {
@@ -361,6 +401,8 @@ void CBaseBar::OnOK()
 	m_btnGo.EnableButton(FALSE);
 	m_btnGo2.EnableButton(FALSE);
 	UpdateBaseBackBuffer(m_strComboBasePath,m_strComboBasePathRef);
+	FListLoadData data(m_strBasePath,m_strBasePathRef,FILE_LIST_ATTRIB_MAIN|FILE_LIST_ATTRIB_REF);
+	StartListLoad(data,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
 }
 
 
@@ -406,6 +448,8 @@ void CBaseBar::OnCbnSelchangeComboBasePath()
 	m_strBasePath=m_strComboBasePath;
 	m_btnGo.EnableButton(FALSE);
 	UpdateBaseBackBuffer(m_strComboBasePath,NULL);
+	FListLoadData data(m_strBasePath,_T(""),FILE_LIST_ATTRIB_MAIN);
+	StartListLoad(data,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
 }
 
 
@@ -419,6 +463,8 @@ void CBaseBar::OnCbnSelchangeComboBasePath2()
 	m_strBasePathRef=m_strComboBasePathRef;
 	m_btnGo2.EnableButton(FALSE);
 	UpdateBaseBackBuffer(NULL,m_strComboBasePathRef);
+	FListLoadData data(_T(""),m_strBasePathRef,FILE_LIST_ATTRIB_REF);
+	StartListLoad(data,0);
 }
 
 
@@ -448,6 +494,8 @@ void CBaseBar::OnCmdMenuImpFile()
 	m_strBasePath=m_strComboBasePath=strImpFile;
 	m_btnGo.EnableButton(FALSE);
 	UpdateBaseBackBuffer(m_strComboBasePath,NULL);
+	FListLoadData data(m_strBasePath,_T(""),FILE_LIST_ATTRIB_MAIN);
+	StartListLoad(data,ACC_PATH_TYPE_FILE);
 }
 
 
@@ -470,4 +518,6 @@ void CBaseBar::OnCmdMenuImpFileRef()
 	m_strBasePathRef=m_strComboBasePathRef=strImpFile;
 	m_btnGo2.EnableButton(FALSE);
 	UpdateBaseBackBuffer(NULL,m_strComboBasePathRef);
+	FListLoadData data(_T(""),m_strBasePathRef,FILE_LIST_ATTRIB_REF);
+	StartListLoad(data,0);
 }

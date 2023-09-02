@@ -54,6 +54,9 @@
     <ClInclude Include="MsgID.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CommonStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileCleaner.cpp">
