@@ -48,6 +48,7 @@ int TreeListCtrl::Init()
 		goto failed;
 	if(!m_bmpFolderExpMask.LoadBitmap(IDB_FOLDER_EXP_MASK))
 		goto failed;
+	SetScrollSizes(CSize(-1,m_nTotalLine*LINE_HEIGHT));
 	return 0;
 failed:
 	Exit();

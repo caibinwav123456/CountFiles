@@ -11,9 +11,12 @@ class CScrollTreeList:public TreeListCtrl
 {
 public:
 	CScrollTreeList(CWnd* pWnd);
-protected:
+public:
 	virtual CPoint GetScrollPos() const;
 	virtual void SetScrollSizes(const CSize& size);
+	virtual CSize GetScrollSizes();
+private:
+	CSize m_sizeScl;
 };
 class CChildView : public CScrollView
 {
@@ -54,4 +57,5 @@ public:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 };

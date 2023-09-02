@@ -204,6 +204,7 @@
     <ClInclude Include="FileCleaner.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="MsgID.h" />
     <ClInclude Include="MyBmpButton.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />

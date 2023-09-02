@@ -187,11 +187,13 @@ public:
 	void OnRBUp(const CPoint& pt);
 	void OnMMove(const CPoint& pt);
 
-protected:
-//Get scroll pos
+public:
+//Get scroll position
 	virtual CPoint GetScrollPos() const=0;
 //Set scroll sizes
 	virtual void SetScrollSizes(const CSize& size)=0;
+//Get scroll sizes
+	virtual CSize GetScrollSizes()=0;
 
 protected:
 	CWnd* m_pWnd;
@@ -203,7 +205,7 @@ private:
 	CBitmap m_bmpFolderExpMask;
 
 //List data
-private:
+protected:
 	FileListLoader m_ListLoader;
 
 //private functions

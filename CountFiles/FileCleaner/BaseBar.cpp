@@ -4,7 +4,8 @@
 #include "pch.h"
 #include "resource.h"
 #include "BaseBar.h"
-#define BARCENTERMARGIN 5
+#include "MsgID.h"
+#include "common.h"
 
 // CBaseBar dialog
 
@@ -102,12 +103,12 @@ void CBaseBar::RelayoutBarCtrl(CRect* rc)
 	m_btnDFold.GetWindowRect(&rcDFold);
 	ScreenToClient(&rcDFold);
 	rcDFold.OffsetRect(-rcDFold.left,0);
-	int grpwidth=(rc->Width()-rcDFold.Width())/2-BARCENTERMARGIN;
-	grpwidth=max(120,grpwidth);
-	rcDFold.OffsetRect(grpwidth+BARCENTERMARGIN,0);
+	int grpwidth=(max(MIN_SCROLL_WIDTH,rc->Width())
+		-rcDFold.Width())/2-BAR_CENTER_MARGIN;
+	rcDFold.OffsetRect(grpwidth+BAR_CENTER_MARGIN,0);
 	m_btnDFold.MoveWindow(&rcDFold);
 	layout1.rect=CRect(0,0,grpwidth,rc->bottom);
-	layout2.rect=CRect(grpwidth+rcDFold.Width()+2*BARCENTERMARGIN,0,0,rc->bottom);
+	layout2.rect=CRect(grpwidth+rcDFold.Width()+2*BAR_CENTER_MARGIN,0,0,rc->bottom);
 	layout2.rect.right=layout2.rect.left+grpwidth;
 	RelayoutCtrlGroup(&layout1);
 	RelayoutCtrlGroup(&layout2);
@@ -125,12 +126,12 @@ void CBaseBar::RelayoutCtrlGroup(BarRelayoutObject* layout)
 	ScreenToClient(&rc3);
 	layout->wndCombo->GetWindowRect(&rcCB);
 	ScreenToClient(&rcCB);
-	int offset=layout->rect.right-rc3.right-BARCENTERMARGIN;
+	int offset=layout->rect.right-rc3.right-BAR_CENTER_MARGIN;
 	rc1.OffsetRect(offset,0);
 	rc2.OffsetRect(offset,0);
 	rc3.OffsetRect(offset,0);
-	rcCB.left=layout->rect.left+BARCENTERMARGIN;
-	rcCB.right=rc1.left-BARCENTERMARGIN;
+	rcCB.left=layout->rect.left+BAR_CENTER_MARGIN;
+	rcCB.right=rc1.left-BAR_CENTER_MARGIN;
 	layout->wndCombo->MoveWindow(&rcCB);
 	layout->btnGo->MoveWindow(rc1);
 	layout->btnOpen->MoveWindow(rc2);

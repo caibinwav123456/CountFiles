@@ -16,7 +16,7 @@
 #endif
 
 // CScrollTreeList
-CScrollTreeList::CScrollTreeList(CWnd* pWnd):TreeListCtrl(pWnd)
+CScrollTreeList::CScrollTreeList(CWnd* pWnd):TreeListCtrl(pWnd),m_sizeScl(MIN_SCROLL_WIDTH,1)
 {
 }
 CPoint CScrollTreeList::GetScrollPos() const
@@ -25,7 +25,15 @@ CPoint CScrollTreeList::GetScrollPos() const
 }
 void CScrollTreeList::SetScrollSizes(const CSize& size)
 {
-	((CScrollView*)m_pWnd)->SetScrollSizes(MM_TEXT,size);
+	size.cx>0?(m_sizeScl.cx=max(size.cx,MIN_SCROLL_WIDTH))
+		:(size.cx==0?(m_sizeScl.cx=MIN_SCROLL_WIDTH):0);
+	size.cy>0?(m_sizeScl.cy=size.cy):(size.cy==0?m_sizeScl.cy=1:0);
+	((CScrollView*)m_pWnd)->SetScrollSizes(MM_TEXT,m_sizeScl,
+		CSize(LINE_HEIGHT,LINE_HEIGHT*3),CSize(LINE_HEIGHT,LINE_HEIGHT));
+}
+CSize CScrollTreeList::GetScrollSizes()
+{
+	return m_sizeScl;
 }
 
 // CChildView
@@ -51,6 +59,7 @@ BEGIN_MESSAGE_MAP(CChildView, CScrollView)
 	ON_WM_VSCROLL()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_ERASEBKGND()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 IMPLEMENT_DYNCREATE(CChildView, CScrollView)
@@ -184,4 +193,12 @@ BOOL CChildView::OnEraseBkgnd(CDC* pDC)
 	// TODO: Add your message handler code here and/or call default
 
 	return TRUE;//CScrollView::OnEraseBkgnd(pDC);
+}
+
+
+void CChildView::OnSize(UINT nType, int cx, int cy)
+{
+	CScrollView::OnSize(nType, cx, cy);
+	m_TreeList.SetScrollSizes(CSize(cx,-1));
+	// TODO: Add your message handler code here
 }
