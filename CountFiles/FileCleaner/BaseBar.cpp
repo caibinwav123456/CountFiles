@@ -106,13 +106,11 @@ void CBaseBar::RelayoutBarCtrl(CRect* rc)
 	m_btnDFold.GetWindowRect(&rcDFold);
 	ScreenToClient(&rcDFold);
 	rcDFold.OffsetRect(-rcDFold.left,0);
-	int grpwidth=(max(MIN_SCROLL_WIDTH,rc->Width())
-		-rcDFold.Width())/2-BAR_CENTER_MARGIN;
-	rcDFold.OffsetRect(grpwidth+BAR_CENTER_MARGIN,0);
+	int grpwidth=(max(MIN_SCROLL_WIDTH,rc->Width())-BAR_CENTER_SPACE)/2;
+	rcDFold.OffsetRect(grpwidth+(BAR_CENTER_SPACE-rcDFold.Width())/2,0);
 	m_btnDFold.MoveWindow(&rcDFold);
 	layout1.rect=CRect(0,0,grpwidth,rc->bottom);
-	layout2.rect=CRect(grpwidth+rcDFold.Width()+2*BAR_CENTER_MARGIN,0,0,rc->bottom);
-	layout2.rect.right=layout2.rect.left+grpwidth;
+	layout2.rect=CRect(grpwidth+BAR_CENTER_SPACE,0,grpwidth*2+BAR_CENTER_SPACE,rc->bottom);
 	RelayoutCtrlGroup(&layout1);
 	RelayoutCtrlGroup(&layout2);
 	Invalidate(FALSE);
