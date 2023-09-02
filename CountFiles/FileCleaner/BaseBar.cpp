@@ -57,6 +57,8 @@ void CBaseBar::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CBaseBar, CDialog)
 	ON_MESSAGE(WM_ENABLE_BTN_GO, &CBaseBar::OnEnableBtnGo)
 	ON_MESSAGE(WM_SIZEPARENT, &CBaseBar::OnSizeParent)
+	ON_WM_EXITMENULOOP()
+	ON_WM_DESTROY()
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_BUTTON_GO, &CBaseBar::OnBnClickedButtonGo)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN, &CBaseBar::OnBnClickedButtonOpen)
@@ -69,6 +71,10 @@ BEGIN_MESSAGE_MAP(CBaseBar, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_DFOLD, &CBaseBar::OnBnClickedButtonDfold)
 	ON_CBN_SELCHANGE(IDC_COMBO_BASE_PATH, &CBaseBar::OnCbnSelchangeComboBasePath)
 	ON_CBN_SELCHANGE(IDC_COMBO_BASE_PATH2, &CBaseBar::OnCbnSelchangeComboBasePath2)
+	ON_COMMAND(ID_CMD_MENU_OPEN, &CBaseBar::OnCmdMenuOpenDir)
+	ON_COMMAND(ID_CMD_MENU_IMP_FILE, &CBaseBar::OnCmdMenuImpFile)
+	ON_COMMAND(ID_CMD_MENU_SELECT_REC, &CBaseBar::OnCmdMenuSelectRec)
+	ON_COMMAND(ID_CMD_MENU_IMP_FILE_REF, &CBaseBar::OnCmdMenuImpFileRef)
 END_MESSAGE_MAP()
 
 
@@ -131,6 +137,39 @@ void CBaseBar::RelayoutCtrlGroup(BarRelayoutObject* layout)
 	layout->btnFold->MoveWindow(rc3);
 }
 
+void CBaseBar::RestoreCtrlState()
+{
+	m_btnOpen.RestoreButtonState();
+	m_btnOpen2.RestoreButtonState();
+}
+
+CString CBaseBar::GetImpFileName(const CString& path)
+{
+	TCHAR* strFileName = new TCHAR[65536];
+	TCHAR* strFileTitle = new TCHAR[65536];
+	_tcscpy_s(strFileName,65535,path);
+	int pos=path.ReverseFind(_T('\\'));
+	pos=(pos<0?0:pos+1);
+	_tcscpy_s(strFileTitle,65535,((LPCTSTR)path)+pos);
+	CFileDialog dlg(TRUE, NULL, NULL, 0, _T("Text Files|*.txt||"), this);
+	dlg.m_ofn.lpstrFile = strFileName;
+	dlg.m_ofn.lpstrFileTitle = strFileTitle;
+	dlg.m_ofn.nMaxFile = 65536;
+	dlg.m_ofn.nMaxFileTitle = 65536;
+	CString strImpFile;
+	if(dlg.DoModal()==IDOK)
+		strImpFile=dlg.GetPathName();
+	delete[] strFileName;
+	delete[] strFileTitle;
+	return strImpFile;
+}
+
+void CBaseBar::OnExitMenuLoop(BOOL bIsTrackPopupMenu)
+{
+	if(bIsTrackPopupMenu)
+		RestoreCtrlState();
+}
+
 inline int FindComboContent(CBaseCombo& combo,const CString& strItem)
 {
 	for(int i=0;i<combo.GetCount();i++)
@@ -176,13 +215,53 @@ void CBaseBar::OnBnClickedButtonGo()
 
 void CBaseBar::OnBnClickedButtonOpen()
 {
-	// TODO: Add your control notification handler code here
+	UpdateData(TRUE);
+
+	BROWSEINFO bi;
+	TCHAR Buffer[MAX_PATH];
+	bi.hwndOwner=NULL;
+	bi.pidlRoot=NULL;
+	bi.pszDisplayName=Buffer;
+	bi.lpszTitle=_T("Select folder to count");
+	bi.ulFlags=BIF_EDITBOX;
+	bi.lpfn=NULL;
+	bi.lParam=0;
+	bi.iImage=IDR_MAINFRAME;
+
+	LPITEMIDLIST pIDList=SHBrowseForFolder(&bi);
+	RestoreCtrlState();
+	if(pIDList==NULL)
+		return;
+
+	SHGetPathFromIDList(pIDList,Buffer);
+	CString strPath=Buffer;
+
+	IMalloc * imalloc=0;
+	if(FAILED(SHGetMalloc(&imalloc)))
+	{
+		MessageBox(_T("Init IMalloc failed"));
+		return;
+	}
+	imalloc->Free(pIDList);
+	imalloc->Release();
+
+	if(strPath.IsEmpty())
+		return;
+
+	m_strBasePath=m_strComboBasePath=strPath;
+	m_btnGo.EnableButton(FALSE);
+	UpdateBaseBackBuffer(m_strComboBasePath,NULL);
 }
 
 
 void CBaseBar::OnBnClickedButtonDrop()
 {
 	// TODO: Add your control notification handler code here
+	CMenu *popup;
+	CRect rc;
+	m_btnOpen.GetWindowRect(&rc);
+	popup=m_menuPopup.GetSubMenu(0);
+	popup->TrackPopupMenu(TPM_RIGHTALIGN|TPM_TOPALIGN,rc.right,rc.bottom,this);
 }
 
 
@@ -211,6 +290,11 @@ void CBaseBar::OnBnClickedButtonOpen2()
 void CBaseBar::OnBnClickedButtonDrop2()
 {
 	// TODO: Add your control notification handler code here
+	CMenu *popup;
+	CRect rc;
+	m_btnOpen2.GetWindowRect(&rc);
+	popup=m_menuPopup.GetSubMenu(1);
+	popup->TrackPopupMenu(TPM_RIGHTALIGN|TPM_TOPALIGN,rc.right,rc.bottom,this);
 }
 
 
@@ -255,6 +339,8 @@ BOOL CBaseBar::OnInitDialog()
 
 	m_btnDFold.LoadBitmaps(IDB_BMP_DFOLD_N, IDB_BMP_DFOLD_C, IDB_BMP_DFOLD_H, IDB_BMP_DFOLD_D);
 	m_btnDFold.SizeToContent();
+
+	m_menuPopup.LoadMenu(IDR_MENU_POPUP);
 
 	m_bInited=TRUE;
 
@@ -330,6 +416,57 @@ void CBaseBar::OnCbnSelchangeComboBasePath2()
 	if(sel>=0)
 		m_comboBasePath2.GetLBText(sel,m_strComboBasePathRef);
 	m_strBasePathRef=m_strComboBasePathRef;
+	m_btnGo2.EnableButton(FALSE);
+	UpdateBaseBackBuffer(NULL,m_strComboBasePathRef);
+}
+
+
+void CBaseBar::OnDestroy()
+{
+	CDialog::OnDestroy();
+	m_menuPopup.DestroyMenu();
+}
+
+
+void CBaseBar::OnCmdMenuOpenDir()
+{
+	// TODO: Add your command handler code here
+	RestoreCtrlState();
+	OnBnClickedButtonOpen();
+}
+
+
+void CBaseBar::OnCmdMenuImpFile()
+{
+	// TODO: Add your command handler code here
+	RestoreCtrlState();
+	UpdateData(TRUE);
+	CString strImpFile=GetImpFileName(m_strComboBasePath);
+	if(strImpFile.IsEmpty())
+		return;
+	m_strBasePath=m_strComboBasePath=strImpFile;
+	m_btnGo.EnableButton(FALSE);
+	UpdateBaseBackBuffer(m_strComboBasePath,NULL);
+}
+
+
+void CBaseBar::OnCmdMenuSelectRec()
+{
+	// TODO: Add your command handler code here
+	RestoreCtrlState();
+	OnBnClickedButtonOpen2();
+}
+
+
+void CBaseBar::OnCmdMenuImpFileRef()
+{
+	// TODO: Add your command handler code here
+	RestoreCtrlState();
+	UpdateData(TRUE);
+	CString strImpFile=GetImpFileName(m_strComboBasePathRef);
+	if(strImpFile.IsEmpty())
+		return;
+	m_strBasePathRef=m_strComboBasePathRef=strImpFile;
 	m_btnGo2.EnableButton(FALSE);
 	UpdateBaseBackBuffer(NULL,m_strComboBasePathRef);
 }

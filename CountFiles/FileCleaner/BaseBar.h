@@ -47,6 +47,8 @@ private:
 	void RelayoutCtrlGroup(BarRelayoutObject* layout);
 
 	void UpdateBaseBackBuffer(LPCTSTR left,LPCTSTR right);
+	CString GetImpFileName(const CString& path);
+	void RestoreCtrlState();
 
 	//class data
 private:
@@ -54,11 +56,16 @@ private:
 	CMyBmpButton m_btnGo;
 	DropDownButton m_btnOpen;
 	CMyBmpButton m_btnFold;
+
 	CBaseCombo m_comboBasePath2;
 	CMyBmpButton m_btnGo2;
 	DropDownButton m_btnOpen2;
 	CMyBmpButton m_btnFold2;
+
 	CMyBmpButton m_btnDFold;
+
+	CMenu m_menuPopup;
+
 	CString m_strComboBasePath;
 	CString m_strComboBasePathRef;
 
@@ -72,7 +79,9 @@ private:
 private:
 	afx_msg LRESULT OnSizeParent(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEnableBtnGo(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnExitMenuLoop(BOOL bIsTrackPopupMenu);
 	afx_msg void OnBnClickedButtonGo();
 	afx_msg void OnBnClickedButtonOpen();
 	afx_msg void OnBnClickedButtonDrop();
@@ -84,6 +93,10 @@ private:
 	afx_msg void OnBnClickedButtonDfold();
 	afx_msg void OnCbnSelchangeComboBasePath();
 	afx_msg void OnCbnSelchangeComboBasePath2();
+	afx_msg void OnCmdMenuOpenDir();
+	afx_msg void OnCmdMenuImpFile();
+	afx_msg void OnCmdMenuSelectRec();
+	afx_msg void OnCmdMenuImpFileRef();
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -42,6 +42,11 @@ void CMyBmpButton::EnableButton(BOOL bEnable)
 {
 	EnableWindow(bEnable);
 	m_bDisabled=!bEnable;
+	RestoreButtonState();
+}
+
+void CMyBmpButton::RestoreButtonState()
+{
 	m_iBtnState=0;
 	Invalidate(FALSE);
 }
@@ -50,6 +55,12 @@ void DropDownButton::EnableButton(BOOL bEnable)
 {
 	m_btnMain.EnableButton(bEnable);
 	m_btnDrop.EnableButton(bEnable);
+}
+
+void DropDownButton::RestoreButtonState()
+{
+	m_iCompState=0;
+	UpdateButtonState();
 }
 
 void DropDownButton::GetWindowRect(LPRECT pRect)

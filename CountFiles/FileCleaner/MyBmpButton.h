@@ -14,6 +14,7 @@ public:
 	CMyBmpButton();
 
 	void EnableButton(BOOL bEnable);
+	void RestoreButtonState();
 
 private:
 	UINT m_iBtnState;
@@ -45,6 +46,8 @@ public:
 
 public:
 	void EnableButton(BOOL bEnable);
+	void RestoreButtonState();
+
 	void GetWindowRect(LPRECT pRect);
 	void MoveWindow(LPRECT pRect);
 
