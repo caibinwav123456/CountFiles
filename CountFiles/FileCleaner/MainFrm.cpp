@@ -7,8 +7,6 @@
 #include "FileCleaner.h"
 
 #include "MainFrm.h"
-#include "MsgID.h"
-#include "CommonStruct.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -21,7 +19,6 @@ IMPLEMENT_DYNAMIC(CMainFrame, CFrameWnd)
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
-	ON_MESSAGE(WM_FILE_LIST_START_LOAD,OnStartLoadList)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -125,12 +122,6 @@ void CMainFrame::OnSetFocus(CWnd* /*pOldWnd*/)
 {
 	// forward focus to the view window
 	m_pWndView->SetFocus();
-}
-
-LRESULT CMainFrame::OnStartLoadList(WPARAM wParam,LPARAM lParam)
-{
-	FListLoadData* lpData=(FListLoadData*)wParam;
-	return TRUE;
 }
 
 BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)

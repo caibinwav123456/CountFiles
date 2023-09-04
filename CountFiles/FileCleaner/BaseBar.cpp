@@ -4,7 +4,6 @@
 #include "pch.h"
 #include "resource.h"
 #include "BaseBar.h"
-#include "MsgID.h"
 #include "common.h"
 
 #define ACC_PATH_TYPE_FILE 1
@@ -15,7 +14,9 @@
 IMPLEMENT_DYNAMIC(CBaseBar, CDialog)
 
 CBaseBar::CBaseBar(CWnd* pParent /*=nullptr*/)
-	: CDialog(IDD_DIALOGBAR, pParent),m_comboBasePath(eBComboMain), m_comboBasePath2(eBComboRef)
+	: CDialog(IDD_DIALOGBAR, pParent)
+	, m_comboBasePath(eBComboMain)
+	, m_comboBasePath2(eBComboRef)
 	, m_strComboBasePath(_T(""))
 	, m_strComboBasePathRef(_T(""))
 {
@@ -385,7 +386,7 @@ BOOL CBaseBar::StartListLoad(const FListLoadData& path,UINT accept_type)
 		MessageBox(_T("Invalid Paths"));
 		return FALSE;
 	}
-	return AfxGetMainWnd()->SendMessage(WM_FILE_LIST_START_LOAD,(WPARAM)&path);
+	return PDXGetWndFromID(IDW_MAIN_VIEW)->SendMessage(WM_FILE_LIST_START_LOAD,(WPARAM)&path);
 }
 
 void CBaseBar::OnOK()

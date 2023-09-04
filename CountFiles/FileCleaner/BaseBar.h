@@ -1,7 +1,6 @@
 #pragma once
 #include "BaseCombo.h"
 #include "MyBmpButton.h"
-#include "CommonStruct.h"
 
 struct BarRelayoutObject
 {

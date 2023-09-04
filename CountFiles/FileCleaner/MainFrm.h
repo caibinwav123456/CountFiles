@@ -44,7 +44,6 @@ protected:  // control bar embedded members
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
-	afx_msg LRESULT OnStartLoadList(WPARAM wParam,LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 };
 

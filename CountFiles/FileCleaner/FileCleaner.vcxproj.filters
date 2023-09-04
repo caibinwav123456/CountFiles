@@ -57,6 +57,9 @@
     <ClInclude Include="CommonStruct.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ProgramData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileCleaner.cpp">
@@ -90,6 +93,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MyBmpButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgramData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

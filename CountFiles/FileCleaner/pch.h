@@ -10,4 +10,8 @@
 // add headers that you want to pre-compile here
 #include "framework.h"
 
+#include "MsgID.h"
+#include "CommonStruct.h"
+#include "ProgramData.h"
+
 #endif //PCH_H

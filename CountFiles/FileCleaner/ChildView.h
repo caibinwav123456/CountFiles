@@ -44,10 +44,15 @@ public:
 // Generated message map functions
 protected:
 	virtual void OnDraw(CDC* pDC);
+
+public:
+	DECLARE_ID2WND_MAP(CChildView)
+
+public:
 	DECLARE_MESSAGE_MAP()
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnDestroy();
-public:
+	afx_msg LRESULT OnStartLoadList(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);

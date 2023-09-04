@@ -48,6 +48,7 @@ CChildView::~CChildView()
 
 
 BEGIN_MESSAGE_MAP(CChildView, CScrollView)
+	ON_MESSAGE(WM_FILE_LIST_START_LOAD,OnStartLoadList)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
@@ -63,6 +64,7 @@ BEGIN_MESSAGE_MAP(CChildView, CScrollView)
 END_MESSAGE_MAP()
 
 IMPLEMENT_DYNCREATE(CChildView, CScrollView)
+IMPLEMENT_ID2WND_MAP(CChildView, IDW_MAIN_VIEW)
 
 // CChildView message handlers
 
@@ -106,6 +108,41 @@ void CChildView::OnDestroy()
 	m_TreeList.Exit();
 }
 
+LRESULT CChildView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
+{
+	FListLoadData* lpData=(FListLoadData*)wParam;
+	return TRUE;
+}
+
+static inline UINT GetKey()
+{
+#define key_state(vk) (GetAsyncKeyState(vk)&0x8000)
+	UINT nFlags=0;
+	if(key_state(VK_LBUTTON))
+		nFlags|=MK_LBUTTON;
+	if(key_state(VK_RBUTTON))
+		nFlags|=MK_RBUTTON;
+	if(key_state(VK_CONTROL))
+		nFlags|=MK_CONTROL;
+	if(key_state(VK_SHIFT))
+		nFlags|=MK_SHIFT;
+	return nFlags;
+}
+static inline CPoint GetMousePos(CScrollView* pView)
+{
+	CPoint pt;
+	GetCursorPos(&pt);
+	pView->ScreenToClient(&pt);
+	TRACE("mpos: %d, %d\n",pt.x,pt.y);
+	pt.Offset(CSize(pView->GetScrollPosition()));
+	return pt;
+}
+static inline CPoint GetMousePos(const CPoint& pt,CScrollView* pView)
+{
+	CPoint point=pt;
+	point.Offset(CSize(pView->GetScrollPosition()));
+	return point;
+}
 
 void CChildView::OnLButtonDown(UINT nFlags, CPoint point)
 {
