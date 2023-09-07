@@ -351,7 +351,7 @@ void CBaseBar::OnBnClickedButtonOpen()
 
 	BROWSEINFO bi;
 	TCHAR Buffer[MAX_PATH];
-	bi.hwndOwner=NULL;
+	bi.hwndOwner=AfxGetMainWnd()->GetSafeHwnd();
 	bi.pidlRoot=NULL;
 	bi.pszDisplayName=Buffer;
 	bi.lpszTitle=_T("Select folder to count");

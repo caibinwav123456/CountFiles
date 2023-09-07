@@ -167,26 +167,30 @@ BOOL CDlgLoad::StartLoadingThread()
 	obj->dlg=this;
 	obj->user_canceled=FALSE;
 
+	m_loadingObject.callback=callback;
+	m_loadingObject.obj=obj;
+
 	obj->hFile=sys_fopen((char*)obj->file.c_str(),FILE_WRITE|FILE_CREATE_ALWAYS);
 	obj->hFileErr=NULL;
 
 	if(!VALID(obj->hFile))
 	{
-		ShowMessage(_T("\"%s\": can not open file for writing"),(LPCTSTR)a2t(obj->file.c_str()));
+		safe_delete_obj(m_loadingObject);
+		ShowMessage(_T("\"%s\": can not open file for writing"),(LPCTSTR)a2t(obj->file));
 		return FALSE;
 	}
 	obj->hFileErr=sys_fopen((char*)obj->err_file.c_str(),FILE_WRITE|FILE_CREATE_ALWAYS);
 	if(!VALID(obj->hFileErr))
 	{
 		clean_write_obj(obj,true);
-		ShowMessage(_T("\"%s\": can not open file for writing"),(LPCTSTR)a2t(obj->err_file.c_str()));
+		safe_delete_obj(m_loadingObject);
+		ShowMessage(_T("\"%s\": can not open file for writing"),(LPCTSTR)a2t(obj->err_file));
 		return FALSE;
 	}
-	m_loadingObject.callback=callback;
-	m_loadingObject.obj=obj;
 	m_hThreadLoadFile=sys_create_thread(count_path,callback);
 	if(!VALID(m_hThreadLoadFile))
 	{
+		clean_write_obj(obj,true);
 		safe_delete_obj(m_loadingObject);
 		return FALSE;
 	}
