@@ -2,9 +2,32 @@
 #define _TREE_LIST_CTRL_H_
 #include "FileListLoader.h"
 #include "DrawObject.h"
-string ConvertTStrToAnsiStr(LPCTSTR from);
-CString ConvertAnsiStrToTStr(LPCSTR from);
-CString ConvertAnsiStrToTStr(const string& from);
+#include <vector>
+#include <map>
+#include <set>
+enum E_FOLDER_STATE
+{
+	eFSNone,
+	eFSEqual,
+	eFSOld,
+	eFSNew,
+	eFSSolo,
+	eFSNewOld,
+	eFSSoloOld,
+	eFSNewSolo,
+	eFSNReady,
+	eFSError,
+	eFSMax,
+};
+#define eFSAnormal eFSNReady
+enum E_TREE_ITEM_TYPE
+{
+	eITypeNone,
+	eITypeDir,
+	eITypeFile,
+	eITypeErrDir,
+	eITypeErrFile,
+};
 COLORREF GetDispColor(E_FOLDER_STATE state);
 struct TLItem;
 struct TLItemDir;

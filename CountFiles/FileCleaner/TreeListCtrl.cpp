@@ -1,36 +1,28 @@
 #include "pch.h"
 #include "TreeListCtrl.h"
 #include "resource.h"
-#define t2a(p) ConvertTStrToAnsiStr(p)
-#define a2t(p) ConvertAnsiStrToTStr(p)
-enum E_FOLDER_STATE
+#include <assert.h>
+COLORREF GetDispColor(E_FOLDER_STATE state)
 {
-	eFSEqual=1,
-	eFSOld,
-	eFSNew,
-	eFSSolo,
-	eFSNewOld,
-	eFSSoloOld,
-	eFSNewSolo,
-	eFSNReady,
-	eFSMax,
-};
-string ConvertTStrToAnsiStr(LPCTSTR from)
-{
-	USES_CONVERSION;
-	return T2A(from);
+	switch(state)
+	{
+	case eFSOld:
+		return OLD_COLOR;
+	case eFSNew:
+	case eFSNewOld:
+	case eFSNewSolo:
+		return RED_COLOR;
+	case eFSSolo:
+	case eFSSoloOld:
+		return BLUE_COLOR;
+	case eFSNReady:
+	case eFSError:
+		return YELLOW_COLOR;
+	default:
+		return RGB(0,0,0);
+	}
 }
-CString ConvertAnsiStrToTStr(LPCSTR from)
-{
-	USES_CONVERSION;
-	return A2T(from);
-}
-CString ConvertAnsiStrToTStr(const string& from)
-{
-	USES_CONVERSION;
-	return A2T(from.c_str());
-}
-TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd)
+TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_nTotalLine(0),m_pRootItem(NULL),m_ItemSel(this)
 {
 
 }

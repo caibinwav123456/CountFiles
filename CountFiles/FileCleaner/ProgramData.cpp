@@ -32,3 +32,19 @@ CWnd* PDXGetWndFromID(UINT id)
 	ASSERT(FALSE);
 	return NULL;
 }
+
+string ConvertTStrToAnsiStr(LPCTSTR from)
+{
+	USES_CONVERSION;
+	return T2A(from);
+}
+CString ConvertAnsiStrToTStr(LPCSTR from)
+{
+	USES_CONVERSION;
+	return A2T(from);
+}
+CString ConvertAnsiStrToTStr(const string& from)
+{
+	USES_CONVERSION;
+	return A2T(from.c_str());
+}

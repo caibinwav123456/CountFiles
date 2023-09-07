@@ -60,6 +60,9 @@
     <ClInclude Include="ProgramData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DlgLoad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileCleaner.cpp">
@@ -96,6 +99,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ProgramData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgLoad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

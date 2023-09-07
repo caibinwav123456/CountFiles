@@ -17,7 +17,12 @@ static int cb_wr_file_err(byte* buf,uint buflen,void* param)
 	FileObject* obj=(FileObject*)param;
 	return sys_fwrite(obj->hFileErr,buf,buflen,NULL);
 }
-int parse_options(int argc,char** argv,char*& file,char*& cnt_path,char*& err_file)
+static int cb_def_wr_err(byte* buf,uint buflen,void* param)
+{
+	printf("%s",buf);
+	return 0;
+}
+int parse_options(int argc,char** argv,const char*& file,const char*& cnt_path,const char*& err_file)
 {
 	file=NULL;
 	cnt_path=NULL;
@@ -115,7 +120,7 @@ int _tmain(int argc,TCHAR** argv)
 	}
 	callback.param=&obj;
 	callback.cb_info=cb_wr_file_info;
-	callback.cb_error=(err_file!=NULL?cb_wr_file_err:NULL);
+	callback.cb_error=(obj.err_file!=NULL?cb_wr_file_err:cb_def_wr_err);
 	callback.cb_rec=NULL;
 	ret=GenFileList(cnt_path,&callback,'\\');
 	sys_fclose(obj.hFile);

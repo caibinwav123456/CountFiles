@@ -35,6 +35,7 @@
 #define IDB_BMP_DROP_H                  332
 #define IDB_BMP_DROP_N                  333
 #define IDR_MENU_POPUP                  334
+#define IDD_DIALOG_LOAD                 335
 #define IDC_COMBO_BASE_PATH             1000
 #define IDC_BUTTON_GO                   1001
 #define IDC_BUTTON_OPEN                 1002
@@ -46,6 +47,7 @@
 #define IDC_BUTTON_DFOLD                1012
 #define IDC_BUTTON_DROP                 1013
 #define IDC_BUTTON_DROP2                1014
+#define IDC_STATIC_PATH                 1015
 #define ID_CMD_MENU_OPEN                32771
 #define ID_CMD_MENU_IMP_FILE            32772
 #define ID_CMD_MENU_SELECT_REC          32773
@@ -55,9 +57,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        335
+#define _APS_NEXT_RESOURCE_VALUE        336
 #define _APS_NEXT_COMMAND_VALUE         32775
-#define _APS_NEXT_CONTROL_VALUE         1015
+#define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif

@@ -7,6 +7,7 @@
 #include "FileCleaner.h"
 #include "ChildView.h"
 #include "DrawObject.h"
+#include "DlgLoad.h"
 
 #include "GenFileList.h"
 #include "FileListLoader.h"
@@ -111,6 +112,22 @@ void CChildView::OnDestroy()
 LRESULT CChildView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 {
 	FListLoadData* lpData=(FListLoadData*)wParam;
+	if(lpData->mask&FILE_LIST_ATTRIB_MAIN)
+	{
+		dword type=0;
+		if(sys_fstat((char*)t2a(lpData->left).c_str(),&type)!=0)
+			return FALSE;
+
+		if(type==FILE_TYPE_DIR)
+		{
+			CDlgLoad dlg(NULL,lpData->left);
+			if(dlg.DoModal()==IDOK)
+			{
+				CString strList=a2t(dlg.GetCacheFilePath());
+				CString strErrList=a2t(dlg.GetCacheErrFilePath());
+			}
+		}
+	}
 	return TRUE;
 }
 

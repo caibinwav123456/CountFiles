@@ -1,5 +1,14 @@
 #ifndef _PROGRAM_DATA_H_
 #define _PROGRAM_DATA_H_
+#include <string>
+using namespace std;
+
+#define t2a(p) ConvertTStrToAnsiStr(p)
+#define a2t(p) ConvertAnsiStrToTStr(p)
+
+string ConvertTStrToAnsiStr(LPCTSTR from);
+CString ConvertAnsiStrToTStr(LPCSTR from);
+CString ConvertAnsiStrToTStr(const string& from);
 
 struct ID2CWndPtrAssoc
 {
