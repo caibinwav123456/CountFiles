@@ -5,5 +5,6 @@
 #define WM_FILE_LIST_START_LOAD (WM_USER+2001)
 
 #define IDW_MAIN_VIEW 1
+#define IDW_BASE_BAR  2
 
 #endif

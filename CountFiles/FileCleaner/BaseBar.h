@@ -50,7 +50,8 @@ private:
 	CString GetImpFileName(const CString& path);
 	void RestoreCtrlState();
 
-	BOOL StartListLoad(const FListLoadData& path,UINT accept_type);
+	BOOL ValidatePaths(const FListLoadData& path,UINT accept_type);
+	BOOL StartListLoad(UINT mask,UINT accept_type);
 
 	//class data
 private:
@@ -76,6 +77,9 @@ private:
 
 	CString m_strBasePath;
 	CString m_strBasePathRef;
+
+public:
+	DECLARE_ID2WND_MAP(CBaseBar)
 
 	//message handlers
 private:

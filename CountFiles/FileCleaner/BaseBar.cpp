@@ -12,6 +12,7 @@
 // CBaseBar dialog
 
 IMPLEMENT_DYNAMIC(CBaseBar, CDialog)
+IMPLEMENT_ID2WND_MAP(CBaseBar,IDW_BASE_BAR)
 
 CBaseBar::CBaseBar(CWnd* pParent /*=nullptr*/)
 	: CDialog(IDD_DIALOGBAR, pParent)
@@ -167,12 +168,6 @@ CString CBaseBar::GetImpFileName(const CString& path)
 	return strImpFile;
 }
 
-void CBaseBar::OnExitMenuLoop(BOOL bIsTrackPopupMenu)
-{
-	if(bIsTrackPopupMenu)
-		RestoreCtrlState();
-}
-
 inline int FindComboContent(CBaseCombo& combo,const CString& strItem)
 {
 	for(int i=0;i<combo.GetCount();i++)
@@ -199,125 +194,57 @@ inline void UpdateComboStrings(CBaseCombo& combo,const CString& str,UINT maxcnt)
 
 void CBaseBar::UpdateBaseBackBuffer(LPCTSTR left,LPCTSTR right)
 {
-	if(left!=NULL)
+	if(left!=NULL&&*left!=0)
 		UpdateComboStrings(m_comboBasePath,left,m_nBasePathBufLen);
-	if(right!=NULL)
+	if(right!=NULL&&*right!=0)
 		UpdateComboStrings(m_comboBasePath2,right,m_nBasePathBufLen);
 	UpdateData(FALSE);
 }
 
-void CBaseBar::OnBnClickedButtonGo()
+inline UINT AcceptPathType(const CString& path,UINT accept_type)
 {
-	// TODO: Add your control notification handler code here
-	UpdateData(TRUE);
-	m_strBasePath=m_strComboBasePath;
-	m_btnGo.EnableButton(FALSE);
-	UpdateBaseBackBuffer(m_strComboBasePath,NULL);
-	FListLoadData data(m_strBasePath,_T(""),FILE_LIST_ATTRIB_MAIN);
-	StartListLoad(data,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
+	if(!PathFileExists(path))
+		return 0;
+	if((accept_type&ACC_PATH_TYPE_DIR)&&PathIsDirectory(path))
+		return ACC_PATH_TYPE_DIR;
+	if(accept_type&ACC_PATH_TYPE_FILE)
+		return ACC_PATH_TYPE_FILE;
+	return 0;
 }
 
-
-void CBaseBar::OnBnClickedButtonOpen()
+BOOL CBaseBar::ValidatePaths(const FListLoadData& path,UINT accept_type)
 {
-	UpdateData(TRUE);
-
-	BROWSEINFO bi;
-	TCHAR Buffer[MAX_PATH];
-	bi.hwndOwner=NULL;
-	bi.pidlRoot=NULL;
-	bi.pszDisplayName=Buffer;
-	bi.lpszTitle=_T("Select folder to count");
-	bi.ulFlags=BIF_EDITBOX;
-	bi.lpfn=NULL;
-	bi.lParam=0;
-	bi.iImage=IDR_MAINFRAME;
-
-	LPITEMIDLIST pIDList=SHBrowseForFolder(&bi);
-	RestoreCtrlState();
-	if(pIDList==NULL)
-		return;
-
-	SHGetPathFromIDList(pIDList,Buffer);
-	CString strPath=Buffer;
-
-	IMalloc * imalloc=0;
-	if(FAILED(SHGetMalloc(&imalloc)))
+	if(path.mask==0)
+		return FALSE;
+	CString strErr;
+	if((path.mask&FILE_LIST_ATTRIB_MAIN)&&AcceptPathType(path.left,accept_type)==0)
 	{
-		MessageBox(_T("Init IMalloc failed"));
-		return;
+		strErr.Format(_T("Invalid path: \"%s\""),(LPCTSTR)path.left);
+		MessageBox(strErr);
+		return FALSE;
 	}
-	imalloc->Free(pIDList);
-	imalloc->Release();
-
-	if(strPath.IsEmpty())
-		return;
-
-	m_strBasePath=m_strComboBasePath=strPath;
-	m_btnGo.EnableButton(FALSE);
-	UpdateBaseBackBuffer(m_strComboBasePath,NULL);
-	FListLoadData data(m_strBasePath,_T(""),FILE_LIST_ATTRIB_MAIN);
-	StartListLoad(data,ACC_PATH_TYPE_DIR);
+	if((path.mask&FILE_LIST_ATTRIB_REF)&&AcceptPathType(path.right,ACC_PATH_TYPE_FILE)==0)
+	{
+		strErr.Format(_T("Invalid path: \"%s\""),(LPCTSTR)path.right);
+		MessageBox(strErr);
+		return FALSE;
+	}
+	return TRUE;
 }
 
-
-void CBaseBar::OnBnClickedButtonDrop()
+BOOL CBaseBar::StartListLoad(UINT mask,UINT accept_type)
 {
-	// TODO: Add your control notification handler code here
-	CMenu *popup;
-	CRect rc;
-	m_btnOpen.GetWindowRect(&rc);
-	popup=m_menuPopup.GetSubMenu(0);
-	popup->TrackPopupMenu(TPM_RIGHTALIGN|TPM_TOPALIGN,rc.right,rc.bottom,this);
+	if(mask&FILE_LIST_ATTRIB_MAIN)
+		m_strBasePath=m_strComboBasePath;
+	if(mask&FILE_LIST_ATTRIB_REF)
+		m_strBasePathRef=m_strComboBasePathRef;
+	FListLoadData data(m_strBasePath,m_strBasePathRef,mask);
+	UpdateBaseBackBuffer((mask&FILE_LIST_ATTRIB_MAIN)?m_strComboBasePath:_T(""),
+		(mask&FILE_LIST_ATTRIB_REF)?m_strComboBasePathRef:_T(""));
+	if(!ValidatePaths(data,accept_type))
+		return FALSE;
+	return PDXGetWndFromID(IDW_MAIN_VIEW)->SendMessage(WM_FILE_LIST_START_LOAD,(WPARAM)&data);
 }
-
-
-void CBaseBar::OnBnClickedButtonFold()
-{
-	// TODO: Add your control notification handler code here
-}
-
-
-void CBaseBar::OnBnClickedButtonGo2()
-{
-	// TODO: Add your control notification handler code here
-	UpdateData(TRUE);
-	m_strBasePathRef=m_strComboBasePathRef;
-	m_btnGo2.EnableButton(FALSE);
-	UpdateBaseBackBuffer(NULL,m_strComboBasePathRef);
-	FListLoadData data(_T(""),m_strBasePathRef,FILE_LIST_ATTRIB_REF);
-	StartListLoad(data,0);
-}
-
-
-void CBaseBar::OnBnClickedButtonOpen2()
-{
-	// TODO: Add your control notification handler code here
-}
-
-
-void CBaseBar::OnBnClickedButtonDrop2()
-{
-	// TODO: Add your control notification handler code here
-	CMenu *popup;
-	CRect rc;
-	m_btnOpen2.GetWindowRect(&rc);
-	popup=m_menuPopup.GetSubMenu(1);
-	popup->TrackPopupMenu(TPM_RIGHTALIGN|TPM_TOPALIGN,rc.right,rc.bottom,this);
-}
-
-
-void CBaseBar::OnBnClickedButtonFold2()
-{
-	// TODO: Add your control notification handler code here
-}
-
-
-void CBaseBar::OnBnClickedButtonDfold()
-{
-	// TODO: Add your control notification handler code here
-}
-
 
 BOOL CBaseBar::OnInitDialog()
 {
@@ -357,36 +284,18 @@ BOOL CBaseBar::OnInitDialog()
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-inline UINT AcceptPathType(const CString& path,UINT accept_type)
+void CBaseBar::OnDestroy()
 {
-	if(!PathFileExists(path))
-		return 0;
-	if((accept_type&ACC_PATH_TYPE_DIR)&&PathIsDirectory(path))
-		return ACC_PATH_TYPE_DIR;
-	if(accept_type&ACC_PATH_TYPE_FILE)
-		return ACC_PATH_TYPE_FILE;
-	return 0;
+	CDialog::OnDestroy();
+	m_menuPopup.DestroyMenu();
 }
 
-inline BOOL ValidatePaths(const FListLoadData& path,UINT accept_type)
+void CBaseBar::OnSize(UINT nType, int cx, int cy)
 {
-	if(path.mask==0)
-		return FALSE;
-	if((path.mask&FILE_LIST_ATTRIB_MAIN)&&AcceptPathType(path.left,accept_type)==0)
-		return FALSE;
-	if((path.mask&FILE_LIST_ATTRIB_REF)&&AcceptPathType(path.right,ACC_PATH_TYPE_FILE)==0)
-		return FALSE;
-	return TRUE;
-}
-
-BOOL CBaseBar::StartListLoad(const FListLoadData& path,UINT accept_type)
-{
-	if(!ValidatePaths(path,accept_type))
-	{
-		MessageBox(_T("Invalid Paths"));
-		return FALSE;
-	}
-	return PDXGetWndFromID(IDW_MAIN_VIEW)->SendMessage(WM_FILE_LIST_START_LOAD,(WPARAM)&path);
+	CDialog::OnSize(nType, cx, cy);
+	CRect rc(0,0,cx,cy);
+	if(m_bInited)
+		RelayoutBarCtrl(&rc);
 }
 
 void CBaseBar::OnOK()
@@ -395,15 +304,10 @@ void CBaseBar::OnOK()
 
 	//CDialog::OnOK();
 	UpdateData(TRUE);
-	m_strBasePath=m_strComboBasePath;
-	m_strBasePathRef=m_strComboBasePathRef;
 	m_btnGo.EnableButton(FALSE);
 	m_btnGo2.EnableButton(FALSE);
-	UpdateBaseBackBuffer(m_strComboBasePath,m_strComboBasePathRef);
-	FListLoadData data(m_strBasePath,m_strBasePathRef,FILE_LIST_ATTRIB_MAIN|FILE_LIST_ATTRIB_REF);
-	StartListLoad(data,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
+	StartListLoad(FILE_LIST_ATTRIB_MAIN|FILE_LIST_ATTRIB_REF,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
 }
-
 
 void CBaseBar::OnCancel()
 {
@@ -411,7 +315,6 @@ void CBaseBar::OnCancel()
 
 	//CDialog::OnCancel();
 }
-
 
 LRESULT CBaseBar::OnEnableBtnGo(WPARAM wParam, LPARAM lParam)
 {
@@ -427,13 +330,114 @@ LRESULT CBaseBar::OnEnableBtnGo(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-
-void CBaseBar::OnSize(UINT nType, int cx, int cy)
+void CBaseBar::OnExitMenuLoop(BOOL bIsTrackPopupMenu)
 {
-	CDialog::OnSize(nType, cx, cy);
-	CRect rc(0,0,cx,cy);
-	if(m_bInited)
-		RelayoutBarCtrl(&rc);
+	if(bIsTrackPopupMenu)
+		RestoreCtrlState();
+}
+
+void CBaseBar::OnBnClickedButtonGo()
+{
+	// TODO: Add your control notification handler code here
+	UpdateData(TRUE);
+	m_btnGo.EnableButton(FALSE);
+	StartListLoad(FILE_LIST_ATTRIB_MAIN,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
+}
+
+
+void CBaseBar::OnBnClickedButtonOpen()
+{
+	UpdateData(TRUE);
+
+	BROWSEINFO bi;
+	TCHAR Buffer[MAX_PATH];
+	bi.hwndOwner=NULL;
+	bi.pidlRoot=NULL;
+	bi.pszDisplayName=Buffer;
+	bi.lpszTitle=_T("Select folder to count");
+	bi.ulFlags=BIF_EDITBOX;
+	bi.lpfn=NULL;
+	bi.lParam=0;
+	bi.iImage=IDR_MAINFRAME;
+
+	LPITEMIDLIST pIDList=SHBrowseForFolder(&bi);
+	RestoreCtrlState();
+	if(pIDList==NULL)
+		return;
+
+	SHGetPathFromIDList(pIDList,Buffer);
+	CString strPath=Buffer;
+
+	IMalloc * imalloc=0;
+	if(FAILED(SHGetMalloc(&imalloc)))
+	{
+		MessageBox(_T("Init IMalloc failed"));
+		return;
+	}
+	imalloc->Free(pIDList);
+	imalloc->Release();
+
+	if(strPath.IsEmpty())
+		return;
+
+	m_strComboBasePath=strPath;
+	m_btnGo.EnableButton(FALSE);
+	StartListLoad(FILE_LIST_ATTRIB_MAIN,ACC_PATH_TYPE_DIR);
+}
+
+
+void CBaseBar::OnBnClickedButtonDrop()
+{
+	// TODO: Add your control notification handler code here
+	CMenu *popup;
+	CRect rc;
+	m_btnOpen.GetWindowRect(&rc);
+	popup=m_menuPopup.GetSubMenu(0);
+	popup->TrackPopupMenu(TPM_RIGHTALIGN|TPM_TOPALIGN,rc.right,rc.bottom,this);
+}
+
+
+void CBaseBar::OnBnClickedButtonFold()
+{
+	// TODO: Add your control notification handler code here
+}
+
+
+void CBaseBar::OnBnClickedButtonGo2()
+{
+	// TODO: Add your control notification handler code here
+	UpdateData(TRUE);
+	m_btnGo2.EnableButton(FALSE);
+	StartListLoad(FILE_LIST_ATTRIB_REF,0);
+}
+
+
+void CBaseBar::OnBnClickedButtonOpen2()
+{
+	// TODO: Add your control notification handler code here
+}
+
+
+void CBaseBar::OnBnClickedButtonDrop2()
+{
+	// TODO: Add your control notification handler code here
+	CMenu *popup;
+	CRect rc;
+	m_btnOpen2.GetWindowRect(&rc);
+	popup=m_menuPopup.GetSubMenu(1);
+	popup->TrackPopupMenu(TPM_RIGHTALIGN|TPM_TOPALIGN,rc.right,rc.bottom,this);
+}
+
+
+void CBaseBar::OnBnClickedButtonFold2()
+{
+	// TODO: Add your control notification handler code here
+}
+
+
+void CBaseBar::OnBnClickedButtonDfold()
+{
+	// TODO: Add your control notification handler code here
 }
 
 
@@ -444,11 +448,8 @@ void CBaseBar::OnCbnSelchangeComboBasePath()
 	int sel=m_comboBasePath.GetCurSel();
 	if(sel>=0)
 		m_comboBasePath.GetLBText(sel,m_strComboBasePath);
-	m_strBasePath=m_strComboBasePath;
 	m_btnGo.EnableButton(FALSE);
-	UpdateBaseBackBuffer(m_strComboBasePath,NULL);
-	FListLoadData data(m_strBasePath,_T(""),FILE_LIST_ATTRIB_MAIN);
-	StartListLoad(data,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
+	StartListLoad(FILE_LIST_ATTRIB_MAIN,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
 }
 
 
@@ -459,18 +460,8 @@ void CBaseBar::OnCbnSelchangeComboBasePath2()
 	int sel=m_comboBasePath2.GetCurSel();
 	if(sel>=0)
 		m_comboBasePath2.GetLBText(sel,m_strComboBasePathRef);
-	m_strBasePathRef=m_strComboBasePathRef;
 	m_btnGo2.EnableButton(FALSE);
-	UpdateBaseBackBuffer(NULL,m_strComboBasePathRef);
-	FListLoadData data(_T(""),m_strBasePathRef,FILE_LIST_ATTRIB_REF);
-	StartListLoad(data,0);
-}
-
-
-void CBaseBar::OnDestroy()
-{
-	CDialog::OnDestroy();
-	m_menuPopup.DestroyMenu();
+	StartListLoad(FILE_LIST_ATTRIB_REF,0);
 }
 
 
@@ -490,11 +481,9 @@ void CBaseBar::OnCmdMenuImpFile()
 	CString strImpFile=GetImpFileName(m_strComboBasePath);
 	if(strImpFile.IsEmpty())
 		return;
-	m_strBasePath=m_strComboBasePath=strImpFile;
+	m_strComboBasePath=strImpFile;
 	m_btnGo.EnableButton(FALSE);
-	UpdateBaseBackBuffer(m_strComboBasePath,NULL);
-	FListLoadData data(m_strBasePath,_T(""),FILE_LIST_ATTRIB_MAIN);
-	StartListLoad(data,ACC_PATH_TYPE_FILE);
+	StartListLoad(FILE_LIST_ATTRIB_MAIN,ACC_PATH_TYPE_FILE);
 }
 
 
@@ -514,9 +503,7 @@ void CBaseBar::OnCmdMenuImpFileRef()
 	CString strImpFile=GetImpFileName(m_strComboBasePathRef);
 	if(strImpFile.IsEmpty())
 		return;
-	m_strBasePathRef=m_strComboBasePathRef=strImpFile;
+	m_strComboBasePathRef=strImpFile;
 	m_btnGo2.EnableButton(FALSE);
-	UpdateBaseBackBuffer(NULL,m_strComboBasePathRef);
-	FListLoadData data(_T(""),m_strBasePathRef,FILE_LIST_ATTRIB_REF);
-	StartListLoad(data,0);
+	StartListLoad(FILE_LIST_ATTRIB_REF,0);
 }
