@@ -141,6 +141,8 @@ void clean_write_obj(FileObject* obj,bool bdelete)
 		sys_fdelete((char*)obj->file.c_str());
 		sys_fdelete((char*)obj->err_file.c_str());
 	}
+	obj->file.clear();
+	obj->err_file.clear();
 }
 int count_path(void* param/*const char* cnt_path,const char* listfile,const char* errfile*/)
 {
@@ -175,16 +177,16 @@ BOOL CDlgLoad::StartLoadingThread()
 
 	if(!VALID(obj->hFile))
 	{
-		safe_delete_obj(m_loadingObject);
 		ShowMessage(_T("\"%s\": can not open file for writing"),(LPCTSTR)a2t(obj->file));
+		safe_delete_obj(m_loadingObject);
 		return FALSE;
 	}
 	obj->hFileErr=sys_fopen((char*)obj->err_file.c_str(),FILE_WRITE|FILE_CREATE_ALWAYS);
 	if(!VALID(obj->hFileErr))
 	{
+		ShowMessage(_T("\"%s\": can not open file for writing"),(LPCTSTR)a2t(obj->err_file));
 		clean_write_obj(obj,true);
 		safe_delete_obj(m_loadingObject);
-		ShowMessage(_T("\"%s\": can not open file for writing"),(LPCTSTR)a2t(obj->err_file));
 		return FALSE;
 	}
 	m_hThreadLoadFile=sys_create_thread(count_path,callback);
