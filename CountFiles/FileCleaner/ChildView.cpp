@@ -69,14 +69,14 @@ IMPLEMENT_ID2WND_MAP(CChildView, IDW_MAIN_VIEW)
 
 // CChildView message handlers
 
-BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) 
+BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 {
 	if (!CWnd::PreCreateWindow(cs))
 		return FALSE;
 
 	cs.dwExStyle |= WS_EX_CLIENTEDGE;
 	cs.style &= ~WS_BORDER;
-	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS, 
+	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS,
 		::LoadCursor(nullptr, IDC_ARROW), reinterpret_cast<HBRUSH>(COLOR_WINDOW+1), nullptr);
 
 	return TRUE;
@@ -87,6 +87,56 @@ void CChildView::OnDraw(CDC* pDC)
 	// TODO: Add your specialized code here and/or call the base class
 	m_TreeList.Draw(pDC,true);
 }
+/*
+static int test()
+{
+	struct fnode
+	{
+		dword flags;
+		UInteger64 fl_start;
+		UInteger64 fl_end;
+		void* handle;
+		fnode():flags(0),handle(NULL){}
+	};
+	struct dir_contents;
+	struct err_dir_node;
+	struct dir_node:public fnode
+	{
+		dir_contents* contents;
+		err_dir_node* enode;
+		dir_node():contents(NULL),enode(NULL){}
+	};
+	const char* listfile="E:\\Programs\\CountFiles\\CountFiles\\IPCIF.txt";
+	FileListLoader loader;
+	int ret=loader.Load(listfile);
+	if(ret!=0)
+		return ret;
+	ret=loader.ExpandNode(loader.GetRootNode(),true);
+	if(ret!=0)
+		return ret;
+
+	file_node_info info;
+
+	for(int i=0;i<(int)get_subdir_cnt(loader.GetRootNode());i++)
+		ret=loader.GetNodeInfo(get_subdir(loader.GetRootNode(),i),&info);
+	for(int i=0;i<(int)get_subfile_cnt(loader.GetRootNode());i++)
+		ret=loader.GetNodeInfo(get_subfile(loader.GetRootNode(),i),&info);
+
+	for(int i=0;i<(int)get_subdir_cnt(loader.GetRootNode());i++)
+		ret=loader.GetNodeInfo(get_subdir(loader.GetRootNode(),i),&info);
+	for(int i=0;i<(int)get_subfile_cnt(loader.GetRootNode());i++)
+		ret=loader.GetNodeInfo(get_subfile(loader.GetRootNode(),i),&info);
+
+	for(int i=0;i<(int)get_subdir_cnt(loader.GetRootNode());i++)
+		ret=loader.GetNodeInfo(get_subdir(loader.GetRootNode(),i),&info);
+	ret=loader.GetNodeInfo(get_subfile(loader.GetRootNode(),0),&info);
+
+	dir_node tmpnode=*(dir_node*)get_subdir(loader.GetRootNode(),0);
+	ret=loader.GetNodeInfo(get_subdir(loader.GetRootNode(),0),&info);
+	ret=loader.GetNodeInfo((HDNODE)&tmpnode,&info);
+
+	return ret;
+}*/
 int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CScrollView::OnCreate(lpCreateStruct) == -1)
@@ -94,6 +144,7 @@ int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// TODO:  Add your specialized creation code here
 
+	//test();
 	if(m_TreeList.Init()!=0)
 		return -1;
 
@@ -164,9 +215,10 @@ static inline CPoint GetMousePos(const CPoint& pt,CScrollView* pView)
 void CChildView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	CPoint pt=point;
-	pt.Offset(CSize(GetScrollPosition()));
-	m_TreeList.OnLBDown(pt);
+	SetCapture();
+	CPoint pt=GetMousePos(point,this);
+	if(pt.x>=0&&pt.y>=0)
+		m_TreeList.OnLBDown(pt,nFlags);
 	CScrollView::OnLButtonDown(nFlags, point);
 }
 
@@ -174,9 +226,11 @@ void CChildView::OnLButtonDown(UINT nFlags, CPoint point)
 void CChildView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	CPoint pt=point;
-	pt.Offset(CSize(GetScrollPosition()));
-	m_TreeList.OnLBUp(pt);
+	ReleaseCapture();
+	CPoint pt=GetMousePos(point,this);
+	ASSERT(pt.x>=0&&pt.y>=0);
+	if(pt.x>=0&&pt.y>=0)
+		m_TreeList.OnLBUp(pt,nFlags);
 	CScrollView::OnLButtonUp(nFlags, point);
 }
 
@@ -184,9 +238,9 @@ void CChildView::OnLButtonUp(UINT nFlags, CPoint point)
 void CChildView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	CPoint pt=point;
-	pt.Offset(CSize(GetScrollPosition()));
-	m_TreeList.OnMMove(pt);
+	CPoint pt=GetMousePos(point,this);
+	if(pt.x>=0&&pt.y>=0)
+		m_TreeList.OnMMove(pt,nFlags);
 	CScrollView::OnMouseMove(nFlags, point);
 }
 
@@ -194,9 +248,9 @@ void CChildView::OnMouseMove(UINT nFlags, CPoint point)
 void CChildView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	CPoint pt=point;
-	pt.Offset(CSize(GetScrollPosition()));
-	m_TreeList.OnLBDblClick(pt);
+	CPoint pt=GetMousePos(point,this);
+	if(pt.x>=0&&pt.y>=0)
+		m_TreeList.OnLBDblClick(pt,nFlags);
 	CScrollView::OnLButtonDblClk(nFlags, point);
 }
 
@@ -204,9 +258,9 @@ void CChildView::OnLButtonDblClk(UINT nFlags, CPoint point)
 void CChildView::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	CPoint pt=point;
-	pt.Offset(CSize(GetScrollPosition()));
-	m_TreeList.OnRBDown(pt);
+	CPoint pt=GetMousePos(point,this);
+	if(pt.x>=0&&pt.y>=0)
+		m_TreeList.OnRBDown(pt,nFlags);
 	CScrollView::OnRButtonDown(nFlags, point);
 }
 
@@ -214,9 +268,10 @@ void CChildView::OnRButtonDown(UINT nFlags, CPoint point)
 void CChildView::OnRButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	CPoint pt=point;
-	pt.Offset(CSize(GetScrollPosition()));
-	m_TreeList.OnRBUp(pt);
+	CPoint pt=GetMousePos(point,this);
+	ASSERT(pt.x>=0&&pt.y>=0);
+	if(pt.x>=0&&pt.y>=0)
+		m_TreeList.OnRBUp(pt,nFlags);
 	CScrollView::OnRButtonUp(nFlags, point);
 }
 

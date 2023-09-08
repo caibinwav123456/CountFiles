@@ -192,6 +192,8 @@ private:
 };
 class TreeListCtrl
 {
+	friend class ListCtrlIterator;
+	friend class ItemSelector;
 public:
 //Constructor/Destructor
 	TreeListCtrl(CWnd* pWnd);
@@ -204,11 +206,12 @@ public:
 	void Draw(CDC* pClientDC,bool buffered);
 
 //Message handlers
-	void OnLBDown(const CPoint& pt);
-	void OnLBUp(const CPoint& pt);
-	void OnLBDblClick(const CPoint& pt);
-	void OnRBUp(const CPoint& pt);
-	void OnMMove(const CPoint& pt);
+	void OnLBDown(const CPoint& pt,UINT nFlags);
+	void OnLBUp(const CPoint& pt,UINT nFlags);
+	void OnLBDblClick(const CPoint& pt,UINT nFlags);
+	void OnRBDown(const CPoint& pt,UINT nFlags);
+	void OnRBUp(const CPoint& pt,UINT nFlags);
+	void OnMMove(const CPoint& pt,UINT nFlags);
 
 public:
 //Get scroll position
@@ -230,13 +233,23 @@ private:
 //List data
 protected:
 	FileListLoader m_ListLoader;
+	uint m_nTotalLine;
+	TLItem* m_pRootItem;
+	ItemSelector m_ItemSel;
 
 //private functions
 private:
 	void Invalidate();
+	void GetCanvasRect(RECT* rc);
 
 //protected functions
 protected:
-	void DrawFolder(CDrawer* drawer,POINT* pt,int state,BOOL expand);
+	void DrawFolder(CDrawer* drawer,POINT* pt,E_FOLDER_STATE state,BOOL expand);
+	ListCtrlIterator GetDrawIter(POINT* pt=NULL);
+	int LineNumFromPt(POINT* pt);
+	bool EndOfDraw(int iline);
+	void DrawLine(CDrawer& drawer,int iline,TLItem* pItem=NULL);
+	void DrawConn(CDrawer& drawer,const ListCtrlIterator& iter);
+	void DrawLine(CDrawer& drawer,const ListCtrlIterator& iter);
 };
 #endif

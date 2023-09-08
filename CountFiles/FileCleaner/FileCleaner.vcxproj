@@ -222,6 +222,7 @@
     <ClCompile Include="DlgLoad.cpp" />
     <ClCompile Include="DrawObject.cpp" />
     <ClCompile Include="FileCleaner.cpp" />
+    <ClCompile Include="ItemData.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="MyBmpButton.cpp" />
     <ClCompile Include="pch.cpp">

@@ -25,14 +25,16 @@ public:
 	void DrawEllipse(RECT* rc,COLORREF clr=RGB(0,0,0),int linew=1);
 	void FillEllipse(RECT* rc,COLORREF clr=RGB(0,0,0));
 
-	void DrawRect(RECT* rc,COLORREF clr=RGB(0,0,0),int linew=1);
+	void DrawRect(RECT* rc,COLORREF clr=RGB(0,0,0),int linew=1,int style=PS_SOLID);
 	void FillRect(RECT* rc,COLORREF clr=RGB(0,0,0));
 
 	void DrawBitmap(CBitmap* pBmp,POINT* pt,DWORD dwOps=SRCCOPY,RECT* srcrc=NULL);
 
 	void DrawText(POINT* pos,LPCTSTR text,int height=24,COLORREF clr=RGB(0,0,0),UINT backmode=TRANSPARENT,LPCTSTR ftname=_T("Times New Roman"));
+	CSize GetTextExtent(LPCTSTR text,int height=24,LPCTSTR ftname=_T("Times New Roman"));
 private:
 	CDC* SelectDC();
 	CDCDraw* m_pCanvas;
+	CDC* m_pDCDraw;
 };
 #endif

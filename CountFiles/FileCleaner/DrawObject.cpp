@@ -152,23 +152,26 @@ CDCDraw::~CDCDraw()
 }
 CDrawer::CDrawer(CDCDraw* canvas):m_pCanvas(canvas)
 {
+	switch(m_pCanvas->m_nType)
+	{
+	case eDrawDirect:
+		m_pDCDraw=m_pCanvas->m_pClientDC;
+		break;
+	case eDrawBuffered:
+	case eDrawBufferedNoCreateDC:
+		m_pDCDraw=m_pCanvas->m_pMemDC;
+		break;
+	default:
+		ASSERT(FALSE);
+		m_pDCDraw=NULL;
+	}
 }
 CDrawer::~CDrawer()
 {
 }
-CDC* CDrawer::SelectDC()
+inline CDC* CDrawer::SelectDC()
 {
-	switch(m_pCanvas->m_nType)
-	{
-	case eDrawDirect:
-		return m_pCanvas->m_pClientDC;
-	case eDrawBuffered:
-	case eDrawBufferedNoCreateDC:
-		return m_pCanvas->m_pMemDC;
-	default:
-		ASSERT(FALSE);
-		return NULL;
-	}
+	return m_pDCDraw;
 }
 void CDrawer::DrawLine(POINT* start,POINT* end,COLORREF clr,int width,int style)
 {
@@ -188,9 +191,9 @@ void CDrawer::FillEllipse(RECT* rc,COLORREF clr)
 	SelectDC()->SelectStockObject(NULL_PEN);
 	SelectDC()->Ellipse(rc);
 }
-void CDrawer::DrawRect(RECT* rc,COLORREF clr,int linew)
+void CDrawer::DrawRect(RECT* rc,COLORREF clr,int linew,int style)
 {
-	DrawPen pen(SelectDC(),clr,linew,PS_SOLID);
+	DrawPen pen(SelectDC(),clr,linew,style);
 	SelectDC()->SelectStockObject(NULL_BRUSH);
 	SelectDC()->Rectangle(rc);
 }
@@ -227,4 +230,9 @@ void CDrawer::DrawText(POINT* pos,LPCTSTR text,int height,COLORREF clr,UINT back
 	SelectDC()->SetTextColor(clr);
 	SelectDC()->SetBkMode(backmode);
 	SelectDC()->TextOut(pos->x,pos->y,text);
+}
+CSize CDrawer::GetTextExtent(LPCTSTR text,int height,LPCTSTR ftname)
+{
+	DrawFont font(SelectDC(),height,ftname);
+	return SelectDC()->GetTextExtent(text,(int)_tcslen(text));
 }

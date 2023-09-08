@@ -48,7 +48,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// create a view to occupy the client area of the frame
 	m_pWndView=new CChildView;
-	m_pWndView->SetScrollSizes(MM_TEXT,CSize(10000,10000),CSize(LINE_HEIGHT,LINE_HEIGHT*10),CSize(LINE_HEIGHT,LINE_HEIGHT));
+	m_pWndView->SetScrollSizes(MM_TEXT,CSize(LINE_HEIGHT,LINE_HEIGHT),
+		CSize(LINE_HEIGHT,LINE_HEIGHT*3),CSize(LINE_HEIGHT,LINE_HEIGHT));
 
 	m_hIcon=AfxGetApp()->LoadIcon(IDI_MAINFRAME);
 	SetIcon(m_hIcon,TRUE);
@@ -133,4 +134,3 @@ BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO*
 	// otherwise, do default handling
 	return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
 }
-

@@ -18,6 +18,9 @@ enum E_ERR_CODE
 
 #define ERR_NONE                    0
 #define ERR_GENERIC                 _r(__ERR_GENERIC)
+#define ERR_CORRUPTED_FILE          _r(__ERR_CORRUPTED_FILE)
+#define ERR_INVALID_TAG             _r(__ERR_INVALID_TAG)
+#define ERR_INVALID_CALL            _r(__ERR_INVALID_CALL)
 #define ERR_SEM_CREATE_FAILED       _r(__ERR_SEM_CREATE_FAILED)
 #define ERR_THREAD_CREATE_FAILED    _r(__ERR_THREAD_CREATE_FAILED)
 #define ERR_PROCESS_FAILED          _r(__ERR_PROCESS_FAILED)

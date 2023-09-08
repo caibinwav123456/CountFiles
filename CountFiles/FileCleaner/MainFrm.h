@@ -8,10 +8,9 @@
 
 class CMainFrame : public CFrameWnd
 {
-	
 public:
 	CMainFrame() noexcept;
-protected: 
+protected:
 	DECLARE_DYNAMIC(CMainFrame)
 
 // Attributes

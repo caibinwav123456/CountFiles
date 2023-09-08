@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ErrorList.cpp" />
     <ClCompile Include="FileListLoader.cpp" />
     <ClCompile Include="FileListLoaderInternal.cpp" />
     <ClCompile Include="LRUCache.cpp" />
@@ -26,6 +27,7 @@
   <ItemGroup>
     <ClInclude Include="..\include\FileListLoader.h" />
     <ClInclude Include="..\include\struct.h" />
+    <ClInclude Include="FileListLoaderInternal.h" />
     <ClInclude Include="LRUCache.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
