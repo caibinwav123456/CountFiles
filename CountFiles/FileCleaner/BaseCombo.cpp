@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BaseCombo.h"
+
 BEGIN_MESSAGE_MAP(CBaseCombo, CComboBox)
 	ON_CONTROL_REFLECT(CBN_EDITCHANGE, &CBaseCombo::OnCbnEditchange)
 	ON_CONTROL_REFLECT(CBN_EDITUPDATE, &CBaseCombo::OnCbnEditupdate)

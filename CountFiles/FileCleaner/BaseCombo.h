@@ -1,5 +1,4 @@
 #pragma once
-#define WM_ENABLE_BTN_GO (WM_USER+2000)
 enum E_BASECOMBO_ID
 {
 	eBComboMain,
