@@ -14,6 +14,7 @@ struct FileObject
 	void* hFileErr;
 	const char* file;
 	const char* err_file;
+	bool bMute;
 };
 static int cb_wr_file_info(byte* buf,uint buflen,void* param)
 {
@@ -23,18 +24,18 @@ static int cb_wr_file_info(byte* buf,uint buflen,void* param)
 static int cb_wr_file_err(byte* buf,uint buflen,void* param)
 {
 	FileObject* obj=(FileObject*)param;
-	return sys_fwrite(obj->hFileErr,buf,buflen,NULL);
-}
-static int cb_def_wr_err(byte* buf,uint buflen,void* param)
-{
-	printf("%s",buf);
+	if(!obj->bMute)
+		printf("%s",buf);
+	if(VALID(obj->hFileErr))
+		return sys_fwrite(obj->hFileErr,buf,buflen,NULL);
 	return 0;
 }
-int parse_options(int argc,char** argv,const char*& file,const char*& cnt_path,const char*& err_file)
+int parse_options(int argc,char** argv,const char*& file,const char*& cnt_path,const char*& err_file,bool& bmute)
 {
 	file=NULL;
 	cnt_path=NULL;
 	err_file=NULL;
+	bmute=false;
 	for(int i=1;i<argc;i++)
 	{
 		char* cmditem=argv[i];
@@ -56,6 +57,9 @@ int parse_options(int argc,char** argv,const char*& file,const char*& cnt_path,c
 					return -1;
 				}
 				err_file=argv[i];
+				break;
+			case 'm':
+				bmute=true;
 				break;
 			default:
 				printf("\"%s\": invalid option\n",option);
@@ -106,6 +110,7 @@ int _tmain(int argc,TCHAR** argv)
 			"Additional Options:\n"
 			"-v: show version info\n"
 			"-h: show help\n"
+			"-m: do not display errors\n"
 			"-e [filepath]: specify error output file\n\n"
 		);
 		return 0;
@@ -114,7 +119,7 @@ int _tmain(int argc,TCHAR** argv)
 	FileObject obj;
 	intf_cntfile callback;
 	const char* cnt_path;
-	if(0!=(ret=parse_options(argc,argv,obj.file,cnt_path,obj.err_file)))
+	if(0!=(ret=parse_options(argc,argv,obj.file,cnt_path,obj.err_file,obj.bMute)))
 		return ret;
 	obj.hFile=sys_fopen((char*)obj.file,FILE_WRITE|FILE_CREATE_ALWAYS);
 	obj.hFileErr=NULL;
@@ -136,7 +141,7 @@ int _tmain(int argc,TCHAR** argv)
 	}
 	callback.param=&obj;
 	callback.cb_info=cb_wr_file_info;
-	callback.cb_error=(obj.err_file!=NULL?cb_wr_file_err:cb_def_wr_err);
+	callback.cb_error=cb_wr_file_err;
 	callback.cb_rec=NULL;
 	if(0!=(ret=GenFileList(cnt_path,&callback)))
 	{
