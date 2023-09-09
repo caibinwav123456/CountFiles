@@ -328,9 +328,9 @@ void TreeListCtrl::OnLBDblClick(const CPoint& pt,UINT nFlags)
 			goto end;
 		TLItem* pItem=it.m_pStkItem->m_pLItem;
 		assert(pItem!=NULL&&pItem->issel);
-		m_ItemSel.SetSel(NULL,-1);
 		if(pItem->type==eITypeDir)
 		{
+			m_ItemSel.SetSel(NULL,-1);
 			TLItemDir* dir=dynamic_cast<TLItemDir*>(pItem);
 			dir->OpenDir(!dir->isopen,false);
 			m_ItemSel.SetSel(pItem,iline);
