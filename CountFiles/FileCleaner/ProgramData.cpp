@@ -44,16 +44,24 @@ void PDXShowMessage(LPCTSTR format,...)
 
 CProgramData CProgramData::s_Data;
 CProgramData::CProgramData()
-	: m_strCachePath(".\\LocalCache\\")
+	: m_strBasePath("D:\\")
+	, m_strCachePath("LocalCache\\")
 	, m_strCacheFileName("current")
 	, m_strCFileExt(".fl")
 	, m_strCFileErrExt(".err")
 {
 }
-
+string CProgramData::GetProgramDataBasePath()
+{
+	return s_Data.m_strBasePath;
+}
+string CProgramData::GetCacheDirPath()
+{
+	return s_Data.GetProgramDataBasePath()+s_Data.m_strCachePath;
+}
 string CProgramData::GetCFilePathRoot()
 {
-	return s_Data.m_strCachePath+s_Data.m_strCacheFileName;
+	return s_Data.GetCacheDirPath()+s_Data.m_strCacheFileName;
 }
 string CProgramData::GetCacheFilePath()
 {

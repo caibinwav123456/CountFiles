@@ -50,12 +50,15 @@ public:
 class CProgramData
 {
 public:
+	static string GetProgramDataBasePath();
+	static string GetCacheDirPath();
 	static string GetCFilePathRoot();
 	static string GetCacheFilePath();
 	static string GetCacheErrFilePath();
 	static string GetErrListFilePath(const string& path);
 private:
 	CProgramData::CProgramData();
+	const string m_strBasePath;
 	const string m_strCachePath;
 	const string m_strCacheFileName;
 	const string m_strCFileExt;
