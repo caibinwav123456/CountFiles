@@ -283,9 +283,10 @@ void TreeListCtrl::OnLBDown(const CPoint& pt,UINT nFlags)
 {
 	m_iCurLine=-1;
 	int iline=LineNumFromPt((POINT*)&pt);
-	if(m_ItemSel.valid(iline))
+	if(!m_ItemSel.valid(iline))
+		goto end;
 	{
-		ListCtrlIterator it(m_pRootItem,iline,this);
+		ListCtrlIterator it=GetListIter(iline);
 		if(it.m_pStkItem==NULL)
 			goto end;
 		TLItem* pItem=it.m_pStkItem->m_pLItem;
@@ -319,9 +320,10 @@ void TreeListCtrl::OnLBDblClick(const CPoint& pt,UINT nFlags)
 {
 	m_iCurLine=-1;
 	int iline=LineNumFromPt((POINT*)&pt);
-	if(m_ItemSel.valid(iline))
+	if(!m_ItemSel.valid(iline))
+		goto end;
 	{
-		ListCtrlIterator it(m_pRootItem,iline,this);
+		ListCtrlIterator it=GetListIter(iline);
 		if(it.m_pStkItem==NULL)
 			goto end;
 		TLItem* pItem=it.m_pStkItem->m_pLItem;
