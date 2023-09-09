@@ -68,9 +68,9 @@ BOOL CDlgLoad::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	// TODO:  Add extra initialization here
-	if(0!=sys_mkdir((char*)CProgramData::GetCFilePathRoot().c_str()))
+	if(0!=sys_mkdir((char*)CProgramData::GetCacheDirPath().c_str()))
 	{
-		PDXShowMessage(_T("Create cache directory \"%s\" failed"),(LPCTSTR)a2t(CProgramData::GetCFilePathRoot()));
+		PDXShowMessage(_T("Create cache directory \"%s\" failed"),(LPCTSTR)a2t(CProgramData::GetCacheDirPath()));
 		goto exitdlg;
 	}
 
