@@ -421,6 +421,7 @@ bool ItemSelector::BeginDragSel(int iline,bool cancel)
 	if(!valid(iline))
 		return false;
 	m_iDragStart=iline;
+	m_iDragEnd=iline;
 	m_bCancelRgn=cancel;
 	return true;
 }
@@ -431,6 +432,18 @@ bool ItemSelector::DragSelTo(int iline)
 	if(m_iDragStart<0)
 		return false;
 	m_iDragEnd=iline;
+	m_iItemSel=iline;
+	return true;
+}
+bool ItemSelector::CompoundSel(int iline)
+{
+	if(!valid(iline))
+		return false;
+	if(m_iDragStart<0)
+		return false;
+	DragSelTo(iline);
+	EndDragSel();
+	BeginDragSel(iline,false);
 	m_iItemSel=iline;
 	return true;
 }

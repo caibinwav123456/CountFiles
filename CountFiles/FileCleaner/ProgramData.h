@@ -19,6 +19,7 @@ struct ID2CWndPtrAssoc
 BOOL PDXAddToIDWndPtrMap(UINT id,CWnd* pWnd);
 BOOL PDXRemoveFromIDWndPtrMap(UINT id);
 CWnd* PDXGetWndFromID(UINT id);
+void PDXShowMessage(LPCTSTR format,...);
 template<typename T>
 class CAddToWndMap
 {
@@ -45,5 +46,21 @@ public:
 			(&(static_cast<className*>((CWnd*)NULL))->__thisMapObj)); \
 		return &theAssoc; \
 	}
+
+class CProgramData
+{
+public:
+	static string GetCFilePathRoot();
+	static string GetCacheFilePath();
+	static string GetCacheErrFilePath();
+	static string GetErrListFilePath(const string& path);
+private:
+	CProgramData::CProgramData();
+	const string m_strCachePath;
+	const string m_strCacheFileName;
+	const string m_strCFileExt;
+	const string m_strCFileErrExt;
+	static CProgramData s_Data;
+};
 
 #endif

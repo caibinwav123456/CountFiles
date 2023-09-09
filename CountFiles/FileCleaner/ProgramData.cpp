@@ -32,6 +32,41 @@ CWnd* PDXGetWndFromID(UINT id)
 	ASSERT(FALSE);
 	return NULL;
 }
+void PDXShowMessage(LPCTSTR format,...)
+{
+	CString strMsg;
+	va_list args;
+	va_start(args, format);
+	strMsg.FormatV(format, args);
+	va_end(args);
+	AfxMessageBox(strMsg);
+}
+
+CProgramData CProgramData::s_Data;
+CProgramData::CProgramData()
+	: m_strCachePath(".\\LocalCache\\")
+	, m_strCacheFileName("current")
+	, m_strCFileExt(".fl")
+	, m_strCFileErrExt(".err")
+{
+}
+
+string CProgramData::GetCFilePathRoot()
+{
+	return s_Data.m_strCachePath+s_Data.m_strCacheFileName;
+}
+string CProgramData::GetCacheFilePath()
+{
+	return s_Data.GetCFilePathRoot()+s_Data.m_strCFileExt;
+}
+string CProgramData::GetCacheErrFilePath()
+{
+	return s_Data.GetCacheFilePath()+s_Data.m_strCFileErrExt;
+}
+string CProgramData::GetErrListFilePath(const string& path)
+{
+	return path+s_Data.m_strCFileErrExt;
+}
 
 string ConvertTStrToAnsiStr(LPCTSTR from)
 {

@@ -25,8 +25,6 @@ public:
 	virtual ~CDlgLoad();
 
 public:
-	string GetCacheFilePath();
-	string GetCacheErrFilePath();
 	void UpdateProgress(const string& strPathProc);
 
 // Dialog Data
@@ -40,21 +38,15 @@ public:
 	}m_loadingObject;
 
 private:
-	const string m_strCachePath;
-	const string m_strCacheFileName;
-	const string m_strCFileExt;
-	const string m_strCFileErrExt;
 	CString m_strBasePath;
 	CString m_strProgressBuf;
 
 	void* m_hThreadLoadFile;
 	CRITICAL_SECTION m_cs;
 
-	string GetCFilePathRoot();
 	void SplitPathDisplay();
 
 	BOOL StartLoadingThread();
-	void ShowMessage(LPCTSTR format,...);
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

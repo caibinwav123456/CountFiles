@@ -162,22 +162,39 @@ void CChildView::OnDestroy()
 
 LRESULT CChildView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 {
+	int ret=0;
 	FListLoadData* lpData=(FListLoadData*)wParam;
+	string strList;
+	string strErrList;
 	if(lpData->mask&FILE_LIST_ATTRIB_MAIN)
 	{
+		string path=t2a(lpData->left);
 		dword type=0;
-		if(sys_fstat((char*)t2a(lpData->left).c_str(),&type)!=0)
+		if(sys_fstat((char*)path.c_str(),&type)!=0)
 			return FALSE;
 
 		if(type==FILE_TYPE_DIR)
 		{
 			CDlgLoad dlg(NULL,lpData->left);
-			if(dlg.DoModal()==IDOK)
-			{
-				CString strList=a2t(dlg.GetCacheFilePath());
-				CString strErrList=a2t(dlg.GetCacheErrFilePath());
-			}
+			if(dlg.DoModal()!=IDOK)
+				return TRUE;
+			strList=CProgramData::GetCacheFilePath();
+			strErrList=CProgramData::GetCacheErrFilePath();
 		}
+		else
+		{
+			strList=path;
+			string patherr=CProgramData::GetErrListFilePath(path);
+			if(sys_fstat((char*)patherr.c_str(),&type)!=0&&type==FILE_TYPE_NORMAL)
+				strErrList=patherr;
+		}
+	}
+	if(lpData->mask&FILE_LIST_ATTRIB_REF)
+	{
+	}
+	if(0!=(ret=m_TreeList.Load(strList.c_str(),strErrList.c_str())))
+	{
+		PDXShowMessage(_T("Load file list failed: %s"),(LPCTSTR)a2t(get_error_desc(ret)));
 	}
 	return TRUE;
 }
