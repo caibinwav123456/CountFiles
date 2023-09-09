@@ -300,7 +300,18 @@ void TreeListCtrl::OnLBDown(const CPoint& pt,UINT nFlags)
 		}
 		else if(nFlags|MK_SHIFT)
 		{
-			m_ItemSel.DragSelTo(iline);
+			int linefocus=m_ItemSel.GetFocus();
+			if(linefocus<0)
+				m_ItemSel.SetSel(pItem,iline);
+			else
+			{
+				ListCtrlIterator itsel=GetListIter(linefocus);
+				if(itsel.m_pStkItem!=NULL&&itsel.m_pStkItem->m_pLItem!=NULL)
+				{
+					m_ItemSel.SetSel(itsel.m_pStkItem->m_pLItem,linefocus);
+					m_ItemSel.DragSelTo(iline);
+				}
+			}
 		}
 		else
 		{

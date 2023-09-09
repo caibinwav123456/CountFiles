@@ -330,6 +330,10 @@ bool ListCtrlIterator::operator<=(const ListCtrlIterator& other) const
 		return false;
 	return m_iline<=other.m_iline;
 }
+int ItemSelector::GetFocus()
+{
+	return m_iItemSel;
+}
 bool ItemSelector::IsFocus(int iline)
 {
 	if(m_iItemSel<0)
