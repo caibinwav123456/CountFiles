@@ -67,6 +67,7 @@ public:
 	};
 	ItemSelector(TreeListCtrl* pOwner):m_pOwner(pOwner),m_iItemSel(-1),
 		m_iDragStart(-1),m_iDragEnd(-1),m_bCancelRgn(false){}
+	int GetFocus();
 	bool IsFocus(int iline);
 	bool IsSelected(TLItem* item,int iline);
 	bool InDragRegion(int iline,bool* cancel=NULL);
