@@ -76,8 +76,10 @@ public:
 	void ToggleSel(TLItem* item,int iline);
 	bool BeginDragSel(int iline,bool cancel);
 	bool DragSelTo(int iline);
+	bool CompoundSel(int iline);
 	void EndDragSel();
 	void SortSelection(SortedSelItemNode& tree);
+	bool valid(int iline);
 private:
 	set<SelItem> m_setSel;
 	int m_iItemSel;
@@ -85,7 +87,6 @@ private:
 	int m_iDragEnd;
 	TreeListCtrl* m_pOwner;
 	bool m_bCancelRgn;
-	bool valid(int iline);
 };
 struct TLItemPair
 {
@@ -202,6 +203,9 @@ public:
 	int Init();
 	void Exit();
 
+	int Load(const char* lfile,const char* efile);
+	void UnLoad();
+
 //Draw callbacks
 	void Draw(CDC* pClientDC,bool buffered);
 
@@ -230,6 +234,8 @@ private:
 	CBitmap m_bmpFolderExp;
 	CBitmap m_bmpFolderExpMask;
 
+	int m_iCurLine;
+
 //List data
 protected:
 	FileListLoader m_ListLoader;
@@ -246,10 +252,12 @@ private:
 protected:
 	void DrawFolder(CDrawer* drawer,POINT* pt,E_FOLDER_STATE state,BOOL expand);
 	ListCtrlIterator GetDrawIter(POINT* pt=NULL);
+	ListCtrlIterator GetListIter(int iline);
 	int LineNumFromPt(POINT* pt);
 	bool EndOfDraw(int iline);
 	void DrawLine(CDrawer& drawer,int iline,TLItem* pItem=NULL);
 	void DrawConn(CDrawer& drawer,const ListCtrlIterator& iter);
 	void DrawLine(CDrawer& drawer,const ListCtrlIterator& iter);
+	void UpdateListStat();
 };
 #endif

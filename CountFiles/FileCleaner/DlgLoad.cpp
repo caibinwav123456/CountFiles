@@ -31,10 +31,6 @@ CDlgLoad::CDlgLoad(CWnd* pParent,const CString& path)
 	: CDialog(IDD_DIALOG_LOAD, pParent)
 	, m_strPathLoading(_T(""))
 	, m_strBasePath(path)
-	, m_strCachePath(".\\LocalCache\\")
-	, m_strCacheFileName("current")
-	, m_strCFileExt(".txt")
-	, m_strCFileErrExt(".err.txt")
 {
 	m_loadingObject.callback=NULL;
 	m_loadingObject.obj=NULL;
@@ -44,18 +40,6 @@ CDlgLoad::~CDlgLoad()
 {
 }
 
-string CDlgLoad::GetCFilePathRoot()
-{
-	return m_strCachePath+m_strCacheFileName;
-}
-string CDlgLoad::GetCacheFilePath()
-{
-	return GetCFilePathRoot()+m_strCFileExt;
-}
-string CDlgLoad::GetCacheErrFilePath()
-{
-	return GetCFilePathRoot()+m_strCFileErrExt;
-}
 void CDlgLoad::SplitPathDisplay()
 {
 	for(int i=70;i<m_strPathLoading.GetLength();i+=70)
@@ -84,9 +68,9 @@ BOOL CDlgLoad::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	// TODO:  Add extra initialization here
-	if(0!=sys_mkdir((char*)m_strCachePath.c_str()))
+	if(0!=sys_mkdir((char*)CProgramData::GetCFilePathRoot().c_str()))
 	{
-		ShowMessage(_T("Create cache directory \"%s\" failed"),(LPCTSTR)a2t(m_strCachePath));
+		PDXShowMessage(_T("Create cache directory \"%s\" failed"),(LPCTSTR)a2t(CProgramData::GetCFilePathRoot()));
 		goto exitdlg;
 	}
 
@@ -103,16 +87,6 @@ BOOL CDlgLoad::OnInitDialog()
 exitdlg:
 	CDialog::OnCancel();
 	return TRUE;
-}
-
-void CDlgLoad::ShowMessage(LPCTSTR format,...)
-{
-	CString strMsg;
-	va_list args;
-	va_start(args, format);
-	strMsg.FormatV(format, args);
-	va_end(args);
-	MessageBox(strMsg);
 }
 
 static int cb_wr_file_info(byte* buf,uint buflen,void* param)
@@ -170,8 +144,8 @@ BOOL CDlgLoad::StartLoadingThread()
 
 	obj->ret=0;
 	obj->cnt_path=t2a(m_strBasePath);
-	obj->file=GetCacheFilePath();
-	obj->err_file=GetCacheErrFilePath();
+	obj->file=CProgramData::GetCacheFilePath();
+	obj->err_file=CProgramData::GetCacheErrFilePath();
 	obj->dlg=this;
 	obj->user_canceled=FALSE;
 
@@ -183,14 +157,14 @@ BOOL CDlgLoad::StartLoadingThread()
 
 	if(!VALID(obj->hFile))
 	{
-		ShowMessage(_T("\"%s\": can not open file for writing"),(LPCTSTR)a2t(obj->file));
+		PDXShowMessage(_T("\"%s\": can not open file for writing"),(LPCTSTR)a2t(obj->file));
 		safe_delete_obj(m_loadingObject);
 		return FALSE;
 	}
 	obj->hFileErr=sys_fopen((char*)obj->err_file.c_str(),FILE_WRITE|FILE_CREATE_ALWAYS);
 	if(!VALID(obj->hFileErr))
 	{
-		ShowMessage(_T("\"%s\": can not open file for writing"),(LPCTSTR)a2t(obj->err_file));
+		PDXShowMessage(_T("\"%s\": can not open file for writing"),(LPCTSTR)a2t(obj->err_file));
 		clean_write_obj(obj,true);
 		safe_delete_obj(m_loadingObject);
 		return FALSE;
@@ -229,7 +203,7 @@ LRESULT CDlgLoad::OnLoadingComplete(WPARAM wParam, LPARAM lParam)
 	else if(m_loadingObject.obj->ret!=0)
 	{
 		clean_write_obj(m_loadingObject.obj,true);
-		ShowMessage(_T("GenFileList failed: %s"),(LPCTSTR)a2t(get_error_desc(m_loadingObject.obj->ret)));
+		PDXShowMessage(_T("GenFileList failed: %s"),(LPCTSTR)a2t(get_error_desc(m_loadingObject.obj->ret)));
 		safe_delete_obj(m_loadingObject);
 		CDialog::OnCancel();
 	}
