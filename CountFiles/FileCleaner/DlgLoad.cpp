@@ -85,18 +85,24 @@ BOOL CDlgLoad::OnInitDialog()
 
 	// TODO:  Add extra initialization here
 	if(0!=sys_mkdir((char*)m_strCachePath.c_str()))
-		return FALSE;
+	{
+		ShowMessage(_T("Create cache directory \"%s\" failed"),(LPCTSTR)a2t(m_strCachePath));
+		goto exitdlg;
+	}
 
 	InitializeCriticalSection(&m_cs);
 	if(!StartLoadingThread())
 	{
 		DeleteCriticalSection(&m_cs);
-		return FALSE;
+		goto exitdlg;
 	}
 	SetTimer(IDEVENT_TIMER_PROG,100,NULL);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
+exitdlg:
+	CDialog::OnCancel();
+	return TRUE;
 }
 
 void CDlgLoad::ShowMessage(LPCTSTR format,...)
@@ -104,7 +110,7 @@ void CDlgLoad::ShowMessage(LPCTSTR format,...)
 	CString strMsg;
 	va_list args;
 	va_start(args, format);
-	strMsg.Format(format, args);
+	strMsg.FormatV(format, args);
 	va_end(args);
 	MessageBox(strMsg);
 }
