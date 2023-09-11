@@ -78,6 +78,7 @@ public:
 	bool BeginDragSel(int iline,bool cancel);
 	bool DragSelTo(int iline);
 	bool CompoundSel(int iline);
+	bool ClearAndDragSel(TLItem* item,int iline);
 	void EndDragSel();
 	void SortSelection(SortedSelItemNode& tree);
 	bool valid(int iline);
