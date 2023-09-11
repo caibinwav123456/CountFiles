@@ -196,7 +196,8 @@ LRESULT CChildView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 	{
 		PDXShowMessage(_T("Load file list failed: %s"),(LPCTSTR)a2t(get_error_desc(ret)));
 	}
-	return TRUE;
+	Invalidate();
+	return ret==0?TRUE:FALSE;
 }
 
 static inline UINT GetKey()

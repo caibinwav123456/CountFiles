@@ -78,7 +78,6 @@ int TreeListCtrl::Load(const char* lfile,const char* efile)
 		return ret;
 	}
 	UpdateListStat();
-	Invalidate();
 	return 0;
 }
 void TreeListCtrl::UnLoad()
@@ -94,6 +93,7 @@ void TreeListCtrl::UnLoad()
 	}
 	m_pRootItem=NULL;
 	m_ListLoader.Unload();
+	UpdateListStat();
 }
 void TreeListCtrl::Invalidate()
 {
