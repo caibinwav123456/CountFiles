@@ -82,6 +82,7 @@ int TreeListCtrl::Load(const char* lfile,const char* efile)
 }
 void TreeListCtrl::UnLoad()
 {
+	m_ItemSel.SetSel(NULL,-1);
 	if(m_pRootItem!=NULL)
 	{
 		TLItemDir* root=dynamic_cast<TLItemDir*>(m_pRootItem);
@@ -342,17 +343,19 @@ end:
 }
 void TreeListCtrl::OnRBDown(const CPoint& pt,UINT nFlags)
 {
+	m_ItemSel.EndDragSel();
 	Invalidate();
 }
 void TreeListCtrl::OnRBUp(const CPoint& pt,UINT nFlags)
 {
+	m_ItemSel.EndDragSel();
 	Invalidate();
 }
 void TreeListCtrl::OnMMove(const CPoint& pt,UINT nFlags)
 {
 	int iline=LineNumFromPt((POINT*)&pt);
-	if(m_ItemSel.valid(iline)&&m_ItemSel.valid(m_iCurLine)
-		&&iline!=m_iCurLine&&(nFlags|MK_LBUTTON))
+	if((nFlags|MK_LBUTTON)&&m_ItemSel.valid(iline)&&m_ItemSel.valid(m_iCurLine)
+		&&iline!=m_iCurLine)
 	{
 		m_ItemSel.DragSelTo(iline);
 		m_iCurLine=iline;
