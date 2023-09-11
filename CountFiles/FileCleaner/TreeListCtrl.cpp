@@ -187,7 +187,7 @@ void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter)
 }
 inline void DrawConfinedText(CDrawer& drawer,const string& text,const CRect& rc,COLORREF clr)
 {
-	CString txt=a2t(text);
+	CString txt=a2tstr(text);
 	CSize txtsize=drawer.GetTextExtent(txt,TEXT_HEIGHT);
 	if(txtsize.cx>rc.Width())
 	{
