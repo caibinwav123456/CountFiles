@@ -168,7 +168,7 @@ LRESULT CChildView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 	string strErrList;
 	if(lpData->mask&FILE_LIST_ATTRIB_MAIN)
 	{
-		string path=t2a(lpData->left);
+		string path=t2astr(lpData->left);
 		dword type=0;
 		if(sys_fstat((char*)path.c_str(),&type)!=0)
 			return FALSE;
@@ -194,7 +194,7 @@ LRESULT CChildView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 	}
 	if(0!=(ret=m_TreeList.Load(strList.c_str(),strErrList.c_str())))
 	{
-		PDXShowMessage(_T("Load file list failed: %s"),(LPCTSTR)a2t(get_error_desc(ret)));
+		PDXShowMessage(_T("Load file list failed: %s"),a2t(get_error_desc(ret)));
 	}
 	Invalidate();
 	return ret==0?TRUE:FALSE;

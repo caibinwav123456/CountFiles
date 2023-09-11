@@ -71,7 +71,7 @@ BOOL CDlgLoad::OnInitDialog()
 	string cache_path=CProgramData::GetCacheDirPath();
 	if(0!=sys_mkdir((char*)cache_path.c_str()))
 	{
-		PDXShowMessage(_T("Create cache directory \"%s\" failed"),(LPCTSTR)a2t(cache_path));
+		PDXShowMessage(_T("Create cache directory \"%s\" failed"),a2t(cache_path));
 		goto exitdlg;
 	}
 
@@ -144,7 +144,7 @@ BOOL CDlgLoad::StartLoadingThread()
 	callback->cb_rec=cb_cnt_file_prog;
 
 	obj->ret=0;
-	obj->cnt_path=t2a(m_strBasePath);
+	obj->cnt_path=t2astr(m_strBasePath);
 	obj->file=CProgramData::GetCacheFilePath();
 	obj->err_file=CProgramData::GetCacheErrFilePath();
 	obj->dlg=this;
@@ -158,14 +158,14 @@ BOOL CDlgLoad::StartLoadingThread()
 
 	if(!VALID(obj->hFile))
 	{
-		PDXShowMessage(_T("\"%s\": can not open file for writing"),(LPCTSTR)a2t(obj->file));
+		PDXShowMessage(_T("\"%s\": can not open file for writing"),a2t(obj->file));
 		safe_delete_obj(m_loadingObject);
 		return FALSE;
 	}
 	obj->hFileErr=sys_fopen((char*)obj->err_file.c_str(),FILE_WRITE|FILE_CREATE_ALWAYS);
 	if(!VALID(obj->hFileErr))
 	{
-		PDXShowMessage(_T("\"%s\": can not open file for writing"),(LPCTSTR)a2t(obj->err_file));
+		PDXShowMessage(_T("\"%s\": can not open file for writing"),a2t(obj->err_file));
 		clean_write_obj(obj,true);
 		safe_delete_obj(m_loadingObject);
 		return FALSE;
@@ -184,7 +184,7 @@ BOOL CDlgLoad::StartLoadingThread()
 void CDlgLoad::UpdateProgress(const string& strPathProc)
 {
 	EnterCriticalSection(&m_cs);
-	m_strProgressBuf=a2t(strPathProc);
+	m_strProgressBuf=a2tstr(strPathProc);
 	LeaveCriticalSection(&m_cs);
 }
 
@@ -204,7 +204,7 @@ LRESULT CDlgLoad::OnLoadingComplete(WPARAM wParam, LPARAM lParam)
 	else if(m_loadingObject.obj->ret!=0)
 	{
 		clean_write_obj(m_loadingObject.obj,true);
-		PDXShowMessage(_T("GenFileList failed: %s"),(LPCTSTR)a2t(get_error_desc(m_loadingObject.obj->ret)));
+		PDXShowMessage(_T("GenFileList failed: %s"),a2t(get_error_desc(m_loadingObject.obj->ret)));
 		safe_delete_obj(m_loadingObject);
 		CDialog::OnCancel();
 	}

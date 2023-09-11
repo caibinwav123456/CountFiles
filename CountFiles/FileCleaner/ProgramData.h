@@ -3,8 +3,10 @@
 #include <string>
 using namespace std;
 
-#define t2a(p) ConvertTStrToAnsiStr(p)
-#define a2t(p) ConvertAnsiStrToTStr(p)
+#define t2a(p) ConvertTStrToAnsiStr(p).c_str()
+#define a2t(p) (LPCTSTR)ConvertAnsiStrToTStr(p)
+#define t2astr(p) ConvertTStrToAnsiStr(p)
+#define a2tstr(p) ConvertAnsiStrToTStr(p)
 
 string ConvertTStrToAnsiStr(LPCTSTR from);
 CString ConvertAnsiStrToTStr(LPCSTR from);
