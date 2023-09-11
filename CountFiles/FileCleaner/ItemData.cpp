@@ -451,6 +451,27 @@ bool ItemSelector::CompoundSel(int iline)
 	m_iItemSel=iline;
 	return true;
 }
+bool ItemSelector::ClearAndDragSel(TLItem* item,int iline)
+{
+	if(item==NULL||!valid(iline))
+		return false;
+	if(m_iDragStart<0||m_iItemSel<0)
+	{
+		SetSel(item,iline);
+		return true;
+	}
+	else if(m_iDragStart>=0)
+	{
+		int pos=m_iDragStart;
+		ListCtrlIterator itds(m_pOwner->m_pRootItem,pos);
+		if(itds.m_pStkItem==NULL)
+			return false;
+		SetSel(itds.m_pStkItem->m_pLItem,pos);
+		DragSelTo(iline);
+		return true;
+	}
+	return false;
+}
 void ItemSelector::EndDragSel()
 {
 	if(m_iDragStart<0||m_iDragEnd<0)
