@@ -155,7 +155,7 @@ CString CBaseBar::GetImpFileName(const CString& path)
 	int pos=path.ReverseFind(_T('\\'));
 	pos=(pos<0?0:pos+1);
 	_tcscpy_s(strFileTitle,65535,((LPCTSTR)path)+pos);
-	CFileDialog dlg(TRUE, NULL, NULL, 0, _T("Text Files|*.txt||"), this);
+	CFileDialog dlg(TRUE, NULL, NULL, 0, _T("File List Files|*.fl||"), this);
 	dlg.m_ofn.lpstrFile = strFileName;
 	dlg.m_ofn.lpstrFileTitle = strFileTitle;
 	dlg.m_ofn.nMaxFile = 65536;

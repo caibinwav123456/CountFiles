@@ -141,7 +141,7 @@ bool TreeListCtrl::EndOfDraw(int iline)
 		return true;
 	CRect rc;
 	GetCanvasRect(&rc);
-	return iline*LINE_HEIGHT>rc.bottom||(iline+1)*LINE_HEIGHT<rc.bottom;
+	return iline*LINE_HEIGHT>rc.bottom||(iline+1)*LINE_HEIGHT<rc.top;
 }
 void TreeListCtrl::DrawLine(CDrawer& drawer,int iline,TLItem* pItem)
 {
@@ -172,11 +172,11 @@ void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter)
 	for(;pstk->next!=NULL;pstk=pstk->next,level--)
 	{
 		assert(level>0);
-		int xpos=LINE_INDENT*level+CONN_START;
+		int xpos=LINE_INDENT*(level-1)+CONN_START;
 		bool last=pstk->parentidx==(int)pstk->m_pLItem->parent->subitems.size()-1;
 		if(level==iter.lvl)
 		{
-			int xposend=LINE_INDENT*level+CONN_END;
+			int xposend=LINE_INDENT*(level-1)+CONN_END;
 			drawer.DrawLine(&CPoint(xpos,ypos),&CPoint(xposend,ypos),CONN_COLOR,1,PS_DOT);
 		}
 		if(!last)
@@ -188,7 +188,8 @@ void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter)
 inline void DrawConfinedText(CDrawer& drawer,const string& text,const CRect& rc,COLORREF clr)
 {
 	CString txt=a2tstr(text);
-	CSize txtsize=drawer.GetTextExtent(txt,TEXT_HEIGHT);
+	static const LPCTSTR fontname=_T("Times New Roman");
+	CSize txtsize=drawer.GetTextExtent(txt,TEXT_HEIGHT,fontname);
 	if(txtsize.cx>rc.Width())
 	{
 		CString tmptxt=txt;
@@ -196,13 +197,13 @@ inline void DrawConfinedText(CDrawer& drawer,const string& text,const CRect& rc,
 		{
 			tmptxt=tmptxt.Left(tmptxt.GetLength()-1);
 			txt=tmptxt+_T("...");
-			txtsize=drawer.GetTextExtent(txt,TEXT_HEIGHT);
+			txtsize=drawer.GetTextExtent(txt,TEXT_HEIGHT,fontname);
 		}
 		if(tmptxt.IsEmpty())
 			txt.Empty();
 	}
 	CPoint pt(rc.left,rc.top+(rc.Height()-TEXT_HEIGHT)/2);
-	drawer.DrawText(&pt,txt,TEXT_HEIGHT,clr);
+	drawer.DrawText(&pt,txt,TEXT_HEIGHT,clr,TRANSPARENT,fontname);
 }
 void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 {
@@ -252,7 +253,7 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 			info.mod_time.Format(date,FORMAT_DATE|FORMAT_TIME|FORMAT_WEEKDAY);
 			DrawConfinedText(drawer,info.name,CRect(pos,CPoint(400,pos.y+LINE_HEIGHT)),clr);
 			DrawConfinedText(drawer,format_segmented_u64(info.size),CRect(400,pos.y,500,pos.y+LINE_HEIGHT),clr);
-			DrawConfinedText(drawer,date,CRect(500,pos.y,600,pos.y+LINE_HEIGHT),clr);
+			DrawConfinedText(drawer,date,CRect(500,pos.y,700,pos.y+LINE_HEIGHT),clr);
 		}
 		break;
 	case eITypeErrDir:
@@ -261,7 +262,7 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 			err_node_info info;
 			m_ListLoader.GetNodeErrInfo(item->errnode,&info);
 			DrawConfinedText(drawer,info.name,CRect(pos,CPoint(400,pos.y+LINE_HEIGHT)),clr);
-			DrawConfinedText(drawer,info.err_desc,CRect(400,pos.y,500,pos.y+LINE_HEIGHT),clr);
+			DrawConfinedText(drawer,info.err_desc,CRect(400,pos.y,700,pos.y+LINE_HEIGHT),clr);
 		}
 		break;
 	}
@@ -291,15 +292,15 @@ void TreeListCtrl::OnLBDown(const CPoint& pt,UINT nFlags)
 		if(it.m_pStkItem==NULL)
 			goto end;
 		TLItem* pItem=it.m_pStkItem->m_pLItem;
-		if((nFlags|MK_CONTROL)&&(nFlags|MK_SHIFT))
+		if((nFlags&MK_CONTROL)&&(nFlags&MK_SHIFT))
 		{
 			m_ItemSel.CompoundSel(iline);
 		}
-		else if(nFlags|MK_CONTROL)
+		else if(nFlags&MK_CONTROL)
 		{
 			m_ItemSel.ToggleSel(pItem,iline);
 		}
-		else if(nFlags|MK_SHIFT)
+		else if(nFlags&MK_SHIFT)
 		{
 			m_ItemSel.ClearAndDragSel(pItem,iline);
 		}
@@ -354,7 +355,7 @@ void TreeListCtrl::OnRBUp(const CPoint& pt,UINT nFlags)
 void TreeListCtrl::OnMMove(const CPoint& pt,UINT nFlags)
 {
 	int iline=LineNumFromPt((POINT*)&pt);
-	if((nFlags|MK_LBUTTON)&&m_ItemSel.valid(iline)&&m_ItemSel.valid(m_iCurLine)
+	if((nFlags&MK_LBUTTON)&&m_ItemSel.valid(iline)&&m_ItemSel.valid(m_iCurLine)
 		&&iline!=m_iCurLine)
 	{
 		m_ItemSel.DragSelTo(iline);

@@ -239,6 +239,7 @@ struct unode_iterator
 {
 	union
 	{
+		void* it;
 		node_iterator* dirit;
 		err_node_iterator* errit;
 	};
@@ -474,7 +475,9 @@ static int build_err_tree(err_dir_node*& ebase,void* hef,const UInteger64& off,c
 	ebase=new err_dir_node;
 	if(0!=(ret=load_error_list(ebase,off,end,hef)))
 		return ret;
-	base->enode=ebase;
+	if(ebase->subdirs==NULL||ebase->subdirs->size()!=1)
+		return ERR_CORRUPTED_FILE;
+	base->enode=&ebase->subdirs->at(0);
 	return 0;
 }
 void unload_file_list(ctx_flist_loader* ctx,LRUCache* cache);
