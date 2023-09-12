@@ -231,9 +231,9 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 			else
 				m_ListLoader.GetNodeInfo(item->filenode,&info);
 			info.mod_time.Format(date,FORMAT_DATE|FORMAT_TIME|FORMAT_WEEKDAY);
-			drawer.DrawTextInRect(&CRect(pos,CPoint(350,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,
+			drawer.DrawTextInRect(&CRect(pos,CPoint(400,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,
 				a2t(info.name),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-			drawer.DrawTextInRect(&CRect(350,pos.y,480,pos.y+LINE_HEIGHT),DT_ALIGN_RIGHT,
+			drawer.DrawTextInRect(&CRect(400,pos.y,490,pos.y+LINE_HEIGHT),DT_ALIGN_RIGHT,
 				a2t(format_segmented_u64(info.size)),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 			drawer.DrawTextInRect(&CRect(500,pos.y,700,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
 				a2t(date),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
@@ -244,9 +244,9 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 		{
 			err_node_info info;
 			m_ListLoader.GetNodeErrInfo(item->errnode,&info);
-			drawer.DrawTextInRect(&CRect(pos,CPoint(350,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,a2t(info.name),
+			drawer.DrawTextInRect(&CRect(pos,CPoint(400,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,a2t(info.name),
 				TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-			drawer.DrawTextInRect(&CRect(350,pos.y,700,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,a2t(info.err_desc),
+			drawer.DrawTextInRect(&CRect(400,pos.y,700,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,a2t(info.err_desc),
 				TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 		}
 		break;

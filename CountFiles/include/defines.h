@@ -1,9 +1,9 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
 
-#define LINE_HEIGHT 24
+#define LINE_HEIGHT 20
 #define LINE_INDENT 24
-#define TEXT_HEIGHT 20
+#define TEXT_HEIGHT 16
 #define FOLDER_WIDTH 24
 #define CONN_START 12
 #define CONN_END 24
