@@ -175,6 +175,7 @@ LRESULT CChildView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 
 		if(type==FILE_TYPE_DIR)
 		{
+			m_TreeList.UnLoad();
 			CDlgLoad dlg(NULL,lpData->left);
 			if(dlg.DoModal()!=IDOK)
 				return TRUE;
@@ -185,7 +186,7 @@ LRESULT CChildView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 		{
 			strList=path;
 			string patherr=CProgramData::GetErrListFilePath(path);
-			if(sys_fstat((char*)patherr.c_str(),&type)!=0&&type==FILE_TYPE_NORMAL)
+			if(sys_fstat((char*)patherr.c_str(),&type)==0&&type==FILE_TYPE_NORMAL)
 				strErrList=patherr;
 		}
 	}
@@ -227,6 +228,8 @@ static inline CPoint GetMousePos(const CPoint& pt,CScrollView* pView)
 {
 	CPoint point=pt;
 	point.Offset(CSize(pView->GetScrollPosition()));
+	if(point.x<0)point.x=0;
+	if(point.y<0)point.y=0;
 	return point;
 }
 
@@ -235,8 +238,7 @@ void CChildView::OnLButtonDown(UINT nFlags, CPoint point)
 	// TODO: Add your message handler code here and/or call default
 	SetCapture();
 	CPoint pt=GetMousePos(point,this);
-	if(pt.x>=0&&pt.y>=0)
-		m_TreeList.OnLBDown(pt,nFlags);
+	m_TreeList.OnLBDown(pt,nFlags);
 	CScrollView::OnLButtonDown(nFlags, point);
 }
 
@@ -246,9 +248,7 @@ void CChildView::OnLButtonUp(UINT nFlags, CPoint point)
 	// TODO: Add your message handler code here and/or call default
 	ReleaseCapture();
 	CPoint pt=GetMousePos(point,this);
-	ASSERT(pt.x>=0&&pt.y>=0);
-	if(pt.x>=0&&pt.y>=0)
-		m_TreeList.OnLBUp(pt,nFlags);
+	m_TreeList.OnLBUp(pt,nFlags);
 	CScrollView::OnLButtonUp(nFlags, point);
 }
 
@@ -257,8 +257,7 @@ void CChildView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	CPoint pt=GetMousePos(point,this);
-	if(pt.x>=0&&pt.y>=0)
-		m_TreeList.OnMMove(pt,nFlags);
+	m_TreeList.OnMMove(pt,nFlags);
 	CScrollView::OnMouseMove(nFlags, point);
 }
 
@@ -267,8 +266,7 @@ void CChildView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	CPoint pt=GetMousePos(point,this);
-	if(pt.x>=0&&pt.y>=0)
-		m_TreeList.OnLBDblClick(pt,nFlags);
+	m_TreeList.OnLBDblClick(pt,nFlags);
 	CScrollView::OnLButtonDblClk(nFlags, point);
 }
 
@@ -277,8 +275,7 @@ void CChildView::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	CPoint pt=GetMousePos(point,this);
-	if(pt.x>=0&&pt.y>=0)
-		m_TreeList.OnRBDown(pt,nFlags);
+	m_TreeList.OnRBDown(pt,nFlags);
 	CScrollView::OnRButtonDown(nFlags, point);
 }
 
@@ -287,9 +284,7 @@ void CChildView::OnRButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	CPoint pt=GetMousePos(point,this);
-	ASSERT(pt.x>=0&&pt.y>=0);
-	if(pt.x>=0&&pt.y>=0)
-		m_TreeList.OnRBUp(pt,nFlags);
+	m_TreeList.OnRBUp(pt,nFlags);
 	CScrollView::OnRButtonUp(nFlags, point);
 }
 
@@ -299,8 +294,7 @@ void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	// TODO: Add your message handler code here and/or call default
 	CScrollView::OnVScroll(nSBCode, nPos, pScrollBar);
 	CPoint point=GetMousePos(this);
-	if(point.x>=0&&point.y>=0)
-		m_TreeList.OnMMove(point,GetKey());
+	m_TreeList.OnMMove(point,GetKey());
 }
 
 
@@ -309,8 +303,7 @@ BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	// TODO: Add your message handler code here and/or call default
 	BOOL ret=CScrollView::OnMouseWheel(nFlags, zDelta, pt);
 	CPoint point=GetMousePos(this);
-	if(point.x>=0&&point.y>=0)
-		m_TreeList.OnMMove(point,GetKey());
+	m_TreeList.OnMMove(point,GetKey());
 	return ret;
 }
 

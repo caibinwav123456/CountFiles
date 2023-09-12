@@ -57,8 +57,8 @@ static int parse_error_rec(err_dir_node* enode,vector<string>& stack,const UInte
 	string name;
 	uint idx=0;
 	const byte *buf=_buf,*ptr=_buf;
-	uint tmplen=len;
 	pass_byte('\"');
+	uint tmplen=len;
 	if(!find_byte(ptr,tmplen,'\"'))
 		return ERR_CORRUPTED_FILE;
 	ptr=buf;
@@ -70,6 +70,7 @@ static int parse_error_rec(err_dir_node* enode,vector<string>& stack,const UInte
 		bool bfind=find_byte(ptr,namelen,dir_symbol);
 		if(ptr==buf)
 			return ERR_CORRUPTED_FILE;
+		len-=ptr-buf;
 		if((!bfind)||namelen==1)
 		{
 			startoff=off+UInteger64(buf-_buf),endoff=off+UInteger64(ptr-_buf);
@@ -88,6 +89,7 @@ static int parse_error_rec(err_dir_node* enode,vector<string>& stack,const UInte
 		enode=add_err_dir_node(enode,stack,name,idx);
 		init_err_node(enode,off+UInteger64(buf-_buf),off+UInteger64(ptr-_buf));
 		pass_byte('\0');
+		namelen--;
 		idx++;
 	}
 	efnode* err_file_node=add_leaf_err_node(enode,errdir);
@@ -127,6 +129,7 @@ int FindLine(UInteger64& off,const UInteger64& end,void* hlf)
 			off=tmpoff+UInteger64(ptr+1-buf);
 			return 0;
 		}
+		tmpoff=tmpend;
 	}
 	off=end;
 	return 0;

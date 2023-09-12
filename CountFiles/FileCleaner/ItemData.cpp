@@ -78,7 +78,7 @@ int TLItemDir::OpenDir(bool open,bool release)
 	if(open)
 	{
 		if(open_length>0)
-			return 0;
+			goto end;
 		if(0!=(ret=ctx->ExpandNode(dirnode,true,release)))
 			goto fail;
 		if(0!=(ret=construct_list()))
@@ -86,23 +86,21 @@ int TLItemDir::OpenDir(bool open,bool release)
 			ctx->ExpandNode(dirnode,false,true);
 			goto fail;
 		}
-		update_displen(GetDispLength()-oldlen);
-		return 0;
+		goto end;
 	}
 	else if(release)
 	{
 		clear();
 		ret=ctx->ExpandNode(dirnode,false,true);
-		update_displen(GetDispLength()-oldlen);
-		return ret;
+		goto end;
 	}
 	else if(0!=(ret=ctx->ExpandNode(dirnode,false)))
 		goto fail;
-	update_displen(GetDispLength()-oldlen);
-	return 0;
+	goto end;
 fail:
 	isopen=false;
 	clear();
+end:
 	update_displen(GetDispLength()-oldlen);
 	return ret;
 }
@@ -152,8 +150,10 @@ ItStkItem* TLItem::FromLineNum(int iline,int& lvl)
 		int displen=item->GetDispLength();
 		if(iacc+displen>iline)
 		{
+			iacc++;
 			cur=dynamic_cast<TLItemDir*>(item);
 			assert(cur!=NULL);
+			stack->m_pLItem=item;
 			stack=push_item_stack(stack);
 			level++;
 		}
@@ -264,21 +264,19 @@ void ListCtrlIterator::operator--(int)
 		end=false;
 		goto second_phase;
 	}
-	for(;;)
+	if(m_pStkItem->parentidx>0)
 	{
-		if(m_pStkItem->parentidx>0)
-		{
-			m_pStkItem->parentidx--;
-			m_pStkItem->m_pLItem=m_pStkItem->m_pLItem->parent->subitems[m_pStkItem->parentidx];
-			break;
-		}
-		if(lvl==0)
-			return;
-		lvl--;
-		ItStkItem* next=m_pStkItem->next;
-		delete m_pStkItem;
-		m_pStkItem=next;
+		m_pStkItem->parentidx--;
+		m_pStkItem->m_pLItem=m_pStkItem->m_pLItem->parent->subitems[m_pStkItem->parentidx];
+		goto second_phase;
 	}
+	if(lvl==0)
+		return;
+	lvl--;
+	ItStkItem* next=m_pStkItem->next;
+	delete m_pStkItem;
+	m_pStkItem=next;
+	return;
 second_phase:
 	for(;;)
 	{
@@ -388,7 +386,7 @@ void ItemSelector::AddSel(TLItem* item,int iline)
 		return;
 	assert(valid(iline));
 	assert(item->issel==false);
-	assert(m_setSel.find(item)==m_setSel.end());
+	assert(m_setSel.find(SelItem(item,iline))==m_setSel.end());
 	item->issel=true;
 	m_setSel.insert(SelItem(item,iline));
 }
@@ -398,7 +396,7 @@ void ItemSelector::CancelSel(TLItem* item,int iline)
 		return;
 	assert(valid(iline));
 	assert(item->issel==true);
-	assert(m_setSel.find(item)!=m_setSel.end());
+	assert(m_setSel.find(SelItem(item,iline))!=m_setSel.end());
 	item->issel=false;
 	m_setSel.erase(SelItem(item,iline));
 }

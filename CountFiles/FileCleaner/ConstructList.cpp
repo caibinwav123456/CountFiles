@@ -4,8 +4,6 @@
 #include <assert.h>
 void TLItemDir::clear()
 {
-	open_length=0;
-	dir_border=0;
 	subitems.clear();
 	subpairs->clear();
 	for(int i=0;i<(int)subfiles.size();i++)
@@ -33,6 +31,8 @@ void TLItemDir::clear()
 		delete subdirs[i];
 	}
 	subdirs.clear();
+	open_length=0;
+	dir_border=0;
 }
 static inline void init_new_item(TLItem* item,TLItemDir* parent,E_TREE_ITEM_TYPE type,void* node,int idx)
 {
@@ -293,7 +293,7 @@ static int merge_callback(unode_iterator it1,unode_iterator it2,E_MERGE_SIDE sid
 		plist->push_back(element1);
 		break;
 	case eMSRight:
-		element2=(it2.type==UNODE_ITERTYPE_DIR?(TLItem*)*(it2.errdirit->it):(TLItem*)*(it2.errfileit->it));
+		element2=(it2.type==UNODE_ITERTYPE_ERRDIR?(TLItem*)*(it2.errdirit->it):(TLItem*)*(it2.errfileit->it));
 		element2->parentidx=plist->size();
 		plist->push_back(element2);
 		break;

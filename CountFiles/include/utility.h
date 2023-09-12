@@ -23,14 +23,18 @@ int merge_ordered_list(iteratorT l1,iteratorT l2,int (*cb)(iteratorT,iteratorT,E
 	bool bleft=true;
 	for(;;)
 	{
-		for(;*it1;(*it1)++)
+		for(;*it1;)
 		{
-			if(!*it2)
-				err_return(ret,cb(l1,l2,eMSLeft,param))
-			else if(**it1<**it2)
+			if((!*it2)||**it1<**it2)
+			{
 				err_return(ret,cb(l1,l2,bleft?eMSLeft:eMSRight,param))
+				(*it1)++;
+			}
 			else if(!(**it2<**it1))
+			{
 				err_return(ret,cb(l1,l2,eMSBoth,param))
+				(*it1)++,(*it2)++;
+			}
 			else
 				break;
 		}
