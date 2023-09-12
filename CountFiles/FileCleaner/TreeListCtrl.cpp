@@ -185,26 +185,6 @@ void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter)
 			drawer.DrawLine(&CPoint(xpos,ystart),&CPoint(xpos,ypos),CONN_COLOR,1,PS_DOT);
 	}
 }
-inline void DrawConfinedText(CDrawer& drawer,const string& text,const CRect& rc,COLORREF clr)
-{
-	CString txt=a2tstr(text);
-	static const LPCTSTR fontname=_T("Times New Roman");
-	CSize txtsize=drawer.GetTextExtent(txt,TEXT_HEIGHT,fontname);
-	if(txtsize.cx>rc.Width())
-	{
-		CString tmptxt=txt;
-		while((!tmptxt.IsEmpty())&&txtsize.cx>rc.Width())
-		{
-			tmptxt=tmptxt.Left(tmptxt.GetLength()-1);
-			txt=tmptxt+_T("...");
-			txtsize=drawer.GetTextExtent(txt,TEXT_HEIGHT,fontname);
-		}
-		if(tmptxt.IsEmpty())
-			txt.Empty();
-	}
-	CPoint pt(rc.left,rc.top+(rc.Height()-TEXT_HEIGHT)/2);
-	drawer.DrawText(&pt,txt,TEXT_HEIGHT,clr,TRANSPARENT,fontname);
-}
 void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 {
 	DrawLine(drawer,iter.m_iline,iter.m_pStkItem==NULL?NULL:iter.m_pStkItem->m_pLItem);
@@ -251,9 +231,12 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 			else
 				m_ListLoader.GetNodeInfo(item->filenode,&info);
 			info.mod_time.Format(date,FORMAT_DATE|FORMAT_TIME|FORMAT_WEEKDAY);
-			DrawConfinedText(drawer,info.name,CRect(pos,CPoint(400,pos.y+LINE_HEIGHT)),clr);
-			DrawConfinedText(drawer,format_segmented_u64(info.size),CRect(400,pos.y,500,pos.y+LINE_HEIGHT),clr);
-			DrawConfinedText(drawer,date,CRect(500,pos.y,700,pos.y+LINE_HEIGHT),clr);
+			drawer.DrawTextInRect(&CRect(pos,CPoint(350,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,
+				a2t(info.name),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
+			drawer.DrawTextInRect(&CRect(350,pos.y,480,pos.y+LINE_HEIGHT),DT_ALIGN_RIGHT,
+				a2t(format_segmented_u64(info.size)),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
+			drawer.DrawTextInRect(&CRect(500,pos.y,700,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
+				a2t(date),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 		}
 		break;
 	case eITypeErrDir:
@@ -261,8 +244,10 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 		{
 			err_node_info info;
 			m_ListLoader.GetNodeErrInfo(item->errnode,&info);
-			DrawConfinedText(drawer,info.name,CRect(pos,CPoint(400,pos.y+LINE_HEIGHT)),clr);
-			DrawConfinedText(drawer,info.err_desc,CRect(400,pos.y,700,pos.y+LINE_HEIGHT),clr);
+			drawer.DrawTextInRect(&CRect(pos,CPoint(350,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,a2t(info.name),
+				TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
+			drawer.DrawTextInRect(&CRect(350,pos.y,700,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,a2t(info.err_desc),
+				TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 		}
 		break;
 	}
