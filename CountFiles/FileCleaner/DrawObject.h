@@ -14,6 +14,8 @@ private:
 	CRect m_rcClient;
 	int m_nType;
 };
+#define DT_ALIGN_LEFT  1
+#define DT_ALIGN_RIGHT 2
 class CDrawer
 {
 public:
@@ -31,6 +33,7 @@ public:
 	void DrawBitmap(CBitmap* pBmp,POINT* pt,DWORD dwOps=SRCCOPY,RECT* srcrc=NULL);
 
 	void DrawText(POINT* pos,LPCTSTR text,int height=24,COLORREF clr=RGB(0,0,0),UINT backmode=TRANSPARENT,LPCTSTR ftname=_T("Times New Roman"));
+	void DrawTextInRect(RECT* rect,UINT align,LPCTSTR text,int height=24,COLORREF clr=RGB(0,0,0),UINT backmode=TRANSPARENT,LPCTSTR ftname=_T("Times New Roman"));
 	CSize GetTextExtent(LPCTSTR text,int height=24,LPCTSTR ftname=_T("Times New Roman"));
 private:
 	CDC* SelectDC();

@@ -200,8 +200,10 @@ void CDrawer::DrawRect(RECT* rc,COLORREF clr,int linew,int style)
 void CDrawer::FillRect(RECT* rc,COLORREF clr)
 {
 	DrawBrush brush(SelectDC(),clr);
+	CRect rect=*rc;
+	rect.InflateRect(&CRect(1,0,1,1));
 	SelectDC()->SelectStockObject(NULL_PEN);
-	SelectDC()->Rectangle(rc);
+	SelectDC()->Rectangle(rect);
 }
 void CDrawer::DrawBitmap(CBitmap* pBmp,POINT* pt,DWORD dwOps,RECT* srcrc)
 {
@@ -230,6 +232,29 @@ void CDrawer::DrawText(POINT* pos,LPCTSTR text,int height,COLORREF clr,UINT back
 	SelectDC()->SetTextColor(clr);
 	SelectDC()->SetBkMode(backmode);
 	SelectDC()->TextOut(pos->x,pos->y,text);
+}
+void CDrawer::DrawTextInRect(RECT* rect,UINT align,LPCTSTR text,int height,COLORREF clr,UINT backmode,LPCTSTR ftname)
+{
+	CString txt(text);
+	CSize txtsize=GetTextExtent(txt,height,ftname);
+	if(txtsize.cx>((CRect*)rect)->Width())
+	{
+		CString tmptxt=txt;
+		while((!tmptxt.IsEmpty())&&txtsize.cx>((CRect*)rect)->Width())
+		{
+			tmptxt=tmptxt.Left(tmptxt.GetLength()-1);
+			txt=tmptxt+_T("...");
+			txtsize=GetTextExtent(txt,height,ftname);
+		}
+		if(tmptxt.IsEmpty())
+			txt.Empty();
+	}
+	CPoint pt;
+	if(align&DT_ALIGN_LEFT)
+		pt=CPoint(rect->left,rect->top+(((CRect*)rect)->Height()-height)/2);
+	else if(align&DT_ALIGN_RIGHT)
+		pt=CPoint(rect->right-txtsize.cx,rect->top+(((CRect*)rect)->Height()-height)/2);
+	DrawText(&pt,txt,height,clr,backmode,ftname);
 }
 CSize CDrawer::GetTextExtent(LPCTSTR text,int height,LPCTSTR ftname)
 {

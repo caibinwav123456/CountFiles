@@ -30,4 +30,6 @@
 
 #define dir_symbol '\\'
 
+#define VIEW_FONT _T("Arial")
+
 #endif
