@@ -50,6 +50,10 @@ struct err_dir_node:public fnode
 	dir_err_contents* err_contents;
 	vector<err_dir_node>* subdirs;
 	err_dir_node():err_contents(NULL),subdirs(NULL){}
+	bool empty()
+	{
+		return err_contents==NULL&&subdirs==NULL;
+	}
 };
 struct dir_contents
 {

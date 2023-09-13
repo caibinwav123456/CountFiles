@@ -233,7 +233,7 @@ void CDrawer::DrawText(POINT* pos,LPCTSTR text,int height,COLORREF clr,UINT back
 	SelectDC()->SetBkMode(backmode);
 	SelectDC()->TextOut(pos->x,pos->y,text);
 }
-void CDrawer::DrawTextInRect(RECT* rect,UINT align,LPCTSTR text,int height,COLORREF clr,UINT backmode,LPCTSTR ftname)
+void CDrawer::DrawText(RECT* rect,UINT align,LPCTSTR text,int height,COLORREF clr,UINT backmode,LPCTSTR ftname)
 {
 	CString txt(text);
 	CSize txtsize=GetTextExtent(txt,height,ftname);
