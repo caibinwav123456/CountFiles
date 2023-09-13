@@ -475,6 +475,8 @@ static int build_err_tree(err_dir_node*& ebase,void* hef,const UInteger64& off,c
 	ebase=new err_dir_node;
 	if(0!=(ret=load_error_list(ebase,off,end,hef)))
 		return ret;
+	if(ebase->empty())
+		return 0;
 	if(ebase->subdirs==NULL||ebase->subdirs->size()!=1)
 		return ERR_CORRUPTED_FILE;
 	base->enode=&ebase->subdirs->at(0);

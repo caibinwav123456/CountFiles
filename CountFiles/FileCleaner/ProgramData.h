@@ -3,6 +3,7 @@
 #include <string>
 using namespace std;
 
+#ifdef UNICODE
 #define t2a(p) ConvertTStrToAnsiStr(p).c_str()
 #define a2t(p) (LPCTSTR)ConvertAnsiStrToTStr(p)
 #define t2astr(p) ConvertTStrToAnsiStr(p)
@@ -11,6 +12,28 @@ using namespace std;
 string ConvertTStrToAnsiStr(LPCTSTR from);
 CString ConvertAnsiStrToTStr(LPCSTR from);
 CString ConvertAnsiStrToTStr(const string& from);
+#else
+inline LPCSTR t2a(LPSTR p)
+{
+	return p;
+}
+inline LPCSTR a2t(LPSTR p)
+{
+	return p;
+}
+inline LPCSTR a2t(const string& str)
+{
+	return str.c_str();
+}
+inline string t2astr(const CString& str)
+{
+	return (LPCSTR)str;
+}
+inline CString a2tstr(const string& str)
+{
+	return str.c_str();
+}
+#endif
 
 struct ID2CWndPtrAssoc
 {

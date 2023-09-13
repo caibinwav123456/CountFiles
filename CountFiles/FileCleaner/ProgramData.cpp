@@ -76,6 +76,7 @@ string CProgramData::GetErrListFilePath(const string& path)
 	return path+s_Data.m_strCFileErrExt;
 }
 
+#ifdef UNICODE
 string ConvertTStrToAnsiStr(LPCTSTR from)
 {
 	USES_CONVERSION;
@@ -91,3 +92,4 @@ CString ConvertAnsiStrToTStr(const string& from)
 	USES_CONVERSION;
 	return A2T(from.c_str());
 }
+#endif
