@@ -166,32 +166,25 @@ LRESULT CChildView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 	FListLoadData* lpData=(FListLoadData*)wParam;
 	string strList;
 	string strErrList;
-	if(lpData->mask&FILE_LIST_ATTRIB_MAIN)
+	string path=t2astr(lpData->left);
+	dword type=0;
+	if(sys_fstat((char*)path.c_str(),&type)!=0)
+		return FALSE;
+	m_TreeList.UnLoad();
+	if(type==FILE_TYPE_DIR)
 	{
-		string path=t2astr(lpData->left);
-		dword type=0;
-		if(sys_fstat((char*)path.c_str(),&type)!=0)
-			return FALSE;
-
-		if(type==FILE_TYPE_DIR)
-		{
-			m_TreeList.UnLoad();
-			CDlgLoad dlg(NULL,lpData->left);
-			if(dlg.DoModal()!=IDOK)
-				return TRUE;
-			strList=CProgramData::GetCacheFilePath();
-			strErrList=CProgramData::GetCacheErrFilePath();
-		}
-		else
-		{
-			strList=path;
-			string patherr=CProgramData::GetErrListFilePath(path);
-			if(sys_fstat((char*)patherr.c_str(),&type)==0&&type==FILE_TYPE_NORMAL)
-				strErrList=patherr;
-		}
+		CDlgLoad dlg(NULL,lpData->left);
+		if(dlg.DoModal()!=IDOK)
+			return TRUE;
+		strList=CProgramData::GetCacheFilePath();
+		strErrList=CProgramData::GetCacheErrFilePath();
 	}
-	if(lpData->mask&FILE_LIST_ATTRIB_REF)
+	else
 	{
+		strList=path;
+		string patherr=CProgramData::GetErrListFilePath(path);
+		if(sys_fstat((char*)patherr.c_str(),&type)==0&&type==FILE_TYPE_NORMAL)
+			strErrList=patherr;
 	}
 	if(0!=(ret=m_TreeList.Load(strList.c_str(),strErrList.c_str())))
 	{
