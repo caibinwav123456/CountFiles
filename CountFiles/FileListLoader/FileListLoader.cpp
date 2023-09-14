@@ -184,26 +184,6 @@ bool operator<(const path_value_t& a,const path_value_t& b)
 		&strb=b.pval!=NULL?*b.pval:b.val;
 	return compare_pathname(stra,strb)<0;
 }
-template<class T>
-struct iterator_base
-{
-	typename vector<T>::iterator it;
-	typename vector<T>::iterator end;
-	iterator_base(vector<T>& v)
-	{
-		it=v.begin();
-		end=v.end();
-	}
-	operator bool()
-	{
-		return it!=end;
-	}
-	void operator++(int)
-	{
-		if(it<end)
-			it++;
-	}
-};
 struct node_iterator:public iterator_base<dir_node>
 {
 	void* hlf;
@@ -233,105 +213,8 @@ struct err_node_iterator:public iterator_base<err_dir_node>
 		return v;
 	}
 };
-#define UNODE_ITERTYPE_DIR 0
-#define UNODE_ITERTYPE_ERR 1
-struct unode_iterator
+int merge_callback(node_iterator it1,err_node_iterator it2,E_MERGE_SIDE side,void* param)
 {
-	union
-	{
-		void* it;
-		node_iterator* dirit;
-		err_node_iterator* errit;
-	};
-	uint type;
-	bool master;
-	unode_iterator(vector<dir_node>* flist,void* _hlf,LRUCache* _cache):type(UNODE_ITERTYPE_DIR),master(true)
-	{
-		dirit=new node_iterator(*flist,_hlf,_cache);
-	}
-	unode_iterator(vector<err_dir_node>* flist,void* _hef):type(UNODE_ITERTYPE_ERR),master(true)
-	{
-		errit=new err_node_iterator(*flist,_hef);
-	}
-	~unode_iterator()
-	{
-		if(!master)
-			return;
-		switch(type)
-		{
-		case UNODE_ITERTYPE_DIR:
-			delete dirit;
-			break;
-		case UNODE_ITERTYPE_ERR:
-			delete errit;
-			break;
-		default:
-			assert(false);
-		}
-	}
-	unode_iterator(const unode_iterator& other):type(other.type),master(false)
-	{
-		switch(type)
-		{
-		case UNODE_ITERTYPE_DIR:
-			dirit=other.dirit;
-			break;
-		case UNODE_ITERTYPE_ERR:
-			errit=other.errit;
-			break;
-		default:
-			assert(false);
-		}
-	}
-	path_value_t operator*()
-	{
-		switch(type)
-		{
-		case UNODE_ITERTYPE_DIR:
-			return **dirit;
-			break;
-		case UNODE_ITERTYPE_ERR:
-			return **errit;
-			break;
-		default:
-			assert(false);
-			return path_value_t();
-		}
-	}
-	operator bool()
-	{
-		switch(type)
-		{
-		case UNODE_ITERTYPE_DIR:
-			return *dirit;
-			break;
-		case UNODE_ITERTYPE_ERR:
-			return *errit;
-			break;
-		default:
-			assert(false);
-			return false;
-		}
-	}
-	void operator++(int)
-	{
-		switch(type)
-		{
-		case UNODE_ITERTYPE_DIR:
-			(*dirit)++;
-			break;
-		case UNODE_ITERTYPE_ERR:
-			(*errit)++;
-			break;
-		default:
-			assert(false);
-		}
-	}
-};
-int merge_callback(unode_iterator it1,unode_iterator it2,E_MERGE_SIDE side,void* param)
-{
-	assert(it1.type==UNODE_ITERTYPE_DIR
-		&&it2.type==UNODE_ITERTYPE_ERR);
 	switch(side)
 	{
 	case eMSLeft:
@@ -340,7 +223,7 @@ int merge_callback(unode_iterator it1,unode_iterator it2,E_MERGE_SIDE side,void*
 		assert(false);
 		break;
 	case eMSBoth:
-		it1.dirit->it->enode=&*(it2.errit->it);
+		it1.it->enode=&*(it2.it);
 		break;
 	default:
 		assert(false);
@@ -351,8 +234,8 @@ static int merge_error_list(dir_node* node,void* hlf,void* hef,LRUCache* cache)
 {
 	if(node->enode->subdirs==NULL)
 		return 0;
-	unode_iterator itdir(&node->contents->dirs,hlf,cache);
-	unode_iterator iterr(node->enode->subdirs,hef);
+	node_iterator itdir(node->contents->dirs,hlf,cache);
+	err_node_iterator iterr(*node->enode->subdirs,hef);
 	try
 	{
 		merge_ordered_list(itdir,iterr,&merge_callback,(void*)NULL);
