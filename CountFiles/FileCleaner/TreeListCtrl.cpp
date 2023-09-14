@@ -64,7 +64,7 @@ int TreeListCtrl::Load(const char* lfile,const char* efile)
 {
 	UnLoad();
 	if(lfile==NULL||*lfile==0)
-		return false;
+		return 0;
 	int ret=0;
 	if(0!=(ret=m_ListLoader.Load(lfile,efile)))
 		return ret;

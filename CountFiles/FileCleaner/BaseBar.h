@@ -50,7 +50,7 @@ private:
 	CString GetImpFileName(const CString& path);
 	void RestoreCtrlState();
 
-	BOOL ValidatePaths(const FListLoadData& path,UINT accept_type);
+	BOOL ValidatePaths(FListLoadData& path,UINT accept_type);
 	BOOL StartListLoad(UINT mask,UINT accept_type);
 
 	//class data

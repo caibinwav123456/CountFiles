@@ -205,29 +205,37 @@ inline UINT AcceptPathType(const CString& path,UINT accept_type)
 {
 	if(!PathFileExists(path))
 		return 0;
-	if((accept_type&ACC_PATH_TYPE_DIR)&&PathIsDirectory(path))
+	BOOL bDir=PathIsDirectory(path);
+	if((accept_type&ACC_PATH_TYPE_DIR)&&bDir)
 		return ACC_PATH_TYPE_DIR;
-	if(accept_type&ACC_PATH_TYPE_FILE)
+	if((accept_type&ACC_PATH_TYPE_FILE)&&!bDir)
 		return ACC_PATH_TYPE_FILE;
 	return 0;
 }
 
-BOOL CBaseBar::ValidatePaths(const FListLoadData& path,UINT accept_type)
+BOOL CBaseBar::ValidatePaths(FListLoadData& path,UINT accept_type)
 {
 	if(path.mask==0)
 		return FALSE;
-	CString strErr;
-	if((path.mask&FILE_LIST_ATTRIB_MAIN)&&AcceptPathType(path.left,accept_type)==0)
+	if(path.mask&FILE_LIST_ATTRIB_MAIN)
 	{
-		strErr.Format(_T("Invalid path: \"%s\""),(LPCTSTR)path.left);
-		MessageBox(strErr);
-		return FALSE;
+		if(path.left.IsEmpty())
+			path.mask&=~FILE_LIST_ATTRIB_MAIN;
+		else if(AcceptPathType(path.left,accept_type)==0)
+		{
+			PDXShowMessage(_T("Invalid path: \"%s\""),(LPCTSTR)path.left);
+			return FALSE;
+		}
 	}
-	if((path.mask&FILE_LIST_ATTRIB_REF)&&AcceptPathType(path.right,ACC_PATH_TYPE_FILE)==0)
+	if(path.mask&FILE_LIST_ATTRIB_REF)
 	{
-		strErr.Format(_T("Invalid path: \"%s\""),(LPCTSTR)path.right);
-		MessageBox(strErr);
-		return FALSE;
+		if(path.right.IsEmpty())
+			path.mask&=~FILE_LIST_ATTRIB_REF;
+		else if(AcceptPathType(path.right,ACC_PATH_TYPE_FILE)==0)
+		{
+			PDXShowMessage(_T("Invalid path: \"%s\""),(LPCTSTR)path.right);
+			return FALSE;
+		}
 	}
 	return TRUE;
 }
@@ -243,6 +251,8 @@ BOOL CBaseBar::StartListLoad(UINT mask,UINT accept_type)
 		(mask&FILE_LIST_ATTRIB_REF)?m_strComboBasePathRef:_T(""));
 	if(!ValidatePaths(data,accept_type))
 		return FALSE;
+	if(data.mask==0)
+		return TRUE;
 	return PDXGetWndFromID(IDW_MAIN_VIEW)->SendMessage(WM_FILE_LIST_START_LOAD,(WPARAM)&data);
 }
 
