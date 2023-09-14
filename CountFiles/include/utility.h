@@ -14,33 +14,57 @@ enum E_MERGE_SIDE
 	eMSLeft,
 	eMSRight,
 };
+template<class T>
+struct iterator_base
+{
+	typename vector<T>::iterator it;
+	typename vector<T>::iterator end;
+	iterator_base(vector<T>& v)
+	{
+		it=v.begin();
+		end=v.end();
+	}
+	operator bool()
+	{
+		return it!=end;
+	}
+	void operator++(int)
+	{
+		if(it<end)
+			it++;
+	}
+};
 #define err_return(ret,proc) {if(0!=(ret=proc))return ret;}
-template<class iteratorT>
-int merge_ordered_list(iteratorT l1,iteratorT l2,int (*cb)(iteratorT,iteratorT,E_MERGE_SIDE,void*),void* param)
+#define cur_left_valid() (bleft?(bool)l1:(bool)l2)
+#define cur_right_valid() (bleft?(bool)l2:(bool)l1)
+#define cur_left_next() (bleft?l1++:l2++)
+#define cur_right_next() (bleft?l2++:l1++)
+#define cur_left() (bleft?*l1:*l2)
+#define cur_right() (bleft?*l2:*l1)
+template<class iteratorT1,class iteratorT2>
+int merge_ordered_list(iteratorT1 l1,iteratorT2 l2,int (*cb)(iteratorT1,iteratorT2,E_MERGE_SIDE,void*),void* param)
 {
 	int ret=0;
-	iteratorT *it1=&l1,*it2=&l2;
 	bool bleft=true;
 	for(;;)
 	{
-		for(;*it1;)
+		for(;cur_left_valid();)
 		{
-			if((!*it2)||**it1<**it2)
+			if((!cur_right_valid())||cur_left()<cur_right())
 			{
 				err_return(ret,cb(l1,l2,bleft?eMSLeft:eMSRight,param))
-				(*it1)++;
+				cur_left_next();
 			}
-			else if(!(**it2<**it1))
+			else if(!(cur_right()<cur_left()))
 			{
 				err_return(ret,cb(l1,l2,eMSBoth,param))
-				(*it1)++,(*it2)++;
+				l1++,l2++;
 			}
 			else
 				break;
 		}
-		if(!(*it1||*it2))
+		if(!(l1||l2))
 			break;
-		swap(it1,it2);
 		bleft=!bleft;
 	}
 	return 0;

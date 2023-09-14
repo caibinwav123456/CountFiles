@@ -82,29 +82,14 @@ bool operator<(const path_value_t& a,const path_value_t& b)
 	return compare_pathname(stra,strb)<0;
 }
 template<class T>
-struct iterator_base
+struct iterator_base_ctx:public iterator_base<T>
 {
-	typename vector<T>::iterator it;
-	typename vector<T>::iterator end;
 	FileListLoader* ctx;
-	iterator_base(vector<T>& v,FileListLoader* loader):ctx(loader)
-	{
-		it=v.begin();
-		end=v.end();
-	}
-	operator bool()
-	{
-		return it!=end;
-	}
-	void operator++(int)
-	{
-		if(it<end)
-			it++;
-	}
+	iterator_base_ctx(vector<T>& v,FileListLoader* loader):iterator_base<T>(v),ctx(loader){}
 };
-struct dir_iterator:public iterator_base<TLItemDir*>
+struct dir_iterator:public iterator_base_ctx<TLItemDir*>
 {
-	dir_iterator(vector<TLItemDir*>& dirlist,FileListLoader* loader):iterator_base<TLItemDir*>(dirlist,loader){}
+	dir_iterator(vector<TLItemDir*>& dirlist,FileListLoader* loader):iterator_base_ctx<TLItemDir*>(dirlist,loader){}
 	path_value_t operator*()
 	{
 		path_value_t v;
@@ -116,9 +101,9 @@ struct dir_iterator:public iterator_base<TLItemDir*>
 		return v;
 	}
 };
-struct errdir_iterator:public iterator_base<TLItemErrDir*>
+struct errdir_iterator:public iterator_base_ctx<TLItemErrDir*>
 {
-	errdir_iterator(vector<TLItemErrDir*>& dirlist,FileListLoader* loader):iterator_base<TLItemErrDir*>(dirlist,loader){}
+	errdir_iterator(vector<TLItemErrDir*>& dirlist,FileListLoader* loader):iterator_base_ctx<TLItemErrDir*>(dirlist,loader){}
 	path_value_t operator*()
 	{
 		path_value_t v;
@@ -130,9 +115,9 @@ struct errdir_iterator:public iterator_base<TLItemErrDir*>
 		return v;
 	}
 };
-struct file_iterator:public iterator_base<TLItemFile*>
+struct file_iterator:public iterator_base_ctx<TLItemFile*>
 {
-	file_iterator(vector<TLItemFile*>& flist,FileListLoader* loader):iterator_base<TLItemFile*>(flist,loader){}
+	file_iterator(vector<TLItemFile*>& flist,FileListLoader* loader):iterator_base_ctx<TLItemFile*>(flist,loader){}
 	path_value_t operator*()
 	{
 		path_value_t v;
@@ -144,9 +129,9 @@ struct file_iterator:public iterator_base<TLItemFile*>
 		return v;
 	}
 };
-struct errfile_iterator:public iterator_base<TLItemErrFile*>
+struct errfile_iterator:public iterator_base_ctx<TLItemErrFile*>
 {
-	errfile_iterator(vector<TLItemErrFile*>& flist,FileListLoader* loader):iterator_base<TLItemErrFile*>(flist,loader){}
+	errfile_iterator(vector<TLItemErrFile*>& flist,FileListLoader* loader):iterator_base_ctx<TLItemErrFile*>(flist,loader){}
 	path_value_t operator*()
 	{
 		path_value_t v;
@@ -158,142 +143,40 @@ struct errfile_iterator:public iterator_base<TLItemErrFile*>
 		return v;
 	}
 };
-#define UNODE_ITERTYPE_DIR 0
-#define UNODE_ITERTYPE_ERRDIR 1
-#define UNODE_ITERTYPE_FILE 2
-#define UNODE_ITERTYPE_ERRFILE 3
-struct unode_iterator
+static int merge_callback_dir(dir_iterator it1,errdir_iterator it2,E_MERGE_SIDE side,void* param)
 {
-	union
-	{
-		void* ptrit;
-		dir_iterator* dirit;
-		errdir_iterator* errdirit;
-		file_iterator* fileit;
-		errfile_iterator* errfileit;
-	};
-	uint type;
-	bool master;
-	unode_iterator(vector<TLItemDir*>* dirlist,FileListLoader* loader):type(UNODE_ITERTYPE_DIR),master(true)
-	{
-		dirit=new dir_iterator(*dirlist,loader);
-	}
-	unode_iterator(vector<TLItemFile*>* flist,FileListLoader* loader):type(UNODE_ITERTYPE_FILE),master(true)
-	{
-		fileit=new file_iterator(*flist,loader);
-	}
-	unode_iterator(vector<TLItemErrDir*>* dirlist,FileListLoader* loader):type(UNODE_ITERTYPE_ERRDIR),master(true)
-	{
-		errdirit=new errdir_iterator(*dirlist,loader);
-	}
-	unode_iterator(vector<TLItemErrFile*>* flist,FileListLoader* loader):type(UNODE_ITERTYPE_ERRFILE),master(true)
-	{
-		errfileit=new errfile_iterator(*flist,loader);
-	}
-	~unode_iterator()
-	{
-		if(!master)
-			return;
-		switch(type)
-		{
-		case UNODE_ITERTYPE_DIR:
-			delete dirit;
-			break;
-		case UNODE_ITERTYPE_FILE:
-			delete fileit;
-			break;
-		case UNODE_ITERTYPE_ERRDIR:
-			delete errdirit;
-			break;
-		case UNODE_ITERTYPE_ERRFILE:
-			delete errfileit;
-			break;
-		default:
-			assert(false);
-		}
-	}
-	unode_iterator(const unode_iterator& other):type(other.type),master(false)
-	{
-		ptrit=other.ptrit;
-	}
-	path_value_t operator*()
-	{
-		switch(type)
-		{
-		case UNODE_ITERTYPE_DIR:
-			return **dirit;
-			break;
-		case UNODE_ITERTYPE_FILE:
-			return **fileit;
-			break;
-		case UNODE_ITERTYPE_ERRDIR:
-			return **errdirit;
-			break;
-		case UNODE_ITERTYPE_ERRFILE:
-			return **errfileit;
-			break;
-		default:
-			assert(false);
-			return path_value_t();
-		}
-	}
-	operator bool()
-	{
-		switch(type)
-		{
-		case UNODE_ITERTYPE_DIR:
-			return *dirit;
-			break;
-		case UNODE_ITERTYPE_FILE:
-			return *fileit;
-			break;
-		case UNODE_ITERTYPE_ERRDIR:
-			return *errdirit;
-			break;
-		case UNODE_ITERTYPE_ERRFILE:
-			return *errfileit;
-			break;
-		default:
-			assert(false);
-			return false;
-		}
-	}
-	void operator++(int)
-	{
-		switch(type)
-		{
-		case UNODE_ITERTYPE_DIR:
-			return (*dirit)++;
-			break;
-		case UNODE_ITERTYPE_FILE:
-			return (*fileit)++;
-			break;
-		case UNODE_ITERTYPE_ERRDIR:
-			return (*errdirit)++;
-			break;
-		case UNODE_ITERTYPE_ERRFILE:
-			return (*errfileit)++;
-			break;
-		default:
-			assert(false);
-		}
-	}
-};
-static int merge_callback(unode_iterator it1,unode_iterator it2,E_MERGE_SIDE side,void* param)
-{
-	assert((it1.type==UNODE_ITERTYPE_DIR&&it2.type==UNODE_ITERTYPE_ERRDIR)
-		||(it1.type==UNODE_ITERTYPE_FILE&&it2.type==UNODE_ITERTYPE_ERRFILE));
 	vector<TLItem*>* plist=(vector<TLItem*>*)param;
 	TLItem *element1,*element2;
 	switch(side)
 	{
 	case eMSLeft:
-		element1=(it1.type==UNODE_ITERTYPE_DIR?(TLItem*)*(it1.dirit->it):(TLItem*)*(it1.fileit->it));
+		element1=*(it1.it);
 		element1->parentidx=plist->size();
 		plist->push_back(element1);
 		break;
 	case eMSRight:
-		element2=(it2.type==UNODE_ITERTYPE_ERRDIR?(TLItem*)*(it2.errdirit->it):(TLItem*)*(it2.errfileit->it));
+		element2=*(it2.it);
+		element2->parentidx=plist->size();
+		plist->push_back(element2);
+		break;
+	default:
+		assert(false);
+	}
+	return 0;
+}
+static int merge_callback_file(file_iterator it1,errfile_iterator it2,E_MERGE_SIDE side,void* param)
+{
+	vector<TLItem*>* plist=(vector<TLItem*>*)param;
+	TLItem *element1,*element2;
+	switch(side)
+	{
+	case eMSLeft:
+		element1=*(it1.it);
+		element1->parentidx=plist->size();
+		plist->push_back(element1);
+		break;
+	case eMSRight:
+		element2=*(it2.it);
 		element2->parentidx=plist->size();
 		plist->push_back(element2);
 		break;
@@ -363,13 +246,13 @@ int TLItemDir::construct_list()
 	}
 	try
 	{
-		unode_iterator itdir(&subdirs,ctx);
-		unode_iterator iterrdir(&errdirs,ctx);
-		merge_ordered_list(itdir,iterrdir,&merge_callback,(void*)&subitems);
+		dir_iterator itdir(subdirs,ctx);
+		errdir_iterator iterrdir(errdirs,ctx);
+		merge_ordered_list(itdir,iterrdir,&merge_callback_dir,(void*)&subitems);
 		dir_border=subitems.size();
-		unode_iterator itfile(&subfiles,ctx);
-		unode_iterator iterrfile(&errfiles,ctx);
-		merge_ordered_list(itfile,iterrfile,&merge_callback,(void*)&subitems);
+		file_iterator itfile(subfiles,ctx);
+		errfile_iterator iterrfile(errfiles,ctx);
+		merge_ordered_list(itfile,iterrfile,&merge_callback_file,(void*)&subitems);
 		open_length=1+subitems.size();
 	}
 	catch(int err)

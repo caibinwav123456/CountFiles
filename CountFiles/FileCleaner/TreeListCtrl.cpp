@@ -105,9 +105,11 @@ void TreeListCtrl::DrawFolder(CDrawer* drawer,POINT* pt,E_FOLDER_STATE state,BOO
 	if(state<=0||state>=eFSMax)
 		return;
 	drawer->DrawBitmap(expand&&state<eFSAnormal?&m_bmpFolderExpMask:&m_bmpFolderMask,pt,SRCAND,
-		&CRect(0,0,LINE_HEIGHT,LINE_HEIGHT));
+		&CRect((FOLDER_WIDTH-LINE_HEIGHT)/2,(FOLDER_WIDTH-LINE_HEIGHT)/2,
+		(FOLDER_WIDTH+LINE_HEIGHT)/2,(FOLDER_WIDTH+LINE_HEIGHT)/2));
 	drawer->DrawBitmap(expand?&m_bmpFolderExp:&m_bmpFolder,pt,SRCPAINT,
-		&CRect(LINE_HEIGHT*(state-1),0,LINE_HEIGHT*state,LINE_HEIGHT));
+		&CRect(FOLDER_WIDTH*(state-1)+(FOLDER_WIDTH-LINE_HEIGHT)/2,(FOLDER_WIDTH-LINE_HEIGHT)/2,
+		FOLDER_WIDTH*state-(FOLDER_WIDTH-LINE_HEIGHT)/2,(FOLDER_WIDTH+LINE_HEIGHT)/2));
 }
 ListCtrlIterator TreeListCtrl::GetDrawIter(POINT* pt)
 {
@@ -207,7 +209,7 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 				exp=(BOOL)dir->isopen;
 			}
 			DrawFolder(&drawer,&pos,item->state,exp);
-			pos.x+=FOLDER_WIDTH;
+			pos.x+=LINE_HEIGHT;
 		}
 		break;
 	case eITypeFile:
