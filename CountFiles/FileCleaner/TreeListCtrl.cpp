@@ -151,7 +151,7 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,int iline,TLItem* pItem)
 		return;
 	CRect rcline(0,0,0,LINE_HEIGHT),rc;
 	GetCanvasRect(&rc);
-	rcline.right=rc.right;
+	rcline.right=max(rc.right,MIN_SCROLL_WIDTH);
 	int starty=iline*LINE_HEIGHT;
 	rcline.MoveToXY(0,starty);
 	bool grey=!!(iline%2);

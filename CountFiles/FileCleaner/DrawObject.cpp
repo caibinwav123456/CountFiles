@@ -3,6 +3,7 @@
 #include "resource.h"
 #include <assert.h>
 #define clear_mem(m) memset(&m,0,sizeof(m))
+#define DEFAULT_FONT _T("Times New Roman")
 class StaticDrawResource
 {
 private:
@@ -154,13 +155,13 @@ private:
 class DrawFont:public DrawObject
 {
 public:
-	DrawFont(CDC* pDC,int height,LPCTSTR ftname):DrawObject(pDC)
+	DrawFont(CDC* pDC,int height,LPCTSTR ftname=NULL):DrawObject(pDC)
 	{
 		LOGFONT logfont;
 		clear_mem(logfont);
 		logfont.lfHeight=height;
 		logfont.lfCharSet=ANSI_CHARSET;
-		_tcscpy_s(logfont.lfFaceName,ftname);
+		_tcscpy_s(logfont.lfFaceName,ftname==NULL?DEFAULT_FONT:ftname);
 		m_pDrawObj=new CFont;
 		((CFont*)m_pDrawObj)->CreateFontIndirect(&logfont);
 		Init();
@@ -290,11 +291,15 @@ void CDrawer::FillEllipse(RECT* rc,COLORREF clr)
 }
 void DrawDotRect(CDrawer* pDraw,RECT* rc)
 {
-	CRect* prc=(CRect*)rc;
-	s_DRes.DrawHDotLine(pDraw,&prc->TopLeft(),prc->Width());
-	s_DRes.DrawVDotLine(pDraw,&prc->TopLeft(),prc->Height());
-	s_DRes.DrawHDotLine(pDraw,&CPoint(prc->left,prc->bottom),prc->Width());
-	s_DRes.DrawVDotLine(pDraw,&CPoint(prc->right,prc->top),prc->Height());
+	CRect rect=*(CRect*)rc;
+	if(rect.left>rect.right)
+		swap(rect.left,rect.right);
+	if(rect.top>rect.bottom)
+		swap(rect.top,rect.bottom);
+	s_DRes.DrawHDotLine(pDraw,&rect.TopLeft(),rect.Width());
+	s_DRes.DrawVDotLine(pDraw,&rect.TopLeft(),rect.Height());
+	s_DRes.DrawHDotLine(pDraw,&CPoint(rect.left,rect.bottom),rect.Width());
+	s_DRes.DrawVDotLine(pDraw,&CPoint(rect.right,rect.top),rect.Height());
 }
 void CDrawer::DrawRect(RECT* rc,COLORREF clr,int linew,int style)
 {
