@@ -249,6 +249,8 @@
     <Image Include="res\dfold_disable.bmp" />
     <Image Include="res\dfold_hover.bmp" />
     <Image Include="res\dfold_normal.bmp" />
+    <Image Include="res\dot_line_h.bmp" />
+    <Image Include="res\dot_line_v.bmp" />
     <Image Include="res\FileCleaner.ico" />
     <Image Include="res\folder.bmp" />
     <Image Include="res\folder_exp.bmp" />

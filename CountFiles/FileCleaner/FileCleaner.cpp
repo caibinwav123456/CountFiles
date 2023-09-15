@@ -8,6 +8,7 @@
 #include "afxdialogex.h"
 #include "FileCleaner.h"
 #include "MainFrm.h"
+#include "DrawObject.h"
 
 
 #ifdef _DEBUG
@@ -64,7 +65,7 @@ BOOL CFileCleanerApp::InitInstance()
 	InitCommonControlsEx(&InitCtrls);
 
 	CWinApp::InitInstance();
-
+	DrawObjectStartup();
 
 	EnableTaskbarInteraction(FALSE);
 
@@ -101,6 +102,7 @@ BOOL CFileCleanerApp::InitInstance()
 int CFileCleanerApp::ExitInstance()
 {
 	//TODO: handle additional resources you may have added
+	DrawObjectShutdown();
 	return CWinApp::ExitInstance();
 }
 

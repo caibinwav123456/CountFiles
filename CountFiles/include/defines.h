@@ -2,17 +2,17 @@
 #define _DEFINES_H_
 
 #define LINE_HEIGHT 20
-#define LINE_INDENT 24
+#define LINE_INDENT 20
 #define TEXT_HEIGHT 16
 #define FOLDER_METRIC 24
-#define CONN_START 12
-#define CONN_END 24
-#define CONN_Y 11
-#define FILE_WIDTH 11
+#define CONN_START 10
+#define CONN_END 18
+#define CONN_Y 10
+#define FILE_WIDTH 12
 #define MIN_SCROLL_WIDTH 294
 #define BAR_CENTER_MARGIN 2
 #define BAR_CENTER_SPACE 54
-#define FILE_RECT CRect(4,7,8,13)
+#define FILE_RECT CRect(3,6,9,14)
 #define CONN_COLOR RGB(128,128,128)
 #define GREY_COLOR RGB(248,250,249)
 #define RED_COLOR RGB(255,0,0)

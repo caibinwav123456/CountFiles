@@ -141,7 +141,14 @@ static inline bool find_byte(const byte*& ptr,uint& len,byte c)
 	if(*buf!=(byte)(c)) \
 		return ERR_BAD_CONFIG_FORMAT; \
 	buf=ptr
+#define pass_byte_spec(buf,ptr,len,c) \
+	buf=ptr; \
+	advance_ptr(ptr,len,1); \
+	if(*buf!=(byte)(c)) \
+		return ERR_BAD_CONFIG_FORMAT; \
+	buf=ptr
 #define pass_space pass_byte(' ')
+#define pass_space_spec(buf,ptr,len) pass_byte_spec(buf,ptr,len,' ')
 static inline bool match_tag(const char* str,const byte*& ptr,uint& len)
 {
 	const byte* buf=ptr;
@@ -154,6 +161,10 @@ static inline bool match_tag(const char* str,const byte*& ptr,uint& len)
 	return true;
 }
 #define pass_str(str) \
+	if(!match_tag(str,ptr,len)) \
+		return ERR_BAD_CONFIG_FORMAT; \
+	buf=ptr
+#define pass_str_spec(buf,ptr,len,str) \
 	if(!match_tag(str,ptr,len)) \
 		return ERR_BAD_CONFIG_FORMAT; \
 	buf=ptr

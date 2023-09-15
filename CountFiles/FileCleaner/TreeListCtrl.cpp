@@ -158,7 +158,10 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,int iline,TLItem* pItem)
 	COLORREF color=grey?GREY_COLOR:RGB(255,255,255);
 	if(m_ItemSel.IsSelected(pItem,iline))
 		color=SEL_COLOR;
-	drawer.FillRect(&rcline,color);
+	CRect rect=rcline;
+	rect.InflateRect(&CRect(0,0,1,1));
+	drawer.FillRect(&rect,color);
+	rcline.DeflateRect(&CRect(0,0,1,1));
 	if(pItem!=NULL&&m_ItemSel.IsFocus(iline))
 		drawer.DrawRect(&rcline,RGB(0,0,0),1,PS_DOT);
 }

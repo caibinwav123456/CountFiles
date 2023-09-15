@@ -1,7 +1,86 @@
 #include "pch.h"
 #include "DrawObject.h"
+#include "resource.h"
 #include <assert.h>
 #define clear_mem(m) memset(&m,0,sizeof(m))
+class StaticDrawResource
+{
+private:
+	CBitmap m_bmpDotH;
+	CBitmap m_bmpDotV;
+	int m_HX;
+	int m_VY;
+	bool m_bInited;
+public:
+	StaticDrawResource():m_HX(-1),m_VY(-1),m_bInited(false)
+	{
+	}
+	~StaticDrawResource()
+	{
+	}
+	void Load()
+	{
+		if(m_bInited)
+			return;
+		m_bmpDotH.LoadBitmap(IDB_BMP_DOT_H);
+		m_bmpDotV.LoadBitmap(IDB_BMP_DOT_V);
+		BITMAP bm;
+		m_bmpDotH.GetBitmap(&bm);
+		m_HX=bm.bmWidth;
+		m_bmpDotV.GetBitmap(&bm);
+		m_VY=bm.bmHeight;
+		m_bInited=true;
+	}
+	void Unload()
+	{
+		if(!m_bInited)
+			return;
+		m_bmpDotH.DeleteObject();
+		m_bmpDotV.DeleteObject();
+		m_HX=-1;
+		m_VY=-1;
+		m_bInited=false;
+	}
+	void DrawHDotLine(CDrawer* pDraw,POINT* pt,int length)
+	{
+		if((!m_bInited)||length<0)
+			return;
+		CPoint coord(*pt);
+		int end=coord.x+length;
+		for(int pos=coord.x;pos<end;)
+		{
+			int drawend=pos+m_HX;
+			if(drawend>end)
+				drawend=end;
+			pDraw->DrawBitmap(&m_bmpDotH,&CPoint(pos,coord.y),SRCAND,&CRect(0,0,drawend-pos,1));
+			pos=drawend;
+		}
+	}
+	void DrawVDotLine(CDrawer* pDraw,POINT* pt,int length)
+	{
+		if((!m_bInited)||length<0)
+			return;
+		CPoint coord(*pt);
+		int end=coord.y+length;
+		for(int pos=coord.y;pos<end;)
+		{
+			int drawend=pos+m_VY;
+			if(drawend>end)
+				drawend=end;
+			pDraw->DrawBitmap(&m_bmpDotV,&CPoint(coord.x,pos),SRCAND,&CRect(0,0,1,drawend-pos));
+			pos=drawend;
+		}
+	}
+};
+static StaticDrawResource s_DRes;
+void DrawObjectStartup()
+{
+	s_DRes.Load();
+}
+void DrawObjectShutdown()
+{
+	s_DRes.Unload();
+}
 enum E_DRAWTYPE
 {
 	eDrawDirect=1,
@@ -175,6 +254,24 @@ inline CDC* CDrawer::SelectDC()
 }
 void CDrawer::DrawLine(POINT* start,POINT* end,COLORREF clr,int width,int style)
 {
+	if(width==1&&style==PS_DOT)
+	{
+		CPoint ptStart(*start),ptEnd(*end);
+		if(ptStart.y==ptEnd.y) //Draw horizontal dot line
+		{
+			if(ptStart.x>ptEnd.x)
+				swap(ptStart,ptEnd);
+			s_DRes.DrawHDotLine(this,&ptStart,ptEnd.x-ptStart.x);
+			return;
+		}
+		else if (ptStart.x == ptEnd.x) //Draw vertical dot line
+		{
+			if(ptStart.y>ptEnd.y)
+				swap(ptStart,ptEnd);
+			s_DRes.DrawVDotLine(this,&ptStart,ptEnd.y-ptStart.y);
+			return;
+		}
+	}
 	DrawPen pen(SelectDC(),clr,width,style);
 	SelectDC()->MoveTo(*start);
 	SelectDC()->LineTo(*end);
@@ -191,19 +288,32 @@ void CDrawer::FillEllipse(RECT* rc,COLORREF clr)
 	SelectDC()->SelectStockObject(NULL_PEN);
 	SelectDC()->Ellipse(rc);
 }
+void DrawDotRect(CDrawer* pDraw,RECT* rc)
+{
+	CRect* prc=(CRect*)rc;
+	s_DRes.DrawHDotLine(pDraw,&prc->TopLeft(),prc->Width());
+	s_DRes.DrawVDotLine(pDraw,&prc->TopLeft(),prc->Height());
+	s_DRes.DrawHDotLine(pDraw,&CPoint(prc->left,prc->bottom),prc->Width());
+	s_DRes.DrawVDotLine(pDraw,&CPoint(prc->right,prc->top),prc->Height());
+}
 void CDrawer::DrawRect(RECT* rc,COLORREF clr,int linew,int style)
 {
-	DrawPen pen(SelectDC(),clr,linew,style);
-	SelectDC()->SelectStockObject(NULL_BRUSH);
-	SelectDC()->Rectangle(rc);
+	if(linew==1&&style==PS_DOT)
+	{
+		DrawDotRect(this,rc);
+	}
+	else
+	{
+		DrawPen pen(SelectDC(),clr,linew,style);
+		SelectDC()->SelectStockObject(NULL_BRUSH);
+		SelectDC()->Rectangle(rc);
+	}
 }
 void CDrawer::FillRect(RECT* rc,COLORREF clr)
 {
 	DrawBrush brush(SelectDC(),clr);
-	CRect rect=*rc;
-	rect.InflateRect(&CRect(1,0,1,1));
 	SelectDC()->SelectStockObject(NULL_PEN);
-	SelectDC()->Rectangle(rect);
+	SelectDC()->Rectangle(rc);
 }
 void CDrawer::DrawBitmap(CBitmap* pBmp,POINT* pt,DWORD dwOps,RECT* srcrc)
 {
