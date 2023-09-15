@@ -61,35 +61,35 @@ static int parse_error_rec(err_dir_node* enode,vector<string>& stack,const UInte
 	uint tmplen=len;
 	if(!find_byte(ptr,tmplen,'\"'))
 		return ERR_CORRUPTED_FILE;
-	ptr=buf;
+	const byte *namebuf=buf,*nameptr=buf;
+	buf=ptr;
 	uint namelen=len-tmplen;
+	len=tmplen;
 	bool errdir=false;
 	UInteger64 startoff,endoff;
 	for(;;)
 	{
-		bool bfind=find_byte(ptr,namelen,dir_symbol);
-		if(ptr==buf)
+		bool bfind=find_byte(nameptr,namelen,dir_symbol);
+		if(nameptr==namebuf)
 			return ERR_CORRUPTED_FILE;
-		len-=ptr-buf;
 		if((!bfind)||namelen==1)
 		{
-			startoff=off+UInteger64(buf-_buf),endoff=off+UInteger64(ptr-_buf);
+			startoff=off+UInteger64(namebuf-_buf),endoff=off+UInteger64(nameptr-_buf);
 			if(namelen==1)
 			{
 				errdir=true;
 				endoff+=UInteger64(1);
-				pass_byte(dir_symbol);
+				pass_byte_spec(namebuf,nameptr,namelen,dir_symbol);
 			}
 			break;
 		}
-		*(byte*)ptr=0;
-		name=(char*)buf;
+		*(byte*)nameptr=0;
+		name=(char*)namebuf;
 		if(name.empty())
 			return ERR_CORRUPTED_FILE;
 		enode=add_err_dir_node(enode,stack,name,idx);
-		init_err_node(enode,off+UInteger64(buf-_buf),off+UInteger64(ptr-_buf));
-		pass_byte('\0');
-		namelen--;
+		init_err_node(enode,off+UInteger64(namebuf-_buf),off+UInteger64(nameptr-_buf));
+		pass_byte_spec(namebuf,nameptr,namelen,'\0');
 		idx++;
 	}
 	efnode* err_file_node=add_leaf_err_node(enode,errdir);

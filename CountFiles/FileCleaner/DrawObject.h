@@ -1,5 +1,7 @@
 #ifndef _DRAW_OBJECT_H_
 #define _DRAW_OBJECT_H_
+void DrawObjectStartup();
+void DrawObjectShutdown();
 class CDCDraw
 {
 	friend class CDrawer;

@@ -194,5 +194,11 @@
     <Image Include="res\arrow_normal.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\dot_line_h.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\dot_line_v.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
