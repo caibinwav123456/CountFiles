@@ -29,7 +29,8 @@ void CScrollTreeList::SetScrollSizes(const CSize& size)
 	size.cx>0?(m_sizeScl.cx=max(size.cx,MIN_SCROLL_WIDTH))
 		:(size.cx==0?(m_sizeScl.cx=MIN_SCROLL_WIDTH):0);
 	size.cy>0?(m_sizeScl.cy=size.cy):(size.cy==0?m_sizeScl.cy=1:0);
-	((CScrollView*)m_pWnd)->SetScrollSizes(MM_TEXT,m_sizeScl,
+	CSize setsize(max(m_sizeScl.cx-30,MIN_SCROLL_WIDTH),m_sizeScl.cy);
+	((CScrollView*)m_pWnd)->SetScrollSizes(MM_TEXT,setsize,
 		CSize(LINE_HEIGHT,LINE_HEIGHT*3),CSize(LINE_HEIGHT,LINE_HEIGHT));
 }
 CSize CScrollTreeList::GetScrollSizes()
@@ -312,11 +313,9 @@ BOOL CChildView::OnEraseBkgnd(CDC* pDC)
 void CChildView::OnSize(UINT nType, int cx, int cy)
 {
 	CScrollView::OnSize(nType, cx, cy);
-	m_TreeList.SetScrollSizes(CSize(max(cx,MIN_SCROLL_WIDTH),-1));
-	CRect rect;
-	m_TreeList.GetCanvasRect(&rect);
+	m_TreeList.SetScrollSizes(CSize(cx,-1));
 	CWnd* pWnd=PDXGetWndFromID(IDW_BASE_BAR);
 	if(pWnd->GetSafeHwnd()!=NULL)
-		pWnd->SendMessage(WM_SET_VIEW_SIZE,(WPARAM)&rect);
+		pWnd->SendMessage(WM_SET_VIEW_SIZE,(WPARAM)&CRect(0,0,cx,cy));
 	// TODO: Add your message handler code here
 }
