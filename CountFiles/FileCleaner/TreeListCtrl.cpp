@@ -230,18 +230,21 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 	case eITypeFile:
 		{
 			file_node_info info;
-			string date;
+			string date,time;
 			if(item->type==eITypeDir)
 				m_ListLoader.GetNodeInfo(item->dirnode,&info);
 			else
 				m_ListLoader.GetNodeInfo(item->filenode,&info);
-			info.mod_time.Format(date,FORMAT_DATE|FORMAT_TIME|FORMAT_WEEKDAY);
+			info.mod_time.Format(date,FORMAT_DATE|FORMAT_WEEKDAY);
+			info.mod_time.Format(time,FORMAT_TIME);
 			drawer.DrawText(&CRect(pos,CPoint(400,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,
 				a2t(info.name),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 			drawer.DrawText(&CRect(400,pos.y,490,pos.y+LINE_HEIGHT),DT_ALIGN_RIGHT,
 				a2t(format_segmented_u64(info.size)),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-			drawer.DrawText(&CRect(500,pos.y,700,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
+			drawer.DrawText(&CRect(500,pos.y,595,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
 				a2t(date),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
+			drawer.DrawText(&CRect(595,pos.y,700,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
+				a2t(time),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 		}
 		break;
 	case eITypeErrDir:
