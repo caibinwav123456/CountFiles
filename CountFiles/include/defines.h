@@ -6,7 +6,7 @@
 #define TEXT_HEIGHT 16
 #define FOLDER_METRIC 24
 #define CONN_START 10
-#define CONN_END 18
+#define CONN_END 20
 #define CONN_Y 10
 #define FILE_WIDTH 12
 #define MIN_SCROLL_WIDTH 294
