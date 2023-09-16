@@ -208,6 +208,8 @@ public:
 	int Load(const char* lfile,const char* efile);
 	void UnLoad();
 
+	void GetCanvasRect(RECT* rc);
+
 //Draw callbacks
 	void Draw(CDC* pClientDC,bool buffered);
 
@@ -248,7 +250,6 @@ protected:
 //private functions
 private:
 	void Invalidate();
-	void GetCanvasRect(RECT* rc);
 
 //protected functions
 protected:
