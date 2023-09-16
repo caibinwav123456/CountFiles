@@ -275,9 +275,9 @@ void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 	int grplen=(max(rc.Width(),MIN_SCROLL_WIDTH)-BAR_CENTER_SPACE)/2;
 	int top=max(0,rc.top);
 	int bottom=min((int)m_nTotalLine*LINE_HEIGHT,rc.bottom);
-	drawer.DrawLine(&CPoint(grplen,top),&CPoint(grplen,bottom),RGB(0,0,0),1,PS_SOLID);
+	drawer.DrawLine(&CPoint(grplen,top),&CPoint(grplen,bottom),BACK_GREY_COLOR,1,PS_SOLID);
 	drawer.DrawLine(&CPoint(grplen+BAR_CENTER_SPACE,top),&CPoint(grplen+BAR_CENTER_SPACE,bottom),
-		RGB(0,0,0),1,PS_SOLID);
+		BACK_GREY_COLOR,1,PS_SOLID);
 }
 void TreeListCtrl::UpdateListStat()
 {
