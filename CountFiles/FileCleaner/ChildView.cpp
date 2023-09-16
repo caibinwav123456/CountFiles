@@ -312,6 +312,11 @@ BOOL CChildView::OnEraseBkgnd(CDC* pDC)
 void CChildView::OnSize(UINT nType, int cx, int cy)
 {
 	CScrollView::OnSize(nType, cx, cy);
-	m_TreeList.SetScrollSizes(CSize(cx,-1));
+	m_TreeList.SetScrollSizes(CSize(max(cx,MIN_SCROLL_WIDTH),-1));
+	CRect rect;
+	m_TreeList.GetCanvasRect(&rect);
+	CWnd* pWnd=PDXGetWndFromID(IDW_BASE_BAR);
+	if(pWnd->GetSafeHwnd()!=NULL)
+		pWnd->SendMessage(WM_SET_VIEW_SIZE,(WPARAM)&rect);
 	// TODO: Add your message handler code here
 }

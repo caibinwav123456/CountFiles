@@ -63,6 +63,7 @@ void CBaseBar::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CBaseBar, CDialog)
 	ON_MESSAGE(WM_ENABLE_BTN_GO, &CBaseBar::OnEnableBtnGo)
 	ON_MESSAGE(WM_SIZEPARENT, &CBaseBar::OnSizeParent)
+	ON_MESSAGE(WM_SET_VIEW_SIZE, &CBaseBar::OnSetViewSize)
 	ON_WM_EXITMENULOOP()
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
@@ -97,6 +98,14 @@ LRESULT CBaseBar::OnSizeParent(WPARAM wParam, LPARAM lParam)
 	AfxRepositionWindow(lpLayout,m_hWnd,&rect);
 	lpLayout->rect.top+=rect.Height();
 	lpLayout->sizeTotal=CRect(lpLayout->rect).Size();
+	return 0;
+}
+
+LRESULT CBaseBar::OnSetViewSize(WPARAM wParam, LPARAM lParam)
+{
+	CRect rc=*(CRect*)wParam;
+	if(m_bInited)
+		RelayoutBarCtrl(&rc);
 	return 0;
 }
 
@@ -303,9 +312,6 @@ void CBaseBar::OnDestroy()
 void CBaseBar::OnSize(UINT nType, int cx, int cy)
 {
 	CDialog::OnSize(nType, cx, cy);
-	CRect rc(0,0,cx,cy);
-	if(m_bInited)
-		RelayoutBarCtrl(&rc);
 }
 
 void CBaseBar::OnOK()

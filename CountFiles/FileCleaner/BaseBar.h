@@ -84,6 +84,7 @@ public:
 	//message handlers
 private:
 	afx_msg LRESULT OnSizeParent(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSetViewSize(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEnableBtnGo(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
