@@ -1,11 +1,11 @@
 
-// ChildView.cpp : implementation of the CChildView class
+// MainView.cpp : implementation of the CMainView class
 //
 
 #include "pch.h"
 #include "framework.h"
 #include "FileCleaner.h"
-#include "ChildView.h"
+#include "MainView.h"
 #include "DrawObject.h"
 #include "DlgLoad.h"
 
@@ -36,18 +36,18 @@ CSize CScrollTreeList::GetScrollSizes()
 	return m_sizeScl;
 }
 
-// CChildView
+// CMainView
 
-CChildView::CChildView():m_TreeList(this)
+CMainView::CMainView():m_TreeList(this)
 {
 }
 
-CChildView::~CChildView()
+CMainView::~CMainView()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(CChildView, CScrollView)
+BEGIN_MESSAGE_MAP(CMainView, CScrollView)
 	ON_MESSAGE(WM_FILE_LIST_START_LOAD,OnStartLoadList)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
@@ -63,12 +63,12 @@ BEGIN_MESSAGE_MAP(CChildView, CScrollView)
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
-IMPLEMENT_DYNCREATE(CChildView, CScrollView)
-IMPLEMENT_ID2WND_MAP(CChildView, IDW_MAIN_VIEW)
+IMPLEMENT_DYNCREATE(CMainView, CScrollView)
+IMPLEMENT_ID2WND_MAP(CMainView, IDW_MAIN_VIEW)
 
-// CChildView message handlers
+// CMainView message handlers
 
-BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
+BOOL CMainView::PreCreateWindow(CREATESTRUCT& cs)
 {
 	if (!CWnd::PreCreateWindow(cs))
 		return FALSE;
@@ -81,7 +81,7 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 	return TRUE;
 }
 
-void CChildView::OnDraw(CDC* pDC)
+void CMainView::OnDraw(CDC* pDC)
 {
 	// TODO: Add your specialized code here and/or call the base class
 	m_TreeList.Draw(pDC,true);
@@ -136,7 +136,7 @@ static int test()
 
 	return ret;
 }*/
-int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CMainView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CScrollView::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -151,7 +151,7 @@ int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 }
 
 
-void CChildView::OnDestroy()
+void CMainView::OnDestroy()
 {
 	CScrollView::OnDestroy();
 
@@ -159,7 +159,7 @@ void CChildView::OnDestroy()
 	m_TreeList.Exit();
 }
 
-LRESULT CChildView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
+LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 {
 	int ret=0;
 	FListLoadData* lpData=(FListLoadData*)wParam;
@@ -225,7 +225,7 @@ static inline CPoint GetMousePos(const CPoint& pt,CScrollView* pView)
 	return point;
 }
 
-void CChildView::OnLButtonDown(UINT nFlags, CPoint point)
+void CMainView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	SetCapture();
@@ -235,7 +235,7 @@ void CChildView::OnLButtonDown(UINT nFlags, CPoint point)
 }
 
 
-void CChildView::OnLButtonUp(UINT nFlags, CPoint point)
+void CMainView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	ReleaseCapture();
@@ -245,7 +245,7 @@ void CChildView::OnLButtonUp(UINT nFlags, CPoint point)
 }
 
 
-void CChildView::OnMouseMove(UINT nFlags, CPoint point)
+void CMainView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	CPoint pt=GetMousePos(point,this);
@@ -254,7 +254,7 @@ void CChildView::OnMouseMove(UINT nFlags, CPoint point)
 }
 
 
-void CChildView::OnLButtonDblClk(UINT nFlags, CPoint point)
+void CMainView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	CPoint pt=GetMousePos(point,this);
@@ -263,7 +263,7 @@ void CChildView::OnLButtonDblClk(UINT nFlags, CPoint point)
 }
 
 
-void CChildView::OnRButtonDown(UINT nFlags, CPoint point)
+void CMainView::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	CPoint pt=GetMousePos(point,this);
@@ -272,7 +272,7 @@ void CChildView::OnRButtonDown(UINT nFlags, CPoint point)
 }
 
 
-void CChildView::OnRButtonUp(UINT nFlags, CPoint point)
+void CMainView::OnRButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	CPoint pt=GetMousePos(point,this);
@@ -281,7 +281,7 @@ void CChildView::OnRButtonUp(UINT nFlags, CPoint point)
 }
 
 
-void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+void CMainView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// TODO: Add your message handler code here and/or call default
 	CScrollView::OnVScroll(nSBCode, nPos, pScrollBar);
@@ -290,7 +290,7 @@ void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 }
 
 
-BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+BOOL CMainView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	// TODO: Add your message handler code here and/or call default
 	BOOL ret=CScrollView::OnMouseWheel(nFlags, zDelta, pt);
@@ -300,7 +300,7 @@ BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 }
 
 
-BOOL CChildView::OnEraseBkgnd(CDC* pDC)
+BOOL CMainView::OnEraseBkgnd(CDC* pDC)
 {
 	// TODO: Add your message handler code here and/or call default
 
@@ -308,14 +308,13 @@ BOOL CChildView::OnEraseBkgnd(CDC* pDC)
 }
 
 
-void CChildView::OnSize(UINT nType, int cx, int cy)
+void CMainView::OnSize(UINT nType, int cx, int cy)
 {
 	CScrollView::OnSize(nType, cx, cy);
 	CRect rect;
 	m_TreeList.GetCanvasRect(&rect);
 	m_TreeList.SetScrollSizes(CSize(rect.Width(),-1));
-	CWnd* pWnd=PDXGetWndFromID(IDW_BASE_BAR);
-	if(pWnd->GetSafeHwnd()!=NULL)
-		pWnd->SendMessage(WM_SET_VIEW_SIZE,(WPARAM)&rect);
+	SendMessageToIDWnd(IDW_BASE_BAR,WM_SET_VIEW_SIZE,(WPARAM)&rect);
+	SendMessageToIDWnd(IDW_HEAD_BAR,WM_SET_VIEW_SIZE,(WPARAM)&rect);
 	// TODO: Add your message handler code here
 }

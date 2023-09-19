@@ -61,6 +61,7 @@ public:
 	}
 };
 #define DECLARE_ID2WND_MAP(className) \
+	friend class CAddToWndMap<className>; \
 	static ID2CWndPtrAssoc* GetWndAssoc(); \
 	CAddToWndMap<className> __thisMapObj;
 
@@ -71,7 +72,13 @@ public:
 			(&(static_cast<className*>((CWnd*)NULL))->__thisMapObj)); \
 		return &theAssoc; \
 	}
-
+inline LRESULT SendMessageToIDWnd(UINT id,UINT message,WPARAM wParam=0,LPARAM lParam=0)
+{
+	CWnd* pWnd=PDXGetWndFromID(id);
+	if(pWnd->GetSafeHwnd()!=NULL)
+		return pWnd->SendMessage(message,wParam,lParam);
+	return -1;
+}
 class CProgramData
 {
 public:

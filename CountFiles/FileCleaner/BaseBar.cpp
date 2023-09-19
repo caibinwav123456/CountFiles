@@ -63,7 +63,7 @@ void CBaseBar::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CBaseBar, CDialog)
 	ON_MESSAGE(WM_ENABLE_BTN_GO, &CBaseBar::OnEnableBtnGo)
 	ON_MESSAGE(WM_SIZEPARENT, &CBaseBar::OnSizeParent)
-	ON_MESSAGE(WM_SET_VIEW_SIZE, &CBaseBar::OnSetViewSize)
+	ON_MESSAGE(WM_SET_VIEW_SIZE, &CBaseBar::OnSizeView)
 	ON_WM_EXITMENULOOP()
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
@@ -101,7 +101,7 @@ LRESULT CBaseBar::OnSizeParent(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-LRESULT CBaseBar::OnSetViewSize(WPARAM wParam, LPARAM lParam)
+LRESULT CBaseBar::OnSizeView(WPARAM wParam, LPARAM lParam)
 {
 	CRect rc=*(CRect*)wParam;
 	if(m_bInited)

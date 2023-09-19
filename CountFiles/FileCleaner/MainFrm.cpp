@@ -47,9 +47,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	// create a view to occupy the client area of the frame
-	m_pWndView=new CChildView;
-	m_pWndView->SetScrollSizes(MM_TEXT,CSize(LINE_HEIGHT,LINE_HEIGHT),
-		CSize(LINE_HEIGHT,LINE_HEIGHT*3),CSize(LINE_HEIGHT,LINE_HEIGHT));
+	m_pWndView=new CContainerWnd;
 
 	m_hIcon=AfxGetApp()->LoadIcon(IDI_MAINFRAME);
 	SetIcon(m_hIcon,TRUE);

@@ -199,7 +199,9 @@
   <ItemGroup>
     <ClInclude Include="BaseBar.h" />
     <ClInclude Include="BaseCombo.h" />
-    <ClInclude Include="ChildView.h" />
+    <ClInclude Include="HeadBar.h" />
+    <ClInclude Include="ContainerWnd.h" />
+    <ClInclude Include="MainView.h" />
     <ClInclude Include="CommonStruct.h" />
     <ClInclude Include="DlgLoad.h" />
     <ClInclude Include="DrawObject.h" />
@@ -217,7 +219,9 @@
   <ItemGroup>
     <ClCompile Include="BaseBar.cpp" />
     <ClCompile Include="BaseCombo.cpp" />
-    <ClCompile Include="ChildView.cpp" />
+    <ClCompile Include="HeadBar.cpp" />
+    <ClCompile Include="ContainerWnd.cpp" />
+    <ClCompile Include="MainView.cpp" />
     <ClCompile Include="ConstructList.cpp" />
     <ClCompile Include="DlgLoad.cpp" />
     <ClCompile Include="DrawObject.cpp" />

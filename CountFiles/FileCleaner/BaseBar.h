@@ -78,13 +78,12 @@ private:
 	CString m_strBasePath;
 	CString m_strBasePathRef;
 
-public:
 	DECLARE_ID2WND_MAP(CBaseBar)
 
 	//message handlers
 private:
 	afx_msg LRESULT OnSizeParent(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnSetViewSize(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSizeView(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEnableBtnGo(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
