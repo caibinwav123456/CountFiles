@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "ChildView.h"
+#include "ContainerWnd.h"
 #include "BaseBar.h"
 
 class CMainFrame : public CFrameWnd
@@ -37,7 +37,7 @@ protected:  // control bar embedded members
 	CToolBar          m_wndToolBar;
 	CBaseBar          m_wndBaseBar;
 	CStatusBar        m_wndStatusBar;
-	CChildView*       m_pWndView;
+	CContainerWnd*    m_pWndView;
 
 // Generated message map functions
 protected:
@@ -45,5 +45,3 @@ protected:
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	DECLARE_MESSAGE_MAP()
 };
-
-

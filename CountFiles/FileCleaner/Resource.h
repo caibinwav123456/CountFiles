@@ -7,12 +7,12 @@
 #define IDR_MAINFRAME                   128
 #define IDI_MAINFRAME                   129
 #define IDR_FileCleanerTYPE             130
-#define IDB_BITMAP1                     310
+#define IDS_TAB_NAME                    129
+#define IDS_TAB_SIZE                    130
+#define IDS_TAB_MODIFY                  131
 #define IDB_FOLDER                      310
-#define IDB_BITMAP2                     311
 #define IDB_FOLDER_MASK                 311
 #define IDB_FOLDER_EXP                  312
-#define IDB_BITMAP4                     313
 #define IDB_FOLDER_EXP_MASK             313
 #define IDB_BMP_GO_C                    314
 #define IDB_BMP_GO_D                    315

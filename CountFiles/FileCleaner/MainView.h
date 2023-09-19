@@ -1,12 +1,12 @@
 
-// ChildView.h : interface of the CChildView class
+// MainView.h : interface of the CMainView class
 //
 
 
 #pragma once
 
 #include "TreeListCtrl.h"
-// CChildView window
+// CMainView window
 class CScrollTreeList:public TreeListCtrl
 {
 public:
@@ -18,13 +18,13 @@ public:
 private:
 	CSize m_sizeScl;
 };
-class CChildView : public CScrollView
+class CMainView : public CScrollView
 {
-	DECLARE_DYNCREATE(CChildView)
+	DECLARE_DYNCREATE(CMainView)
 
 // Construction
 public:
-	CChildView();
+	CMainView();
 
 // Attributes
 public:
@@ -39,14 +39,13 @@ protected:
 
 // Implementation
 public:
-	virtual ~CChildView();
+	virtual ~CMainView();
 
 // Generated message map functions
 protected:
 	virtual void OnDraw(CDC* pDC);
 
-public:
-	DECLARE_ID2WND_MAP(CChildView)
+	DECLARE_ID2WND_MAP(CMainView)
 
 public:
 	DECLARE_MESSAGE_MAP()
