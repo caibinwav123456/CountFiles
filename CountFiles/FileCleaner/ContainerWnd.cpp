@@ -74,7 +74,7 @@ void CContainerWnd::Relayout()
 
 // CContainerWnd message handlers
 
-BOOL CContainerWnd::PreCreateWindow(CREATESTRUCT& cs) 
+BOOL CContainerWnd::PreCreateWindow(CREATESTRUCT& cs)
 {
 	if (!CWnd::PreCreateWindow(cs))
 		return FALSE;
