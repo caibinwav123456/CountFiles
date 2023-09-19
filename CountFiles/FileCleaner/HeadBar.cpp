@@ -5,7 +5,7 @@
 
 TabStat::TabStat()
 {
-	flag=TLTAB_ALL;
+	flag=0;
 	column_names[0].LoadString(IDS_TAB_NAME);
 	column_names[1].LoadString(IDS_TAB_SIZE);
 	column_names[2].LoadString(IDS_TAB_MODIFY);
