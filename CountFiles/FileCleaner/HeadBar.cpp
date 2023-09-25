@@ -50,11 +50,11 @@ void TreeListTabSplitter::ArrangeTabs(bool col_changed,TabStat* pstat)
 	vector<int> idx_cache;
 	int r=tab.rcTotal.right,
 		l=tab.rcTotal.left;
-	for(int i=0,idx=0;i<32;i++)
+	for(int i=0;i<32;i++)
 	{
 		UINT flags=(1<<i);
 		if(tab.mask&flags)
-			idx_cache.push_back(idx++);
+			idx_cache.push_back(i);
 	}
 	if((int)size()==0)
 		return;
