@@ -49,6 +49,7 @@ CMainView::~CMainView()
 
 BEGIN_MESSAGE_MAP(CMainView, CScrollView)
 	ON_MESSAGE(WM_FILE_LIST_START_LOAD,OnStartLoadList)
+	ON_MESSAGE(WM_REARRANGE_TAB_SIZE,OnRearrangeTabSize)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
@@ -191,6 +192,14 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 	}
 	Invalidate();
 	return ret==0?TRUE:FALSE;
+}
+LRESULT CMainView::OnRearrangeTabSize(WPARAM wParam, LPARAM lParam)
+{
+	TabInfo* tab=(TabInfo*)wParam;
+	m_tabLeft=*tab->left;
+	m_tabRight=*tab->right;
+	Invalidate();
+	return 0;
 }
 
 static inline UINT GetKey()
