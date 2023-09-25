@@ -4,6 +4,8 @@ struct TabStat
 {
 	UINT flag;
 	CString column_names[3];
+	int default_width[3];
+	int min_width[3];
 	TabStat();
 };
 
@@ -32,4 +34,6 @@ public:
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnSizeView(WPARAM wParam,LPARAM lParam);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnPaint();
 };
