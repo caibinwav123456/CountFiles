@@ -74,7 +74,7 @@ BOOL CMainView::PreCreateWindow(CREATESTRUCT& cs)
 	if (!CWnd::PreCreateWindow(cs))
 		return FALSE;
 
-	cs.dwExStyle |= WS_EX_CLIENTEDGE;
+	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 	cs.style &= ~WS_BORDER;
 	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS,
 		::LoadCursor(nullptr, IDC_ARROW), reinterpret_cast<HBRUSH>(COLOR_WINDOW+1), nullptr);
@@ -323,7 +323,8 @@ void CMainView::OnSize(UINT nType, int cx, int cy)
 	CRect rect;
 	m_TreeList.GetCanvasRect(&rect);
 	m_TreeList.SetScrollSizes(CSize(rect.Width(),-1));
+	int scrlx=GetScrollPosition().x;
 	SendMessageToIDWnd(IDW_BASE_BAR,WM_SET_VIEW_SIZE,(WPARAM)&rect);
-	SendMessageToIDWnd(IDW_HEAD_BAR,WM_SET_VIEW_SIZE,(WPARAM)&rect);
+	SendMessageToIDWnd(IDW_HEAD_BAR,WM_SET_VIEW_SIZE,(WPARAM)&rect,(LPARAM)scrlx);
 	// TODO: Add your message handler code here
 }
