@@ -59,6 +59,7 @@ BEGIN_MESSAGE_MAP(CMainView, CScrollView)
 	ON_WM_RBUTTONDOWN()
 	ON_WM_RBUTTONUP()
 	ON_WM_VSCROLL()
+	ON_WM_HSCROLL()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_ERASEBKGND()
 	ON_WM_SIZE()
@@ -198,6 +199,7 @@ LRESULT CMainView::OnRearrangeTabSize(WPARAM wParam, LPARAM lParam)
 	TabInfo* tab=(TabInfo*)wParam;
 	m_tabLeft=*tab->left;
 	m_tabRight=*tab->right;
+	m_TreeList.SetTabInfo(m_tabLeft);
 	Invalidate();
 	return 0;
 }
@@ -299,6 +301,16 @@ void CMainView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 }
 
 
+void CMainView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	// TODO: Add your message handler code here and/or call default
+	CScrollView::OnHScroll(nSBCode, nPos, pScrollBar);
+	CRect rect;
+	m_TreeList.GetCanvasRect(&rect);
+	SendMessageToIDWnd(IDW_HEAD_BAR,WM_SET_VIEW_SIZE,(WPARAM)&rect);
+}
+
+
 BOOL CMainView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	// TODO: Add your message handler code here and/or call default
@@ -323,8 +335,7 @@ void CMainView::OnSize(UINT nType, int cx, int cy)
 	CRect rect;
 	m_TreeList.GetCanvasRect(&rect);
 	m_TreeList.SetScrollSizes(CSize(rect.Width(),-1));
-	int scrlx=GetScrollPosition().x;
 	SendMessageToIDWnd(IDW_BASE_BAR,WM_SET_VIEW_SIZE,(WPARAM)&rect);
-	SendMessageToIDWnd(IDW_HEAD_BAR,WM_SET_VIEW_SIZE,(WPARAM)&rect,(LPARAM)scrlx);
+	SendMessageToIDWnd(IDW_HEAD_BAR,WM_SET_VIEW_SIZE,(WPARAM)&rect);
 	// TODO: Add your message handler code here
 }

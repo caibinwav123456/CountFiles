@@ -29,6 +29,7 @@
 #define SEL_COLOR          RGB(204,255,204)
 #define SELN_COLOR         RGB(226,246,226)
 #define BACK_GREY_COLOR    RGB(160,160,160)
+#define TAB_SEP_COLOR      RGB(229,229,229)
 
 #define TAG_TYPE_DIR       "D "
 #define TAG_TYPE_FILE      "N "

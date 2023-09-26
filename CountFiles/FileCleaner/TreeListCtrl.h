@@ -209,6 +209,7 @@ public:
 	void UnLoad();
 
 	void GetCanvasRect(RECT* rc);
+	void SetTabInfo(const TreeListTabGrid& tab);
 
 //Draw callbacks
 	void Draw(CDC* pClientDC,bool buffered);
@@ -246,6 +247,7 @@ protected:
 	uint m_nTotalLine;
 	TLItem* m_pRootItem;
 	ItemSelector m_ItemSel;
+	TreeListTabGrid m_tabInfo;
 
 //private functions
 private:

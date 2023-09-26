@@ -1,4 +1,5 @@
 #pragma once
+#include "DrawObject.h"
 
 struct TabStat
 {
@@ -22,16 +23,20 @@ private:
 	void SplitTab(CRect& rect,UINT flag);
 	void SplitTab(CRect& rect);
 	void CalcTabStat(TreeListTabGrid& tab,CRect& rc,UINT flag);
+	void DrawTabs(CDrawer* pDrawer,const TreeListTabGrid& tab);
 
 private:
 	TreeListTabGrid m_tabLeft;
 	TreeListTabGrid m_tabRight;
 	TabStat m_tabStat;
+	CRect m_rectBar;
 	int m_iOrgX;
 
 public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual void PostNcDestroy();
+
+	virtual void OnDraw(CDC* pDC);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnSizeView(WPARAM wParam,LPARAM lParam);
