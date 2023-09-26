@@ -112,3 +112,11 @@ void CContainerWnd::OnSize(UINT nType, int cx, int cy)
 	CWnd::OnSize(nType, cx, cy);
 	Relayout();
 }
+
+
+void CContainerWnd::PostNcDestroy()
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	delete this;
+}
