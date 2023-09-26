@@ -35,7 +35,7 @@ public:
 	void insert(size_t idx,const CRect& rc,const CString& title);
 	void push(const TabItem& item);
 	void push(const CRect& rc,const CString& title);
-	TabItem pop();
+	void pop();
 	TabItem& back();
 	void erase(size_t idx);
 
@@ -270,11 +270,9 @@ void TreeListTabSplitter::push(const CRect& rc,const CString& title)
 {
 	push(TabItem(rc,title));
 }
-TabItem TreeListTabSplitter::pop()
+void TreeListTabSplitter::pop()
 {
-	TabItem back_item=back();
 	m_tab->arrTab.pop_back();
-	return back_item;
 }
 TabItem& TreeListTabSplitter::back()
 {
