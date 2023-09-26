@@ -44,12 +44,43 @@ void PDXShowMessage(LPCTSTR format,...)
 
 CProgramData CProgramData::s_Data;
 CProgramData::CProgramData()
-	: m_strBasePath("D:\\")
+	: m_dpiX(0)
+	, m_dpiY(0)
+	, m_deflogicX(96)
+	, m_deflogicY(96)
 	, m_strCachePath("LocalCache\\")
 	, m_strCacheFileName("current")
 	, m_strCFileExt(".fl")
 	, m_strCFileErrExt(".err")
 {
+}
+int CProgramData::Init()
+{
+	CDC dcScreen;
+	dcScreen.CreateDC(_T("DISPLAY"),NULL,NULL,NULL);
+	s_Data.m_dpiX=dcScreen.GetDeviceCaps(LOGPIXELSX);
+	s_Data.m_dpiY=dcScreen.GetDeviceCaps(LOGPIXELSY);
+	dcScreen.DeleteDC();
+
+	s_Data.m_strBasePath="D:\\";
+
+	return 0;
+}
+int CProgramData::GetRealPixelsX(int logicx)
+{
+	return logicx*s_Data.m_dpiX/s_Data.m_deflogicX;
+}
+int CProgramData::GetRealPixelsY(int logicy)
+{
+	return logicy*s_Data.m_dpiY/s_Data.m_deflogicY;
+}
+CPoint CProgramData::GetRealPoint(POINT pt)
+{
+	return CPoint(GetRealPixelsX(pt.x),GetRealPixelsY(pt.y));
+}
+CRect CProgramData::GetRealRect(RECT rect)
+{
+	return CRect(GetRealPoint(CRect(rect).TopLeft()),GetRealPoint(CRect(rect).BottomRight()));
 }
 string CProgramData::GetProgramDataBasePath()
 {
