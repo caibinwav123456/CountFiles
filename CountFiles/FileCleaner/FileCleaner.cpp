@@ -65,6 +65,10 @@ BOOL CFileCleanerApp::InitInstance()
 	InitCommonControlsEx(&InitCtrls);
 
 	CWinApp::InitInstance();
+
+	if(CProgramData::Init()!=0)
+		return FALSE;
+	
 	DrawObjectStartup();
 
 	EnableTaskbarInteraction(FALSE);

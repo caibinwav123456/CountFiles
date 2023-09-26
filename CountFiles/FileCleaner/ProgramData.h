@@ -82,15 +82,27 @@ inline LRESULT SendMessageToIDWnd(UINT id,UINT message,WPARAM wParam=0,LPARAM lP
 class CProgramData
 {
 public:
+	static int Init();
 	static string GetProgramDataBasePath();
 	static string GetCacheDirPath();
 	static string GetCFilePathRoot();
 	static string GetCacheFilePath();
 	static string GetCacheErrFilePath();
 	static string GetErrListFilePath(const string& path);
+
+	static int GetRealPixelsX(int logicx);
+	static int GetRealPixelsY(int logicy);
+
+	static CPoint GetRealPoint(POINT pt);
+	static CRect GetRealRect(RECT rect);
+
 private:
 	CProgramData::CProgramData();
-	const string m_strBasePath;
+	const int m_deflogicX;
+	const int m_deflogicY;
+	int m_dpiX;
+	int m_dpiY;
+	string m_strBasePath;
 	const string m_strCachePath;
 	const string m_strCacheFileName;
 	const string m_strCFileExt;
