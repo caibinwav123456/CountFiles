@@ -46,6 +46,7 @@ public:
 };
 void TreeListTabSplitter::ArrangeTabs(bool col_changed,TabStat* pstat)
 {
+	ASSERT(has_tab(TLTAB_NAME));
 	TreeListTabGrid& tab=*m_tab;
 	vector<int> idx_cache;
 	int r=tab.rcTotal.right,
@@ -67,8 +68,9 @@ void TreeListTabSplitter::ArrangeTabs(bool col_changed,TabStat* pstat)
 			r-=pstat->default_width[idx_cache[i]];
 			item.rect.left=r;
 		}
-		tab.arrTab[0].rect.left=l;
-		if(r-l<0)
+		if(r-l>=0)
+			tab.arrTab[0].rect.left=l;
+		else
 		{
 			int insufficiency=0;
 			for(int i=0;i<(int)size();i++)
@@ -79,18 +81,23 @@ void TreeListTabSplitter::ArrangeTabs(bool col_changed,TabStat* pstat)
 			int insuf=insufficiency+r-l;
 			if(insuf>0)
 			{
-				r=tab.arrTab[0].rect.right=l+pstat->default_width[0]-insuf;
-				for(int i=1;i<(int)size();i++)
+				insuf=l-r;
+				for(int i=0;i<(int)size();i++)
 				{
-					tab.arrTab[i].rect.left=r;
-					r+=pstat->default_width[idx_cache[i]];
-					tab.arrTab[i].rect.right=r;
+					int discount=pstat->default_width[idx_cache[i]]
+						-pstat->min_width[idx_cache[i]];
+					if(discount>insuf)
+						discount=insuf;
+					insuf-=discount;
+					tab.arrTab[i].rect.left=l;
+					l+=pstat->default_width[idx_cache[i]]-discount;
+					tab.arrTab[i].rect.right=l;
 				}
-				back().rect.right=tab.rcTotal.right;
 			}
 			else
 			{
 				insuf=-insuf;
+				tab.arrTab[0].rect.left=l;
 				r=tab.arrTab[0].rect.right=l+pstat->min_width[0];
 				for(int i=1;i<(int)size();i++)
 				{
@@ -103,6 +110,8 @@ void TreeListTabSplitter::ArrangeTabs(bool col_changed,TabStat* pstat)
 					tab.arrTab[i].rect.right=r;
 				}
 			}
+			ASSERT(tab.arrTab[0].rect.left==tab.rcTotal.left
+				&&back().rect.right==tab.rcTotal.right);
 		}
 	}
 	else
@@ -115,7 +124,21 @@ void TreeListTabSplitter::ArrangeTabs(bool col_changed,TabStat* pstat)
 		int index=-1;
 		if(diffw==0)
 			return;
-		else if(diffw>0)
+		int sufficient_size=0;
+		for(int i=0;i<(int)size();i++)
+			sufficient_size+=pstat->default_width[idx_cache[i]];
+		if(tab.rcTotal.Width()>=sufficient_size)
+		{
+			for(int i=(int)size()-1;i>=0;i--)
+			{
+				tab.arrTab[i].rect.right=r;
+				r-=pstat->default_width[idx_cache[i]];
+				tab.arrTab[i].rect.left=r;
+			}
+			tab.arrTab[0].rect.left=l;
+			return;
+		}
+		if(diffw>0)
 		{
 #define state_has_below_def 1
 #define state_has_below_min 2
@@ -214,28 +237,59 @@ void TreeListTabSplitter::ArrangeTabs(bool col_changed,TabStat* pstat)
 					}
 				}
 			}
+			int index_consume;
 			switch(state)
 			{
 			case 0:
-				diffw=-diffw+(tab.arrTab[0].rect.Width()-pstat->min_width[0]);
+				diffw=-diffw-(tab.arrTab[0].rect.Width()-pstat->min_width[0]);
 				l=tab.arrTab[0].rect.right=l+pstat->min_width[0];
 				for(int i=1;i<(int)size();i++)
 				{
+					int width=tab.arrTab[i].rect.Width();
+					int consume=width;
 					tab.arrTab[i].rect.left=l;
-					int consume=tab.arrTab[i].rect.Width();
 					if(consume>diffw)
 						consume=diffw;
 					diffw-=consume;
-					l+=(tab.arrTab[i].rect.Width()-consume);
+					l+=(width-consume);
 					tab.arrTab[i].rect.right=l;
 				}
-				back().rect.right=r;
+				ASSERT(back().rect.right==r);
 				break;
 			case state_has_above_min:
 			case state_has_above_def:
-				tab.arrTab[index].rect.right+=diffw;
-				for(int i=index+1;i<(int)size();i++)
-					tab.arrTab[i].rect.OffsetRect(diffw,0);
+				index_consume=(index==0?tab.arrTab[0].rect.Width()-pstat->min_width[0]+diffw
+					:tab.arrTab[index].rect.Width()+diffw);
+				if(index_consume>=0)
+				{
+					tab.arrTab[index].rect.right+=diffw;
+					for(int i=index+1;i<(int)size();i++)
+						tab.arrTab[i].rect.OffsetRect(diffw,0);
+				}
+				else
+				{
+					index_consume=-index_consume;
+					for(int i=0;i<(int)size();i++)
+					{
+						int width=tab.arrTab[i].rect.Width();
+						int consume=width;
+						tab.arrTab[i].rect.left=l;
+						if(i==index)
+						{
+							if(i==0)
+								l+=pstat->min_width[0];
+						}
+						else
+						{
+							if(consume>index_consume)
+								consume=index_consume;
+							index_consume-=consume;
+							l+=(width-consume);
+						}
+						tab.arrTab[i].rect.right=l;
+					}
+					ASSERT(back().rect.right==r);
+				}
 				break;
 			}
 		}
@@ -357,7 +411,7 @@ BEGIN_MESSAGE_MAP(CHeadBar,CWnd)
 	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
-CHeadBar::CHeadBar()
+CHeadBar::CHeadBar():m_iOrgX(0)
 {
 
 }
@@ -410,7 +464,7 @@ BOOL CHeadBar::PreCreateWindow(CREATESTRUCT& cs)
 	if (!CWnd::PreCreateWindow(cs))
 		return FALSE;
 
-	cs.dwExStyle |= WS_EX_CLIENTEDGE;
+	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 	cs.style &= ~WS_BORDER;
 	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS,
 		::LoadCursor(nullptr, IDC_ARROW), reinterpret_cast<HBRUSH>(COLOR_WINDOW+1), nullptr);
@@ -422,6 +476,8 @@ LRESULT CHeadBar::OnSizeView(WPARAM wParam,LPARAM lParam)
 {
 	CRect rc=*(CRect*)wParam;
 	rc.bottom=LINE_HEIGHT;
+	rc.left=0;
+	m_iOrgX=(int)lParam;
 	SplitTab(rc);
 	Invalidate();
 	TabInfo tab(&m_tabLeft,&m_tabRight);
@@ -459,5 +515,5 @@ void CHeadBar::OnPaint()
 	CRect rect;
 	GetClientRect(&rect);
 	rect.InflateRect(1,1,1,1);
-	drawer.FillRect(&rect,RGB(255,0,0));
+	drawer.FillRect(&rect,RGB(255,255,255));
 }

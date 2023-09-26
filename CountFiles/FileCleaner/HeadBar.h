@@ -27,6 +27,7 @@ private:
 	TreeListTabGrid m_tabLeft;
 	TreeListTabGrid m_tabRight;
 	TabStat m_tabStat;
+	int m_iOrgX;
 
 public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
