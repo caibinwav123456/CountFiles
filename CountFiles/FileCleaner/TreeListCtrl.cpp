@@ -36,6 +36,10 @@ inline void TreeListCtrl::GetCanvasRect(RECT* rc)
 	m_pWnd->GetClientRect(rc);
 	((CRect*)rc)->MoveToXY(GetScrollPos());
 }
+void TreeListCtrl::SetTabInfo(const TreeListTabGrid& tab)
+{
+	m_tabInfo=tab;
+}
 int TreeListCtrl::Init()
 {
 	if(!m_bmpFolder.LoadBitmap(IDB_FOLDER))
@@ -231,31 +235,48 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 		{
 			file_node_info info;
 			string date,time;
+			int tabidx=0;
 			if(item->type==eITypeDir)
 				m_ListLoader.GetNodeInfo(item->dirnode,&info);
 			else
 				m_ListLoader.GetNodeInfo(item->filenode,&info);
 			info.mod_time.Format(date,FORMAT_DATE|FORMAT_WEEKDAY);
 			info.mod_time.Format(time,FORMAT_TIME);
-			drawer.DrawText(&CRect(pos,CPoint(400,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,
+			ASSERT(m_tabInfo.mask&TLTAB_NAME);
+			drawer.DrawText(&CRect(pos,CPoint(m_tabInfo.arrTab[tabidx++].rect.right,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,
 				a2t(info.name),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-			drawer.DrawText(&CRect(400,pos.y,490,pos.y+LINE_HEIGHT),DT_ALIGN_RIGHT,
-				a2t(format_segmented_u64(info.size)),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-			drawer.DrawText(&CRect(500,pos.y,595,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
-				a2t(date),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-			drawer.DrawText(&CRect(595,pos.y,700,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
-				a2t(time),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
+			if(m_tabInfo.mask&TLTAB_SIZE)
+			{
+				drawer.DrawText(&CRect(m_tabInfo.arrTab[tabidx].rect.left,pos.y,
+					m_tabInfo.arrTab[tabidx].rect.right-5,pos.y+LINE_HEIGHT),DT_ALIGN_RIGHT,
+					a2t(format_segmented_u64(info.size)),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
+				tabidx++;
+			}
+			if(m_tabInfo.mask&TLTAB_MODIFY)
+			{
+				int length=min(m_tabInfo.arrTab[tabidx].rect.left+95,m_tabInfo.arrTab[tabidx].rect.right);
+				drawer.DrawText(&CRect(m_tabInfo.arrTab[tabidx].rect.left,pos.y,
+					length,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
+					a2t(date),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
+				drawer.DrawText(&CRect(m_tabInfo.arrTab[tabidx].rect.left+95,pos.y,
+					m_tabInfo.arrTab[tabidx].rect.right,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
+					a2t(time),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
+				tabidx++;
+			}
 		}
 		break;
 	case eITypeErrDir:
 	case eITypeErrFile:
 		{
 			err_node_info info;
+			int tabidx=0;
 			m_ListLoader.GetNodeErrInfo(item->errnode,&info);
-			drawer.DrawText(&CRect(pos,CPoint(400,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,a2t(info.name),
-				TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-			drawer.DrawText(&CRect(400,pos.y,700,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,a2t(info.err_desc),
-				TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
+			ASSERT(m_tabInfo.mask&TLTAB_NAME);
+			drawer.DrawText(&CRect(pos,CPoint(m_tabInfo.arrTab[tabidx].rect.right,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,
+				a2t(info.name),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
+			drawer.DrawText(&CRect(m_tabInfo.arrTab[tabidx].rect.right,pos.y,
+				m_tabInfo.rcTotal.right,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
+				a2t(info.err_desc),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 		}
 		break;
 	}

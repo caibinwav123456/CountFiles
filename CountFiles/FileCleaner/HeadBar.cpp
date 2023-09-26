@@ -2,7 +2,6 @@
 #include "HeadBar.h"
 #include "common.h"
 #include "resource.h"
-#include "DrawObject.h"
 
 TabStat::TabStat()
 {
@@ -110,8 +109,6 @@ void TreeListTabSplitter::ArrangeTabs(bool col_changed,TabStat* pstat)
 					tab.arrTab[i].rect.right=r;
 				}
 			}
-			ASSERT(tab.arrTab[0].rect.left==tab.rcTotal.left
-				&&back().rect.right==tab.rcTotal.right);
 		}
 	}
 	else
@@ -254,7 +251,6 @@ void TreeListTabSplitter::ArrangeTabs(bool col_changed,TabStat* pstat)
 					l+=(width-consume);
 					tab.arrTab[i].rect.right=l;
 				}
-				ASSERT(back().rect.right==r);
 				break;
 			case state_has_above_min:
 			case state_has_above_def:
@@ -288,12 +284,13 @@ void TreeListTabSplitter::ArrangeTabs(bool col_changed,TabStat* pstat)
 						}
 						tab.arrTab[i].rect.right=l;
 					}
-					ASSERT(back().rect.right==r);
 				}
 				break;
 			}
 		}
 	}
+	ASSERT(tab.arrTab[0].rect.left==tab.rcTotal.left
+		&&back().rect.right==tab.rcTotal.right);
 }
 void TreeListTabSplitter::clear()
 {
@@ -474,11 +471,11 @@ BOOL CHeadBar::PreCreateWindow(CREATESTRUCT& cs)
 
 LRESULT CHeadBar::OnSizeView(WPARAM wParam,LPARAM lParam)
 {
-	CRect rc=*(CRect*)wParam;
-	rc.bottom=LINE_HEIGHT;
-	rc.left=0;
-	m_iOrgX=(int)lParam;
-	SplitTab(rc);
+	m_rectBar=*(CRect*)wParam;
+	m_iOrgX=m_rectBar.left;
+	m_rectBar.bottom=LINE_HEIGHT;
+	m_rectBar.left=0;
+	SplitTab(m_rectBar);
 	Invalidate();
 	TabInfo tab(&m_tabLeft,&m_tabRight);
 	return SendMessageToIDWnd(IDW_MAIN_VIEW,WM_REARRANGE_TAB_SIZE,(WPARAM)&tab);
@@ -504,20 +501,48 @@ BOOL CHeadBar::OnEraseBkgnd(CDC* pDC)
 	return TRUE;//CWnd::OnEraseBkgnd(pDC);
 }
 
-
 void CHeadBar::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 					   // TODO: Add your message handler code here
 					   // Do not call CWnd::OnPaint() for painting messages
-	CDCDraw canvas(this,&dc,true);
+	dc.SetViewportOrg(CPoint(-m_iOrgX,0));
+	OnDraw(&dc);
+}
+
+void CHeadBar::OnDraw(CDC* pDC)
+{
+	CDCDraw canvas(this,pDC,true);
 	CDrawer drawer(&canvas);
 	CRect rect;
 	GetClientRect(&rect);
+	ASSERT(rect.left==0&&rect.top==0);
+	if(rect.right<MIN_SCROLL_WIDTH)
+		rect.right=MIN_SCROLL_WIDTH;
+
 	rect.InflateRect(1,1,1,1);
 	drawer.FillRect(&rect,RGB(255,255,255));
+	DrawTabs(&drawer,m_tabLeft);
+	DrawTabs(&drawer,m_tabRight);
+
+	drawer.DrawLine(&CPoint(m_tabLeft.rcTotal.right,0),&m_tabLeft.rcTotal.BottomRight(),
+		BACK_GREY_COLOR,1,PS_SOLID);
+	drawer.DrawLine(&m_tabRight.rcTotal.TopLeft(),&CPoint(m_tabRight.rcTotal.left,LINE_HEIGHT),
+		BACK_GREY_COLOR,1,PS_SOLID);
 }
 
+void CHeadBar::DrawTabs(CDrawer* pDrawer,const TreeListTabGrid& tab)
+{
+	for(int i=0;i<(int)tab.arrTab.size();i++)
+	{
+		if(i!=0)
+			pDrawer->DrawLine(&CPoint(tab.arrTab[i].rect.left,0),&CPoint(tab.arrTab[i].rect.left,LINE_HEIGHT),
+				TAB_SEP_COLOR,3,PS_SOLID);
+		CRect rc=tab.arrTab[i].rect;
+		rc.left+=2;
+		pDrawer->DrawText(&rc,DT_ALIGN_LEFT,(LPCTSTR)tab.arrTab[i].title,LINE_HEIGHT,RGB(0,0,0),TRANSPARENT,VIEW_FONT);
+	}
+}
 
 void CHeadBar::PostNcDestroy()
 {
