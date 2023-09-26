@@ -39,6 +39,8 @@ public:
 
 // Generated message map functions
 protected:
+	virtual void PostNcDestroy();
+
 	DECLARE_MESSAGE_MAP()
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSetFocus(CWnd *pOldWnd);

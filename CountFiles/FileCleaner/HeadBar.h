@@ -31,6 +31,7 @@ private:
 
 public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	virtual void PostNcDestroy();
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnSizeView(WPARAM wParam,LPARAM lParam);

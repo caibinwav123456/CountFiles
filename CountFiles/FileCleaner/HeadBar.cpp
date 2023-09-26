@@ -517,3 +517,11 @@ void CHeadBar::OnPaint()
 	rect.InflateRect(1,1,1,1);
 	drawer.FillRect(&rect,RGB(255,255,255));
 }
+
+
+void CHeadBar::PostNcDestroy()
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	delete this;
+}
