@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "math.h"
 
 CMap<UINT,UINT,CWnd*,CWnd*>* GetIDWndMap()
 {
@@ -41,6 +42,11 @@ void PDXShowMessage(LPCTSTR format,...)
 	va_end(args);
 	AfxMessageBox(strMsg);
 }
+#define clamp_value(val,minimum,maximum) \
+	if(val<minimum) \
+		val=minimum; \
+	else if(val>maximum) \
+		val=maximum;
 
 CProgramData CProgramData::s_Data;
 CProgramData::CProgramData()
@@ -48,6 +54,8 @@ CProgramData::CProgramData()
 	, m_dpiY(0)
 	, m_deflogicX(96)
 	, m_deflogicY(96)
+	, m_scaleX(0)
+	, m_scaleY(0)
 	, m_strCachePath("LocalCache\\")
 	, m_strCacheFileName("current")
 	, m_strCFileExt(".fl")
@@ -62,17 +70,23 @@ int CProgramData::Init()
 	s_Data.m_dpiY=dcScreen.GetDeviceCaps(LOGPIXELSY);
 	dcScreen.DeleteDC();
 
+	const float min_scale=1.0f,max_scale=1.2f;
+	s_Data.m_scaleX=(float)s_Data.m_dpiX/s_Data.m_deflogicX;
+	s_Data.m_scaleY=(float)s_Data.m_dpiY/s_Data.m_deflogicY;
+	clamp_value(s_Data.m_scaleX,min_scale,max_scale)
+	clamp_value(s_Data.m_scaleY,min_scale,max_scale)
+
 	s_Data.m_strBasePath="D:\\";
 
 	return 0;
 }
 int CProgramData::GetRealPixelsX(int logicx)
 {
-	return logicx*s_Data.m_dpiX/s_Data.m_deflogicX;
+	return (int)roundf((float)logicx*s_Data.m_scaleX);
 }
 int CProgramData::GetRealPixelsY(int logicy)
 {
-	return logicy*s_Data.m_dpiY/s_Data.m_deflogicY;
+	return (int)roundf((float)logicy*s_Data.m_scaleY);
 }
 CPoint CProgramData::GetRealPoint(POINT pt)
 {

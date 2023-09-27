@@ -108,12 +108,25 @@ void TreeListCtrl::DrawFolder(CDrawer* drawer,POINT* pt,E_FOLDER_STATE state,BOO
 {
 	if(state<=0||state>=eFSMax)
 		return;
-	drawer->DrawBitmap(expand&&state<eFSAnormal?&m_bmpFolderExpMask:&m_bmpFolderMask,pt,SRCAND,
-		&CRect((FOLDER_METRIC-LINE_HEIGHT)/2,(FOLDER_METRIC-LINE_HEIGHT)/2,
-		(FOLDER_METRIC+LINE_HEIGHT)/2,(FOLDER_METRIC+LINE_HEIGHT)/2));
-	drawer->DrawBitmap(expand?&m_bmpFolderExp:&m_bmpFolder,pt,SRCPAINT,
-		&CRect(FOLDER_METRIC*(state-1)+(FOLDER_METRIC-LINE_HEIGHT)/2,(FOLDER_METRIC-LINE_HEIGHT)/2,
-		FOLDER_METRIC*state-(FOLDER_METRIC-LINE_HEIGHT)/2,(FOLDER_METRIC+LINE_HEIGHT)/2));
+	CPoint point=*(CPoint*)pt;
+	CRect rcSrcMask,rcSrc;
+	if(FOLDER_METRIC>LINE_HEIGHT)
+	{
+		rcSrcMask=CRect((FOLDER_METRIC-LINE_HEIGHT)/2,(FOLDER_METRIC-LINE_HEIGHT)/2,
+			(FOLDER_METRIC+LINE_HEIGHT)/2,(FOLDER_METRIC+LINE_HEIGHT)/2);
+		rcSrc=CRect(FOLDER_METRIC*(state-1)+(FOLDER_METRIC-LINE_HEIGHT)/2,(FOLDER_METRIC-LINE_HEIGHT)/2,
+			FOLDER_METRIC*state-(FOLDER_METRIC-LINE_HEIGHT)/2,(FOLDER_METRIC+LINE_HEIGHT)/2);
+	}
+	else
+	{
+		point=point+CPoint((LINE_HEIGHT-FOLDER_METRIC)/2,(LINE_HEIGHT-FOLDER_METRIC)/2);
+		rcSrcMask=CRect(0,0,FOLDER_METRIC,FOLDER_METRIC);
+		rcSrc=CRect(FOLDER_METRIC*(state-1),0,FOLDER_METRIC*state,FOLDER_METRIC);
+	}
+	drawer->DrawBitmap(expand&&state<eFSAnormal?&m_bmpFolderExpMask:&m_bmpFolderMask,&point,SRCAND,
+		&rcSrcMask);
+	drawer->DrawBitmap(expand?&m_bmpFolderExp:&m_bmpFolder,&point,SRCPAINT,
+		&rcSrc);
 }
 ListCtrlIterator TreeListCtrl::GetDrawIter(POINT* pt)
 {
@@ -254,11 +267,11 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 			}
 			if(m_tabInfo.mask&TLTAB_MODIFY)
 			{
-				int length=min(m_tabInfo.arrTab[tabidx].rect.left+95,m_tabInfo.arrTab[tabidx].rect.right);
+				int length=min(m_tabInfo.arrTab[tabidx].rect.left+MODIFY_DATE_PART_WIDTH,m_tabInfo.arrTab[tabidx].rect.right);
 				drawer.DrawText(&CRect(m_tabInfo.arrTab[tabidx].rect.left,pos.y,
 					length,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
 					a2t(date),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-				drawer.DrawText(&CRect(m_tabInfo.arrTab[tabidx].rect.left+95,pos.y,
+				drawer.DrawText(&CRect(m_tabInfo.arrTab[tabidx].rect.left+MODIFY_DATE_PART_WIDTH,pos.y,
 					m_tabInfo.arrTab[tabidx].rect.right,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
 					a2t(time),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 				tabidx++;
