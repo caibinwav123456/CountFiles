@@ -102,6 +102,8 @@ private:
 	const int m_deflogicY;
 	int m_dpiX;
 	int m_dpiY;
+	float m_scaleX;
+	float m_scaleY;
 	string m_strBasePath;
 	const string m_strCachePath;
 	const string m_strCacheFileName;
