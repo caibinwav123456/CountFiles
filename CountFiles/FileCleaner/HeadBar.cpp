@@ -133,6 +133,8 @@ void TreeListTabSplitter::ArrangeTabs(bool col_changed,TabStat* pstat)
 				tab.arrTab[i].rect.left=r;
 			}
 			tab.arrTab[0].rect.left=l;
+			ASSERT(tab.arrTab[0].rect.left==tab.rcTotal.left
+				&&back().rect.right==tab.rcTotal.right);
 			return;
 		}
 		if(diffw>0)

@@ -10,7 +10,7 @@
 // add headers that you want to pre-compile here
 #include "framework.h"
 
-#define USE_HIDPI_SCREEN
+#define USE_HIPPI_SCREEN
 
 #include "MsgID.h"
 #include "CommonStruct.h"
