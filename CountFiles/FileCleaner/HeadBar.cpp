@@ -520,7 +520,7 @@ void CHeadBar::RepositionTab(int xpos)
 {
 	ASSERT(m_pTabGrabbed!=NULL&&m_GrabIndex>=0);
 	ASSERT((m_pTabGrabbed->mask&TLTAB_NAME)&&!m_pTabGrabbed->arrTab.empty());
-	ASSERT(m_pTabGrabbed->arrTab[0].rect.Width()>=m_tabStat.default_width[0]);
+	ASSERT(m_pTabGrabbed->arrTab[0].rect.Width()>=m_tabStat.min_width[0]);
 	int maskoff=GetTabMaskIndex(*m_pTabGrabbed,m_GrabIndex);
 	if((int)m_pTabGrabbed->arrTab.size()==1)
 		return;
