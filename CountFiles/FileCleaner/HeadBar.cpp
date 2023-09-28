@@ -2,6 +2,11 @@
 #include "HeadBar.h"
 #include "common.h"
 #include "resource.h"
+#define clamp_value(val,minimum,maximum) \
+	if(val<minimum) \
+		val=minimum; \
+	else if(val>maximum) \
+		val=maximum;
 
 TabStat::TabStat()
 {
@@ -18,6 +23,33 @@ TabStat::TabStat()
 	min_width[0]=MIN_TABWIDTH_NAME;
 	min_width[1]=MIN_TABWIDTH_OTHER;
 	min_width[2]=MIN_TABWIDTH_OTHER;
+}
+inline int GetTabMaskIndex(const TreeListTabGrid& tab,int index)
+{
+	for(int i=0,idx=0;i<32;i++)
+	{
+		UINT flags=(1<<i);
+		if(tab.mask&flags)
+		{
+			if((idx++)==index)
+				return i;
+		}
+	}
+	return -1;
+}
+
+inline bool InGrabRegion(CPoint pt,int org)
+{
+	return pt.x>=org-TAB_GRAB_BIAS&&pt.x<=org+TAB_GRAB_BIAS;
+}
+inline int GetGrabIndex(CPoint pt,const TreeListTabGrid& tab)
+{
+	for(int i=0;i<(int)tab.arrTab.size()-1;i++)
+	{
+		if(InGrabRegion(pt,tab.arrTab[i].rect.right))
+			return i;
+	}
+	return -1;
 }
 
 class TreeListTabSplitter
@@ -408,9 +440,12 @@ BEGIN_MESSAGE_MAP(CHeadBar,CWnd)
 	ON_WM_CREATE()
 	ON_WM_ERASEBKGND()
 	ON_WM_PAINT()
+	ON_WM_MOUSEMOVE()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
 
-CHeadBar::CHeadBar():m_iOrgX(0)
+CHeadBar::CHeadBar():m_iOrgX(0),m_GrabIndex(-1),m_pTabGrabbed(NULL)
 {
 
 }
@@ -471,6 +506,74 @@ BOOL CHeadBar::PreCreateWindow(CREATESTRUCT& cs)
 	return TRUE;
 }
 
+TreeListTabGrid* CHeadBar::DetectGrabStatus(CPoint pt,int& index)
+{
+	if((index=GetGrabIndex(pt,m_tabLeft))>=0)
+		return &m_tabLeft;
+	else if((index=GetGrabIndex(pt,m_tabRight))>=0)
+		return &m_tabRight;
+	index=-1;
+	return NULL;
+}
+
+void CHeadBar::RepositionTab(int xpos)
+{
+	ASSERT(m_pTabGrabbed!=NULL&&m_GrabIndex>=0);
+	ASSERT((m_pTabGrabbed->mask&TLTAB_NAME)&&!m_pTabGrabbed->arrTab.empty());
+	ASSERT(m_pTabGrabbed->arrTab[0].rect.Width()>=m_tabStat.default_width[0]);
+	int maskoff=GetTabMaskIndex(*m_pTabGrabbed,m_GrabIndex);
+	if((int)m_pTabGrabbed->arrTab.size()==1)
+		return;
+	int left=m_pTabGrabbed->arrTab[m_GrabIndex].rect.left;
+	if(m_GrabIndex==0)
+		left+=m_tabStat.min_width[0];
+	int right=m_pTabGrabbed->arrTab[m_GrabIndex+1].rect.right;
+	clamp_value(xpos,left,right)
+	m_pTabGrabbed->arrTab[m_GrabIndex].rect.right=
+		m_pTabGrabbed->arrTab[m_GrabIndex+1].rect.left=xpos;
+}
+
+void CHeadBar::DrawTabs(CDrawer* pDrawer,const TreeListTabGrid& tab)
+{
+	for(int i=0;i<(int)tab.arrTab.size();i++)
+	{
+		if(i!=0)
+			pDrawer->DrawLine(&CPoint(tab.arrTab[i].rect.left,0),&CPoint(tab.arrTab[i].rect.left,LINE_HEIGHT),
+				TAB_SEP_COLOR,3,PS_SOLID);
+		CRect rc=tab.arrTab[i].rect;
+		rc.left+=2;
+		pDrawer->DrawText(&rc,DT_ALIGN_LEFT,(LPCTSTR)tab.arrTab[i].title,LINE_HEIGHT,RGB(0,0,0),TRANSPARENT,VIEW_FONT);
+	}
+}
+
+void CHeadBar::OnDraw(CDC* pDC)
+{
+	CDCDraw canvas(this,pDC,true);
+	CDrawer drawer(&canvas);
+	CRect rect;
+	GetClientRect(&rect);
+	ASSERT(rect.left==0&&rect.top==0);
+	if(rect.right<MIN_SCROLL_WIDTH)
+		rect.right=MIN_SCROLL_WIDTH;
+
+	rect.InflateRect(1,1,1,1);
+	drawer.FillRect(&rect,RGB(255,255,255));
+	DrawTabs(&drawer,m_tabLeft);
+	DrawTabs(&drawer,m_tabRight);
+
+	drawer.DrawLine(&CPoint(m_tabLeft.rcTotal.right,0),&m_tabLeft.rcTotal.BottomRight(),
+		BACK_GREY_COLOR,1,PS_SOLID);
+	drawer.DrawLine(&m_tabRight.rcTotal.TopLeft(),&CPoint(m_tabRight.rcTotal.left,LINE_HEIGHT),
+		BACK_GREY_COLOR,1,PS_SOLID);
+}
+
+void CHeadBar::PostNcDestroy()
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	delete this;
+}
+
 LRESULT CHeadBar::OnSizeView(WPARAM wParam,LPARAM lParam)
 {
 	m_rectBar=*(CRect*)wParam;
@@ -512,43 +615,53 @@ void CHeadBar::OnPaint()
 	OnDraw(&dc);
 }
 
-void CHeadBar::OnDraw(CDC* pDC)
+void CHeadBar::OnMouseMove(UINT nFlags, CPoint point)
 {
-	CDCDraw canvas(this,pDC,true);
-	CDrawer drawer(&canvas);
-	CRect rect;
-	GetClientRect(&rect);
-	ASSERT(rect.left==0&&rect.top==0);
-	if(rect.right<MIN_SCROLL_WIDTH)
-		rect.right=MIN_SCROLL_WIDTH;
-
-	rect.InflateRect(1,1,1,1);
-	drawer.FillRect(&rect,RGB(255,255,255));
-	DrawTabs(&drawer,m_tabLeft);
-	DrawTabs(&drawer,m_tabRight);
-
-	drawer.DrawLine(&CPoint(m_tabLeft.rcTotal.right,0),&m_tabLeft.rcTotal.BottomRight(),
-		BACK_GREY_COLOR,1,PS_SOLID);
-	drawer.DrawLine(&m_tabRight.rcTotal.TopLeft(),&CPoint(m_tabRight.rcTotal.left,LINE_HEIGHT),
-		BACK_GREY_COLOR,1,PS_SOLID);
-}
-
-void CHeadBar::DrawTabs(CDrawer* pDrawer,const TreeListTabGrid& tab)
-{
-	for(int i=0;i<(int)tab.arrTab.size();i++)
+	// TODO: Add your message handler code here and/or call default
+	if(m_pTabGrabbed==NULL)
 	{
-		if(i!=0)
-			pDrawer->DrawLine(&CPoint(tab.arrTab[i].rect.left,0),&CPoint(tab.arrTab[i].rect.left,LINE_HEIGHT),
-				TAB_SEP_COLOR,3,PS_SOLID);
-		CRect rc=tab.arrTab[i].rect;
-		rc.left+=2;
-		pDrawer->DrawText(&rc,DT_ALIGN_LEFT,(LPCTSTR)tab.arrTab[i].title,LINE_HEIGHT,RGB(0,0,0),TRANSPARENT,VIEW_FONT);
+		int index=-1;
+		TreeListTabGrid* pTabGrabbed=DetectGrabStatus(point,index);
+		if(pTabGrabbed!=NULL)
+			SetCursor(LoadCursor(NULL,IDC_SIZEWE));
+		else
+			SetCursor(LoadCursor(NULL,IDC_ARROW));
 	}
+	else
+	{
+		SetCursor(LoadCursor(NULL,IDC_SIZEWE));
+		RepositionTab(point.x);
+		Invalidate();
+		TabInfo tab(&m_tabLeft,&m_tabRight);
+		SendMessageToIDWnd(IDW_MAIN_VIEW,WM_REARRANGE_TAB_SIZE,(WPARAM)&tab);
+	}
+	CWnd::OnMouseMove(nFlags, point);
 }
 
-void CHeadBar::PostNcDestroy()
-{
-	// TODO: Add your specialized code here and/or call the base class
 
-	delete this;
+void CHeadBar::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	m_pTabGrabbed=DetectGrabStatus(point,m_GrabIndex);
+	if(m_pTabGrabbed!=NULL)
+	{
+		SetCursor(LoadCursor(NULL,IDC_SIZEWE));
+		SetCapture();
+	}
+	else
+	{
+		SetCursor(LoadCursor(NULL,IDC_ARROW));
+	}
+	CWnd::OnLButtonDown(nFlags, point);
+}
+
+
+void CHeadBar::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	m_pTabGrabbed=NULL;
+	m_GrabIndex=-1;
+	ReleaseCapture();
+	SetCursor(LoadCursor(NULL,IDC_ARROW));
+	CWnd::OnLButtonUp(nFlags, point);
 }

@@ -25,12 +25,18 @@ private:
 	void CalcTabStat(TreeListTabGrid& tab,CRect& rc,UINT flag);
 	void DrawTabs(CDrawer* pDrawer,const TreeListTabGrid& tab);
 
+	TreeListTabGrid* DetectGrabStatus(CPoint pt,int& index);
+	void RepositionTab(int xpos);
+
 private:
 	TreeListTabGrid m_tabLeft;
 	TreeListTabGrid m_tabRight;
 	TabStat m_tabStat;
 	CRect m_rectBar;
 	int m_iOrgX;
+
+	int m_GrabIndex;
+	TreeListTabGrid* m_pTabGrabbed;
 
 public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
@@ -43,4 +49,7 @@ public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnPaint();
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 };
