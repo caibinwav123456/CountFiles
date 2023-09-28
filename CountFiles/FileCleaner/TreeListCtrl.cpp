@@ -36,9 +36,9 @@ inline void TreeListCtrl::GetCanvasRect(RECT* rc)
 	m_pWnd->GetClientRect(rc);
 	((CRect*)rc)->MoveToXY(GetScrollPos());
 }
-void TreeListCtrl::SetTabInfo(const TreeListTabGrid& tab)
+void TreeListCtrl::SetTabInfo(const TabInfo* tab)
 {
-	m_tabInfo=tab;
+	m_Tab=*tab->left;
 }
 int TreeListCtrl::Init()
 {
@@ -255,24 +255,24 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 				m_ListLoader.GetNodeInfo(item->filenode,&info);
 			info.mod_time.Format(date,FORMAT_DATE|FORMAT_WEEKDAY);
 			info.mod_time.Format(time,FORMAT_TIME);
-			ASSERT(m_tabInfo.mask&TLTAB_NAME);
-			drawer.DrawText(&CRect(pos,CPoint(m_tabInfo.arrTab[tabidx++].rect.right,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,
+			ASSERT(m_Tab.mask&TLTAB_NAME);
+			drawer.DrawText(&CRect(pos,CPoint(m_Tab.arrTab[tabidx++].rect.right,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,
 				a2t(info.name),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-			if(m_tabInfo.mask&TLTAB_SIZE)
+			if(m_Tab.mask&TLTAB_SIZE)
 			{
-				drawer.DrawText(&CRect(m_tabInfo.arrTab[tabidx].rect.left,pos.y,
-					m_tabInfo.arrTab[tabidx].rect.right-TABMARGIN_SIZE,pos.y+LINE_HEIGHT),DT_ALIGN_RIGHT,
+				drawer.DrawText(&CRect(m_Tab.arrTab[tabidx].rect.left,pos.y,
+					m_Tab.arrTab[tabidx].rect.right-TABMARGIN_SIZE,pos.y+LINE_HEIGHT),DT_ALIGN_RIGHT,
 					a2t(format_segmented_u64(info.size)),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 				tabidx++;
 			}
-			if(m_tabInfo.mask&TLTAB_MODIFY)
+			if(m_Tab.mask&TLTAB_MODIFY)
 			{
-				int length=min(m_tabInfo.arrTab[tabidx].rect.left+MODIFY_DATE_PART_WIDTH,m_tabInfo.arrTab[tabidx].rect.right);
-				drawer.DrawText(&CRect(m_tabInfo.arrTab[tabidx].rect.left,pos.y,
+				int length=min(m_Tab.arrTab[tabidx].rect.left+MODIFY_DATE_PART_WIDTH,m_Tab.arrTab[tabidx].rect.right);
+				drawer.DrawText(&CRect(m_Tab.arrTab[tabidx].rect.left,pos.y,
 					length,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
 					a2t(date),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-				drawer.DrawText(&CRect(m_tabInfo.arrTab[tabidx].rect.left+MODIFY_DATE_PART_WIDTH,pos.y,
-					m_tabInfo.arrTab[tabidx].rect.right,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
+				drawer.DrawText(&CRect(m_Tab.arrTab[tabidx].rect.left+MODIFY_DATE_PART_WIDTH,pos.y,
+					m_Tab.arrTab[tabidx].rect.right,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
 					a2t(time),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 				tabidx++;
 			}
@@ -284,11 +284,11 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 			err_node_info info;
 			int tabidx=0;
 			m_ListLoader.GetNodeErrInfo(item->errnode,&info);
-			ASSERT(m_tabInfo.mask&TLTAB_NAME);
-			drawer.DrawText(&CRect(pos,CPoint(m_tabInfo.arrTab[tabidx].rect.right,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,
+			ASSERT(m_Tab.mask&TLTAB_NAME);
+			drawer.DrawText(&CRect(pos,CPoint(m_Tab.arrTab[tabidx].rect.right,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,
 				a2t(info.name),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-			drawer.DrawText(&CRect(m_tabInfo.arrTab[tabidx].rect.right,pos.y,
-				m_tabInfo.rcTotal.right,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
+			drawer.DrawText(&CRect(m_Tab.arrTab[tabidx].rect.right,pos.y,
+				m_Tab.rcTotal.right,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
 				a2t(info.err_desc),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 		}
 		break;

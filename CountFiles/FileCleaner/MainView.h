@@ -30,9 +30,6 @@ public:
 public:
 	CScrollTreeList m_TreeList;
 
-	TreeListTabGrid m_tabLeft;
-	TreeListTabGrid m_tabRight;
-
 // Operations
 public:
 

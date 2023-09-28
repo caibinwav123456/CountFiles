@@ -197,9 +197,7 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 LRESULT CMainView::OnRearrangeTabSize(WPARAM wParam, LPARAM lParam)
 {
 	TabInfo* tab=(TabInfo*)wParam;
-	m_tabLeft=*tab->left;
-	m_tabRight=*tab->right;
-	m_TreeList.SetTabInfo(m_tabLeft);
+	m_TreeList.SetTabInfo(tab);
 	Invalidate();
 	return 0;
 }
