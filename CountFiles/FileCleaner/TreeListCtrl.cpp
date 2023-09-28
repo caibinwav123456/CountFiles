@@ -261,7 +261,7 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 			if(m_tabInfo.mask&TLTAB_SIZE)
 			{
 				drawer.DrawText(&CRect(m_tabInfo.arrTab[tabidx].rect.left,pos.y,
-					m_tabInfo.arrTab[tabidx].rect.right-5,pos.y+LINE_HEIGHT),DT_ALIGN_RIGHT,
+					m_tabInfo.arrTab[tabidx].rect.right-TABMARGIN_SIZE,pos.y+LINE_HEIGHT),DT_ALIGN_RIGHT,
 					a2t(format_segmented_u64(info.size)),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 				tabidx++;
 			}

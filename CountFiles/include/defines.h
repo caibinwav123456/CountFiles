@@ -20,6 +20,7 @@
 #define DEF_MIN_TABWIDTH_OTHER     10
 
 #define DEF_MODIFY_DATE_PART_WIDTH 105
+#define DEF_TABMARGIN_SIZE     10
 
 #define DEF_FILE_RECT          CRect(3,6,9,14)
 
@@ -44,6 +45,7 @@
 #define MIN_TABWIDTH_OTHER     DEF_MIN_TABWIDTH_OTHER
 
 #define MODIFY_DATE_PART_WIDTH DEF_MODIFY_DATE_PART_WIDTH
+#define TABMARGIN_SIZE         DEF_TABMARGIN_SIZE
 
 #define FILE_RECT          DEF_FILE_RECT
 
@@ -68,6 +70,7 @@
 #define MIN_TABWIDTH_OTHER    (CProgramData::GetRealPixelsX(DEF_MIN_TABWIDTH_OTHER))
 
 #define MODIFY_DATE_PART_WIDTH (CProgramData::GetRealPixelsX(DEF_MODIFY_DATE_PART_WIDTH))
+#define TABMARGIN_SIZE         (CProgramData::GetRealPixelsX(DEF_TABMARGIN_SIZE))
 
 #define FILE_RECT          (CProgramData::GetRealRect(DEF_FILE_RECT))
 
