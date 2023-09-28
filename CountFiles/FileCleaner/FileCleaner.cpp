@@ -68,7 +68,7 @@ BOOL CFileCleanerApp::InitInstance()
 
 	if(CProgramData::Init()!=0)
 		return FALSE;
-	
+
 	DrawObjectStartup();
 
 	EnableTaskbarInteraction(FALSE);
