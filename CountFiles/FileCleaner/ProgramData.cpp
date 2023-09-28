@@ -124,17 +124,28 @@ string CProgramData::GetErrListFilePath(const string& path)
 #ifdef UNICODE
 string ConvertTStrToAnsiStr(LPCTSTR from)
 {
-	USES_CONVERSION;
-	return T2A(from);
+	int length=WideCharToMultiByte(CP_ACP,0,from,-1,NULL,0,NULL,NULL);
+	if(length<=0)
+		return "";
+	char* buf=new char[length];
+	WideCharToMultiByte(CP_ACP,0,from,-1,buf,length,NULL,NULL);
+	string to(buf);
+	delete[] buf;
+	return to;
 }
 CString ConvertAnsiStrToTStr(LPCSTR from)
 {
-	USES_CONVERSION;
-	return A2T(from);
+	int length=MultiByteToWideChar(CP_ACP,0,from,-1,NULL,0);
+	if(length<=0)
+		return L"";
+	WCHAR* buf=new WCHAR[length];
+	MultiByteToWideChar(CP_ACP,0,from,-1,buf,length);
+	CString to(buf);
+	delete[] buf;
+	return to;
 }
 CString ConvertAnsiStrToTStr(const string& from)
 {
-	USES_CONVERSION;
-	return A2T(from.c_str());
+	return ConvertAnsiStrToTStr(from.c_str());
 }
 #endif
