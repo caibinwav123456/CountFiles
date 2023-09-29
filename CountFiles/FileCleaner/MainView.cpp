@@ -169,14 +169,17 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 	string strErrList;
 	string path=t2astr(lpData->left);
 	dword type=0;
-	if(sys_fstat((char*)path.c_str(),&type)!=0)
-		return FALSE;
 	m_TreeList.UnLoad();
+	if((ret=sys_fstat((char*)path.c_str(),&type))!=0)
+	{
+		PDXShowMessage(_T("\'%s\': %s"),(LPCTSTR)lpData->left,a2t(get_error_desc(ret)));
+		goto fail;
+	}
 	if(type==FILE_TYPE_DIR)
 	{
 		CDlgLoad dlg(NULL,lpData->left);
 		if(dlg.DoModal()!=IDOK)
-			return TRUE;
+			goto fail;
 		strList=CProgramData::GetCacheFilePath();
 		strErrList=CProgramData::GetCacheErrFilePath();
 	}
@@ -190,9 +193,13 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 	if(0!=(ret=m_TreeList.Load(strList.c_str(),strErrList.c_str())))
 	{
 		PDXShowMessage(_T("Load file list failed: %s"),a2t(get_error_desc(ret)));
+		goto fail;
 	}
 	Invalidate();
-	return ret==0?TRUE:FALSE;
+	return TRUE;
+fail:
+	Invalidate();
+	return FALSE;
 }
 LRESULT CMainView::OnRearrangeTabSize(WPARAM wParam, LPARAM lParam)
 {
