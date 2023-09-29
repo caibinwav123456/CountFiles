@@ -66,7 +66,6 @@ BEGIN_MESSAGE_MAP(CBaseBar, CDialog)
 	ON_MESSAGE(WM_SET_VIEW_SIZE, &CBaseBar::OnSizeView)
 	ON_WM_EXITMENULOOP()
 	ON_WM_DESTROY()
-	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_BUTTON_GO, &CBaseBar::OnBnClickedButtonGo)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN, &CBaseBar::OnBnClickedButtonOpen)
 	ON_BN_CLICKED(IDC_BUTTON_DROP, &CBaseBar::OnBnClickedButtonDrop)
@@ -307,11 +306,6 @@ void CBaseBar::OnDestroy()
 {
 	CDialog::OnDestroy();
 	m_menuPopup.DestroyMenu();
-}
-
-void CBaseBar::OnSize(UINT nType, int cx, int cy)
-{
-	CDialog::OnSize(nType, cx, cy);
 }
 
 void CBaseBar::OnOK()
