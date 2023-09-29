@@ -541,7 +541,7 @@ void CHeadBar::DrawTabs(CDrawer* pDrawer,const TreeListTabGrid& tab)
 			pDrawer->DrawLine(&CPoint(tab.arrTab[i].rect.left,0),&CPoint(tab.arrTab[i].rect.left,LINE_HEIGHT),
 				TAB_SEP_COLOR,3,PS_SOLID);
 		CRect rc=tab.arrTab[i].rect;
-		rc.left+=2;
+		rc.left+=TAB_GRAB_BIAS;
 		pDrawer->DrawText(&rc,DT_ALIGN_LEFT,(LPCTSTR)tab.arrTab[i].title,LINE_HEIGHT,RGB(0,0,0),TRANSPARENT,VIEW_FONT);
 	}
 }
