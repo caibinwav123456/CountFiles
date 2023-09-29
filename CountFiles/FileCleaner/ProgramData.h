@@ -98,6 +98,7 @@ public:
 
 private:
 	CProgramData::CProgramData();
+	int InitData();
 	const int m_deflogicX;
 	const int m_deflogicY;
 	int m_dpiX;
