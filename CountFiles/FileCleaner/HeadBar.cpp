@@ -618,6 +618,7 @@ void CHeadBar::OnPaint()
 void CHeadBar::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+	point.x+=m_iOrgX;
 	if(m_pTabGrabbed==NULL)
 	{
 		int index=-1;
@@ -642,6 +643,7 @@ void CHeadBar::OnMouseMove(UINT nFlags, CPoint point)
 void CHeadBar::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+	point.x+=m_iOrgX;
 	m_pTabGrabbed=DetectGrabStatus(point,m_GrabIndex);
 	if(m_pTabGrabbed!=NULL)
 	{
@@ -659,6 +661,7 @@ void CHeadBar::OnLButtonDown(UINT nFlags, CPoint point)
 void CHeadBar::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+	point.x+=m_iOrgX;
 	m_pTabGrabbed=NULL;
 	m_GrabIndex=-1;
 	ReleaseCapture();

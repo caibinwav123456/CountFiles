@@ -64,19 +64,23 @@ CProgramData::CProgramData()
 }
 int CProgramData::Init()
 {
+	return s_Data.InitData();
+}
+int CProgramData::InitData()
+{
 	CDC dcScreen;
 	dcScreen.CreateDC(_T("DISPLAY"),NULL,NULL,NULL);
-	s_Data.m_dpiX=dcScreen.GetDeviceCaps(LOGPIXELSX);
-	s_Data.m_dpiY=dcScreen.GetDeviceCaps(LOGPIXELSY);
+	m_dpiX=dcScreen.GetDeviceCaps(LOGPIXELSX);
+	m_dpiY=dcScreen.GetDeviceCaps(LOGPIXELSY);
 	dcScreen.DeleteDC();
 
 	const float min_scale=1.0f,max_scale=1.2f;
-	s_Data.m_scaleX=(float)s_Data.m_dpiX/s_Data.m_deflogicX;
-	s_Data.m_scaleY=(float)s_Data.m_dpiY/s_Data.m_deflogicY;
-	clamp_value(s_Data.m_scaleX,min_scale,max_scale)
-	clamp_value(s_Data.m_scaleY,min_scale,max_scale)
+	m_scaleX=(float)m_dpiX/m_deflogicX;
+	m_scaleY=(float)m_dpiY/m_deflogicY;
+	clamp_value(m_scaleX,min_scale,max_scale)
+	clamp_value(m_scaleY,min_scale,max_scale)
 
-	s_Data.m_strBasePath="D:\\";
+	m_strBasePath="D:\\";
 
 	return 0;
 }
