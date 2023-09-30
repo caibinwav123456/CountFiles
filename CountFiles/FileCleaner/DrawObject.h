@@ -24,6 +24,8 @@ public:
 	CDrawer(CDCDraw* canvas);
 	~CDrawer();
 
+	void SetClipRect(LPCRECT rcclip);
+
 	void DrawLine(POINT* start,POINT* end,COLORREF clr,int width=1,int style=PS_SOLID);
 
 	void DrawEllipse(RECT* rc,COLORREF clr=RGB(0,0,0),int linew=1);
@@ -41,5 +43,6 @@ private:
 	CDC* SelectDC();
 	CDCDraw* m_pCanvas;
 	CDC* m_pDCDraw;
+	void RestoreClipRect();
 };
 #endif

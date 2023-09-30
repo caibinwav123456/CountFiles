@@ -209,9 +209,11 @@ void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter)
 }
 void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 {
+	ASSERT(m_Tab.mask&TLTAB_NAME);
 	DrawLine(drawer,iter.m_iline,iter.m_pStkItem==NULL?NULL:iter.m_pStkItem->m_pLItem);
+	CPoint pos(m_Tab.rcTotal.left,LINE_HEIGHT*iter.m_iline);
+	drawer.SetClipRect(&CRect(pos,CPoint(m_Tab.arrTab[0].rect.right,pos.y+LINE_HEIGHT)));
 	DrawConn(drawer,iter);
-	CPoint pos(0,LINE_HEIGHT*iter.m_iline);
 	pos.x+=LINE_INDENT*iter.lvl;
 	TLItem* item=iter.m_pStkItem->m_pLItem;
 	COLORREF clr=GetDispColor(item->state);
@@ -241,6 +243,7 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 		}
 		break;
 	}
+	drawer.SetClipRect(NULL);
 	switch(item->type)
 	{
 	case eITypeDir:
@@ -255,7 +258,6 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 				m_ListLoader.GetNodeInfo(item->filenode,&info);
 			info.mod_time.Format(date,FORMAT_DATE|FORMAT_WEEKDAY);
 			info.mod_time.Format(time,FORMAT_TIME);
-			ASSERT(m_Tab.mask&TLTAB_NAME);
 			drawer.DrawText(&CRect(pos,CPoint(m_Tab.arrTab[tabidx++].rect.right,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,
 				a2t(info.name),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 			if(m_Tab.mask&TLTAB_SIZE)
@@ -284,7 +286,6 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 			err_node_info info;
 			int tabidx=0;
 			m_ListLoader.GetNodeErrInfo(item->errnode,&info);
-			ASSERT(m_Tab.mask&TLTAB_NAME);
 			drawer.DrawText(&CRect(pos,CPoint(m_Tab.arrTab[tabidx].rect.right,pos.y+LINE_HEIGHT)),DT_ALIGN_LEFT,
 				a2t(info.name),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 			drawer.DrawText(&CRect(m_Tab.arrTab[tabidx].rect.right,pos.y,
