@@ -248,6 +248,26 @@ CDrawer::CDrawer(CDCDraw* canvas):m_pCanvas(canvas)
 }
 CDrawer::~CDrawer()
 {
+	RestoreClipRect();
+}
+void CDrawer::RestoreClipRect()
+{
+	int ret=SelectDC()->SelectClipRgn(NULL);
+	ASSERT(ret!=ERROR);
+}
+void CDrawer::SetClipRect(LPCRECT rcclip)
+{
+	RestoreClipRect();
+	if(rcclip==NULL)
+		return;
+	CPoint ptOrg=SelectDC()->GetViewportOrg();
+	CRect clip=rcclip;
+	clip.OffsetRect(ptOrg);
+	CRgn rgn;
+	rgn.CreateRectRgn(clip.left,clip.top,
+		clip.right,clip.bottom);
+	int ret=SelectDC()->SelectClipRgn(&rgn);
+	ASSERT(ret!=ERROR);
 }
 inline CDC* CDrawer::SelectDC()
 {
