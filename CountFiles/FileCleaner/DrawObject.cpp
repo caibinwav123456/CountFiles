@@ -252,8 +252,7 @@ CDrawer::~CDrawer()
 }
 void CDrawer::RestoreClipRect()
 {
-	int ret=SelectDC()->SelectClipRgn(NULL);
-	ASSERT(ret!=ERROR);
+	VERIFY(SelectDC()->SelectClipRgn(NULL)!=ERROR);
 }
 void CDrawer::SetClipRect(LPCRECT rcclip)
 {
@@ -266,8 +265,7 @@ void CDrawer::SetClipRect(LPCRECT rcclip)
 	CRgn rgn;
 	rgn.CreateRectRgn(clip.left,clip.top,
 		clip.right,clip.bottom);
-	int ret=SelectDC()->SelectClipRgn(&rgn);
-	ASSERT(ret!=ERROR);
+	VERIFY(SelectDC()->SelectClipRgn(&rgn)!=ERROR);
 }
 inline CDC* CDrawer::SelectDC()
 {
