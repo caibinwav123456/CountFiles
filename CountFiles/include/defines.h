@@ -10,7 +10,7 @@
 #define DEF_CONN_Y             10
 #define DEF_FILE_WIDTH         12
 #define DEF_MIN_SCROLL_WIDTH   294
-#define DEF_BAR_CENTER_MARGIN  2
+#define DEF_BAR_CENTER_MARGIN  5
 #define DEF_BAR_CENTER_SPACE   38
 
 #define DEF_DEFAULT_TABWIDTH_NAME  200
