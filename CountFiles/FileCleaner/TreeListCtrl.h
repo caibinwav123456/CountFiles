@@ -32,6 +32,7 @@ COLORREF GetDispColor(E_FOLDER_STATE state);
 struct TLItem;
 struct TLItemDir;
 struct ItStkItem;
+struct TLUnit;
 class ListCtrlIterator;
 class TreeListCtrl;
 struct SortedSelItemNode
@@ -170,6 +171,14 @@ struct ItStkItem
 	int parentidx;
 	ItStkItem* next;
 	ItStkItem(TLItem* pItem):m_pLItem(pItem),parentidx(-1),next(NULL){}
+};
+struct TLUnit
+{
+	FileListLoader m_ListLoader;
+	TLItem* m_pRootItem;
+	TLItem* m_pBaseItem;
+	TLItem* m_pBaseParent;
+	TLUnit():m_pRootItem(NULL),m_pBaseItem(NULL),m_pBaseParent(NULL){}
 };
 class ListCtrlIterator
 {
