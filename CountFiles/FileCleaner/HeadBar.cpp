@@ -445,7 +445,7 @@ BEGIN_MESSAGE_MAP(CHeadBar,CWnd)
 	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
 
-CHeadBar::CHeadBar():m_iOrgX(0),m_GrabIndex(-1),m_pTabGrabbed(NULL)
+CHeadBar::CHeadBar():m_iOrgX(0),m_GrabIndex(-1),m_pTabGrabbed(NULL),m_bStartRepos(FALSE)
 {
 
 }
@@ -521,9 +521,22 @@ void CHeadBar::RepositionTab(int xpos)
 	ASSERT(m_pTabGrabbed!=NULL&&m_GrabIndex>=0);
 	ASSERT((m_pTabGrabbed->mask&TLTAB_NAME)&&!m_pTabGrabbed->arrTab.empty());
 	ASSERT(m_pTabGrabbed->arrTab[0].rect.Width()>=m_tabStat.min_width[0]);
+	BOOL Chance2ChangeGrabCol=m_bStartRepos;
+	m_bStartRepos=FALSE;
 	int maskoff=GetTabMaskIndex(*m_pTabGrabbed,m_GrabIndex);
 	if((int)m_pTabGrabbed->arrTab.size()==1)
 		return;
+	if(Chance2ChangeGrabCol)
+	{
+		int newidx;
+		for(newidx=m_GrabIndex;newidx+1<(int)m_pTabGrabbed->arrTab.size();newidx++)
+		{
+			if(m_pTabGrabbed->arrTab[newidx+1].rect.Width()>0)
+				break;
+		}
+		if(xpos>m_ptStartPos.x&&newidx<(int)m_pTabGrabbed->arrTab.size()-1&&newidx!=m_GrabIndex)
+			m_GrabIndex=newidx;
+	}
 	int left=m_pTabGrabbed->arrTab[m_GrabIndex].rect.left;
 	if(m_GrabIndex==0)
 		left+=m_tabStat.min_width[0];
@@ -649,6 +662,8 @@ void CHeadBar::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		SetCursor(LoadCursor(NULL,IDC_SIZEWE));
 		SetCapture();
+		m_bStartRepos=TRUE;
+		m_ptStartPos=point;
 	}
 	else
 	{
@@ -664,6 +679,8 @@ void CHeadBar::OnLButtonUp(UINT nFlags, CPoint point)
 	point.x+=m_iOrgX;
 	m_pTabGrabbed=NULL;
 	m_GrabIndex=-1;
+	m_bStartRepos=FALSE;
+	m_ptStartPos=CPoint(0,0);
 	ReleaseCapture();
 	SetCursor(LoadCursor(NULL,IDC_ARROW));
 	CWnd::OnLButtonUp(nFlags, point);
