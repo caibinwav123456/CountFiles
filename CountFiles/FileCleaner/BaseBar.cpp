@@ -110,17 +110,18 @@ LRESULT CBaseBar::OnSizeView(WPARAM wParam, LPARAM lParam)
 
 void CBaseBar::RelayoutBarCtrl(CRect* rc)
 {
-	CRect rcDFold;
+	CRect rcDFold,rcClient;
 	BarRelayoutObject layout1(&m_comboBasePath,&m_btnGo,&m_btnOpen,&m_btnFold),
 		layout2(&m_comboBasePath2,&m_btnGo2,&m_btnOpen2,&m_btnFold2);
+	GetClientRect(&rcClient);
+	ASSERT(rcClient.left==0&&rcClient.top==0);
 	m_btnDFold.GetWindowRect(&rcDFold);
-	ScreenToClient(&rcDFold);
-	rcDFold.OffsetRect(-rcDFold.left,0);
+	rcDFold.OffsetRect(-rcDFold.TopLeft());
 	int grpwidth=(max(MIN_SCROLL_WIDTH,rc->Width())-BAR_CENTER_SPACE)/2;
-	rcDFold.OffsetRect(grpwidth+(BAR_CENTER_SPACE-rcDFold.Width())/2,0);
+	rcDFold.OffsetRect(grpwidth+(BAR_CENTER_SPACE-rcDFold.Width())/2,(rcClient.Height()-rcDFold.Height())/2);
 	m_btnDFold.MoveWindow(&rcDFold);
-	layout1.rect=CRect(0,0,grpwidth,rc->bottom);
-	layout2.rect=CRect(grpwidth+BAR_CENTER_SPACE,0,grpwidth*2+BAR_CENTER_SPACE,rc->bottom);
+	layout1.rect=CRect(0,0,grpwidth,rcClient.bottom);
+	layout2.rect=CRect(grpwidth+BAR_CENTER_SPACE,0,grpwidth*2+BAR_CENTER_SPACE,rcClient.bottom);
 	RelayoutCtrlGroup(&layout1);
 	RelayoutCtrlGroup(&layout2);
 	Invalidate(FALSE);
@@ -137,12 +138,16 @@ void CBaseBar::RelayoutCtrlGroup(BarRelayoutObject* layout)
 	ScreenToClient(&rc3);
 	layout->wndCombo->GetWindowRect(&rcCB);
 	ScreenToClient(&rcCB);
-	int offset=layout->rect.right-rc3.right-BAR_CENTER_MARGIN;
-	rc1.OffsetRect(offset,0);
-	rc2.OffsetRect(offset,0);
-	rc3.OffsetRect(offset,0);
+	CPoint offset(layout->rect.right-rc3.right-BAR_CENTER_MARGIN,0);
+	rc1.OffsetRect(offset);
+	rc2.OffsetRect(offset);
+	rc3.OffsetRect(offset);
 	rcCB.left=layout->rect.left+BAR_CENTER_MARGIN;
 	rcCB.right=rc1.left-BAR_CENTER_MARGIN;
+	rc1.OffsetRect(0,-rc1.top+(layout->rect.Height()-rc1.Height())/2);
+	rc2.OffsetRect(0,-rc2.top+(layout->rect.Height()-rc2.Height())/2);
+	rc3.OffsetRect(0,-rc3.top+(layout->rect.Height()-rc3.Height())/2);
+	rcCB.OffsetRect(0,-rcCB.top+(layout->rect.Height()-rcCB.Height())/2);
 	layout->wndCombo->MoveWindow(&rcCB);
 	layout->btnGo->MoveWindow(rc1);
 	layout->btnOpen->MoveWindow(rc2);
