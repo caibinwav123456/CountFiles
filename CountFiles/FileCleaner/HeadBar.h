@@ -37,6 +37,8 @@ private:
 
 	int m_GrabIndex;
 	TreeListTabGrid* m_pTabGrabbed;
+	BOOL m_bStartRepos;
+	CPoint m_ptStartPos;
 
 public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
