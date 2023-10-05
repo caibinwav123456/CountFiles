@@ -155,12 +155,14 @@ struct TLItemDir:public TLItem
 	bool isopen;
 	uint open_length;
 	uint dir_border;
-	FileListLoader* ctx;
-	TLItemDir(FileListLoader* loader):subpairs(NULL),isopen(false),open_length(0),dir_border(0),ctx(loader)
+	TLCore* ctx;
+	TLItemDir(TLCore* _ctx):subpairs(NULL),isopen(false),
+		open_length(0),dir_border(0),ctx(_ctx)
 	{
 	}
 	int OpenDir(bool open,bool release=false);
 	void Detach();
+	bool IsBase();
 	virtual void Release();
 	virtual uint GetDispLength();
 private:
@@ -194,13 +196,15 @@ struct TLUnit
 	TLCore m_treeLeft;
 	TLCore m_treeRight;
 	TLItemDir* m_pItemJoint;
-	TLUnit():m_treeLeft(this),m_treeRight(this),m_pItemJoint(NULL){}
+	uint m_nTotalLine;
+	TLUnit():m_treeLeft(this),m_treeRight(this),m_pItemJoint(NULL),m_nTotalLine(0){}
 	int Load(UINT mask,const char* lfile,const char* efile,const char* lfileref,const char* efileref);
 	void UnLoad();
 	int LoadCore(TLCore& core,const char* lfile,const char* efile);
 	int UnLoadCore(TLCore& core);
-	int InitialExpand(TLCore& core);
-	bool CompareMode(){return m_pItemJoint!=NULL;}
+	int InitialExpand();
+	bool IsCompareMode(){return m_pItemJoint!=NULL;}
+	TLCore* GetPrimaryBase();
 };
 class ListCtrlIterator
 {
@@ -275,7 +279,6 @@ private:
 //List data
 protected:
 	TLUnit m_TlU;
-	uint m_nTotalLine;
 	ItemSelector m_ItemSel;
 
 //private functions
