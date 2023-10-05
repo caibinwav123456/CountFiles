@@ -31,7 +31,8 @@ TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_iCurLine(-1)
 }
 TreeListCtrl::~TreeListCtrl()
 {
-
+	for(int i=0;i<(int)m_vecLists.size();i++)
+		delete m_vecLists[i];
 }
 inline void TreeListCtrl::GetCanvasRect(RECT* rc)
 {
