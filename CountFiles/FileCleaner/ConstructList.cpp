@@ -246,12 +246,12 @@ int TLItemDir::construct_list()
 	}
 	try
 	{
-		dir_iterator itdir(subdirs,ctx);
-		errdir_iterator iterrdir(errdirs,ctx);
+		dir_iterator itdir(subdirs,&ctx->m_ListLoader);
+		errdir_iterator iterrdir(errdirs,&ctx->m_ListLoader);
 		merge_ordered_list(itdir,iterrdir,&merge_callback_dir,(void*)&subitems);
 		dir_border=subitems.size();
-		file_iterator itfile(subfiles,ctx);
-		errfile_iterator iterrfile(errfiles,ctx);
+		file_iterator itfile(subfiles,&ctx->m_ListLoader);
+		errfile_iterator iterrfile(errfiles,&ctx->m_ListLoader);
 		merge_ordered_list(itfile,iterrfile,&merge_callback_file,(void*)&subitems);
 		open_length=1+subitems.size();
 	}

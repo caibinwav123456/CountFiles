@@ -23,7 +23,7 @@ COLORREF GetDispColor(E_FOLDER_STATE state)
 		return RGB(0,0,0);
 	}
 }
-TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_nTotalLine(0),m_ItemSel(this),m_iCurLine(-1)
+TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_ItemSel(this),m_iCurLine(-1)
 {
 
 }
@@ -51,7 +51,7 @@ int TreeListCtrl::Init()
 		goto failed;
 	if(!m_bmpFolderExpMask.LoadBitmap(IDB_FOLDER_EXP_MASK))
 		goto failed;
-	SetScrollSizes(CSize(-1,m_nTotalLine*LINE_HEIGHT));
+	SetScrollSizes(CSize(-1,m_TlU.m_nTotalLine*LINE_HEIGHT));
 	return 0;
 failed:
 	Exit();
@@ -65,20 +65,33 @@ void TreeListCtrl::Exit()
 	m_bmpFolderExp.DeleteObject();
 	m_bmpFolderExpMask.DeleteObject();
 }
+int TLUnit::InitialExpand()
+{
+	TLCore* pBase=GetPrimaryBase();
+	ASSERT(pBase!=NULL);
+	return pBase->m_pBaseItem->OpenDir(true,false);
+}
+TLCore* TLUnit::GetPrimaryBase()
+{
+	if(m_pItemJoint!=NULL)
+		return &m_treeLeft;
+	else if(m_treeLeft.m_pBaseItem!=NULL)
+		return &m_treeLeft;
+	else if(m_treeRight.m_pBaseItem!=NULL)
+		return &m_treeRight;
+	else
+		return NULL;
+}
 int TLUnit::LoadCore(TLCore& core,const char* lfile,const char* efile)
 {
 	int ret=0;
 	if(0!=(ret=core.m_ListLoader.Load(lfile,efile)))
 		return ret;
-	TLItemDir* pRoot=new TLItemDir(&core.m_ListLoader);
+	TLItemDir* pRoot=new TLItemDir(&core);
 	core.m_pRootItem=core.m_pBaseItem=pRoot;
 	pRoot->type=eITypeDir;
 	pRoot->dirnode=core.m_ListLoader.GetRootNode();
 	return 0;
-}
-int TLUnit::InitialExpand(TLCore& core)
-{
-	return core.m_pBaseItem->OpenDir(true,false);
 }
 int TLUnit::UnLoadCore(TLCore& core)
 {
@@ -120,16 +133,9 @@ int TLUnit::Load(UINT mask,const char* lfile,const char* efile,const char* lfile
 		splice->map.push_back(TLItemPair(m_treeLeft.m_pBaseItem,m_treeRight.m_pBaseItem));
 		m_treeLeft.m_pBaseItem->parent=
 			m_treeRight.m_pBaseItem->parent=m_pItemJoint;
-		InitialExpand(m_treeLeft);
 	}
-	else if(loadleft)
-	{
-		InitialExpand(m_treeLeft);
-	}
-	else //loadright
-	{
-		InitialExpand(m_treeRight);
-	}
+	if(0!=(ret=InitialExpand()))
+		goto fail;
 	return 0;
 fail:
 	UnLoad();
@@ -144,6 +150,7 @@ void TLUnit::UnLoad()
 		delete m_pItemJoint;
 		m_pItemJoint=NULL;
 	}
+	m_nTotalLine=0;
 }
 int TreeListCtrl::Load(UINT mask,const char* lfile,const char* efile,const char* lfileref,const char* efileref)
 {
@@ -207,13 +214,13 @@ int TreeListCtrl::LineNumFromPt(POINT* pt)
 	if(pt->x<0||pt->y<0)
 		return -1;
 	iline=pt->y/LINE_HEIGHT;
-	if(iline>=(int)m_nTotalLine)
+	if(iline>=(int)m_TlU.m_nTotalLine)
 		return -1;
 	return iline;
 }
 bool TreeListCtrl::EndOfDraw(int iline)
 {
-	if(iline<0||iline>=(int)m_nTotalLine)
+	if(iline<0||iline>=(int)m_TlU.m_nTotalLine)
 		return true;
 	CRect rc;
 	GetCanvasRect(&rc);
@@ -366,15 +373,17 @@ void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 	GetCanvasRect(&rc);
 	int grplen=(max(rc.Width(),MIN_SCROLL_WIDTH)-BAR_CENTER_SPACE)/2;
 	int top=max(0,rc.top);
-	int bottom=min((int)m_nTotalLine*LINE_HEIGHT,rc.bottom);
+	int bottom=min((int)m_TlU.m_nTotalLine*LINE_HEIGHT,rc.bottom);
 	drawer.DrawLine(&CPoint(grplen,top),&CPoint(grplen,bottom),BACK_GREY_COLOR,1,PS_SOLID);
 	drawer.DrawLine(&CPoint(grplen+BAR_CENTER_SPACE,top),&CPoint(grplen+BAR_CENTER_SPACE,bottom),
 		BACK_GREY_COLOR,1,PS_SOLID);
 }
 void TreeListCtrl::UpdateListStat()
 {
-	m_nTotalLine=(m_pRootItem==NULL?0:(m_pRootItem->GetDispLength()-1));
-	SetScrollSizes(CSize(-1,m_nTotalLine*LINE_HEIGHT));
+	TLCore* pBase=m_TlU.GetPrimaryBase();
+	m_TlU.m_nTotalLine=(pBase==NULL||pBase->m_pBaseItem==NULL?
+		0:(pBase->m_pRootItem->GetDispLength()-1));
+	SetScrollSizes(CSize(-1,m_TlU.m_nTotalLine*LINE_HEIGHT));
 }
 void TreeListCtrl::OnLBDown(const CPoint& pt,UINT nFlags)
 {

@@ -62,6 +62,10 @@ uint TLItemDir::GetDispLength()
 {
 	return isopen?open_length:1;
 }
+bool TLItemDir::IsBase()
+{
+	return parent==ctx->m_pTlUnit->m_pItemJoint;
+}
 void TLItemDir::update_displen(int diff)
 {
 	for(TLItemDir* pp=parent;pp!=NULL;pp=pp->parent)
@@ -79,11 +83,11 @@ int TLItemDir::OpenDir(bool open,bool release)
 	{
 		if(open_length>0)
 			goto end;
-		if(0!=(ret=ctx->ExpandNode(dirnode,true,release)))
+		if(0!=(ret=ctx->m_ListLoader.ExpandNode(dirnode,true,release)))
 			goto fail;
 		if(0!=(ret=construct_list()))
 		{
-			ctx->ExpandNode(dirnode,false,true);
+			ctx->m_ListLoader.ExpandNode(dirnode,false,true);
 			goto fail;
 		}
 		goto end;
@@ -91,10 +95,10 @@ int TLItemDir::OpenDir(bool open,bool release)
 	else if(release)
 	{
 		clear();
-		ret=ctx->ExpandNode(dirnode,false,true);
+		ret=ctx->m_ListLoader.ExpandNode(dirnode,false,true);
 		goto end;
 	}
-	else if(0!=(ret=ctx->ExpandNode(dirnode,false)))
+	else if(0!=(ret=ctx->m_ListLoader.ExpandNode(dirnode,false)))
 		goto fail;
 	goto end;
 fail:
@@ -170,17 +174,12 @@ int TLItem::ToLineNum()
 	if(item==NULL)
 		return -1;
 	int iline=0;
-	for(TLItemDir* dir=item->parent;dir!=NULL;item=dir,dir=dir->parent)
+	for(TLItemDir* dir=item->parent;!dir->IsBase();item=dir,dir=dir->parent)
 	{
-		int i;
-		for(i=0;i<(int)dir->subitems.size();i++)
+		for(int i=0;i<item->parentidx;i++)
 		{
-			if(item==dir->subitems[i])
-				break;
 			iline+=dir->subitems[i]->GetDispLength();
 		}
-		if(i==(int)dir->subitems.size())
-			return -1;
 		iline++;
 	}
 	return iline-1;
@@ -544,7 +543,7 @@ void ItemSelector::SortSelection(SortedSelItemNode& tree)
 }
 bool ItemSelector::valid(int iline)
 {
-	return iline>=0&&iline<(int)m_pOwner->m_nTotalLine;
+	return iline>=0&&iline<(int)m_pOwner->m_TlU.m_nTotalLine;
 }
 void SortedSelItemNode::clear()
 {
