@@ -181,13 +181,14 @@ struct ItStkItem
 struct TLCore
 {
 	FileListLoader m_ListLoader;
-	TreeListTabGrid m_Tab;
+	TreeListTabGrid* m_pTab;
 	TLItemDir* m_pRootItem;
 	TLItemDir* m_pBaseItem;
 	TLItemDir* m_pBaseParent;
 	TLUnit* m_pTlUnit;
-	TLCore(TLUnit* tl)
+	TLCore(TLUnit* tl,TreeListTabGrid* tab)
 		:m_pTlUnit(tl)
+		,m_pTab(tab)
 		,m_pRootItem(NULL)
 		,m_pBaseItem(NULL)
 		,m_pBaseParent(NULL){}
@@ -199,7 +200,7 @@ struct TLUnit
 	TLItemDir* m_pItemJoint;
 	ItemSelector m_ItemSel;
 	uint m_nTotalLine;
-	TLUnit(TreeListCtrl* pOwner):m_ItemSel(pOwner),m_treeLeft(this),m_treeRight(this),m_pItemJoint(NULL),m_nTotalLine(0){}
+	TLUnit(TreeListCtrl* pOwner,TreeListTabGrid* tabLeft,TreeListTabGrid* tabRight):m_ItemSel(pOwner),m_treeLeft(this,tabLeft),m_treeRight(this,tabRight),m_pItemJoint(NULL),m_nTotalLine(0){}
 	int Load(UINT mask,const char* lfile,const char* efile,const char* lfileref,const char* efileref);
 	void UnLoad();
 	int LoadCore(TLCore& core,const char* lfile,const char* efile);
@@ -283,6 +284,9 @@ protected:
 	vector<TLUnit*> m_vecLists;
 	uint m_iVec;
 	TLUnit* m_pCurTlU;
+
+	TreeListTabGrid m_tabLeft;
+	TreeListTabGrid m_tabRight;
 
 //private functions
 private:
