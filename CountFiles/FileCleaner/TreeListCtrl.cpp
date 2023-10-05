@@ -25,7 +25,7 @@ COLORREF GetDispColor(E_FOLDER_STATE state)
 }
 TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_iCurLine(-1)
 {
-	m_vecLists.push_back(new TLUnit(this));
+	m_vecLists.push_back(new TLUnit(this,&m_tabLeft,&m_tabRight));
 	m_iVec=0;
 	m_pCurTlU=m_vecLists[m_iVec];
 }
@@ -41,8 +41,8 @@ inline void TreeListCtrl::GetCanvasRect(RECT* rc)
 }
 void TreeListCtrl::SetTabInfo(const TabInfo* tab)
 {
-	m_TlU.m_treeLeft.m_Tab=*tab->left;
-	m_TlU.m_treeRight.m_Tab=*tab->right;
+	m_tabLeft=*tab->left;
+	m_tabRight=*tab->right;
 }
 int TreeListCtrl::Init()
 {
