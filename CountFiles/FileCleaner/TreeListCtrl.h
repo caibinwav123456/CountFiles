@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#define m_TlU (*m_pCurTlU)
 enum E_FOLDER_STATE
 {
 	eFSNone,
@@ -196,8 +197,9 @@ struct TLUnit
 	TLCore m_treeLeft;
 	TLCore m_treeRight;
 	TLItemDir* m_pItemJoint;
+	ItemSelector m_ItemSel;
 	uint m_nTotalLine;
-	TLUnit():m_treeLeft(this),m_treeRight(this),m_pItemJoint(NULL),m_nTotalLine(0){}
+	TLUnit(TreeListCtrl* pOwner):m_ItemSel(pOwner),m_treeLeft(this),m_treeRight(this),m_pItemJoint(NULL),m_nTotalLine(0){}
 	int Load(UINT mask,const char* lfile,const char* efile,const char* lfileref,const char* efileref);
 	void UnLoad();
 	int LoadCore(TLCore& core,const char* lfile,const char* efile);
@@ -278,8 +280,9 @@ private:
 
 //List data
 protected:
-	TLUnit m_TlU;
-	ItemSelector m_ItemSel;
+	vector<TLUnit*> m_vecLists;
+	uint m_iVec;
+	TLUnit* m_pCurTlU;
 
 //private functions
 private:

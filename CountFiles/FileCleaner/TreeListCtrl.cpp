@@ -23,9 +23,11 @@ COLORREF GetDispColor(E_FOLDER_STATE state)
 		return RGB(0,0,0);
 	}
 }
-TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_ItemSel(this),m_iCurLine(-1)
+TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_iCurLine(-1)
 {
-
+	m_vecLists.push_back(new TLUnit(this));
+	m_iVec=0;
+	m_pCurTlU=m_vecLists[m_iVec];
 }
 TreeListCtrl::~TreeListCtrl()
 {
@@ -154,13 +156,15 @@ void TLUnit::UnLoad()
 }
 int TreeListCtrl::Load(UINT mask,const char* lfile,const char* efile,const char* lfileref,const char* efileref)
 {
+	m_iCurLine=-1;
 	int ret=m_TlU.Load(mask,lfile,efile,lfileref,efileref);
 	UpdateListStat();
 	return ret;
 }
 void TreeListCtrl::UnLoad()
 {
-	m_ItemSel.SetSel(NULL,-1);
+	m_iCurLine=-1;
+	m_TlU.m_ItemSel.SetSel(NULL,-1);
 	m_TlU.UnLoad();
 	UpdateListStat();
 }
@@ -237,13 +241,13 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,int iline,TLItem* pItem)
 	rcline.MoveToXY(0,starty);
 	bool grey=!!(iline%2);
 	COLORREF color=grey?GREY_COLOR:RGB(255,255,255);
-	if(m_ItemSel.IsSelected(pItem,iline))
+	if(m_TlU.m_ItemSel.IsSelected(pItem,iline))
 		color=SEL_COLOR;
 	CRect rect=rcline;
 	rect.InflateRect(&CRect(0,0,1,1));
 	drawer.FillRect(&rect,color);
 	rcline.DeflateRect(&CRect(0,0,1,1));
-	if(pItem!=NULL&&m_ItemSel.IsFocus(iline))
+	if(pItem!=NULL&&m_TlU.m_ItemSel.IsFocus(iline))
 		drawer.DrawRect(&rcline,RGB(0,0,0),1,PS_DOT);
 }
 void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter)
@@ -389,7 +393,7 @@ void TreeListCtrl::OnLBDown(const CPoint& pt,UINT nFlags)
 {
 	m_iCurLine=-1;
 	int iline=LineNumFromPt((POINT*)&pt);
-	if(!m_ItemSel.valid(iline))
+	if(!m_TlU.m_ItemSel.valid(iline))
 		goto end;
 	{
 		ListCtrlIterator it=GetListIter(iline);
@@ -398,19 +402,19 @@ void TreeListCtrl::OnLBDown(const CPoint& pt,UINT nFlags)
 		TLItem* pItem=it.m_pStkItem->m_pLItem;
 		if((nFlags&MK_CONTROL)&&(nFlags&MK_SHIFT))
 		{
-			m_ItemSel.CompoundSel(iline);
+			m_TlU.m_ItemSel.CompoundSel(iline);
 		}
 		else if(nFlags&MK_CONTROL)
 		{
-			m_ItemSel.ToggleSel(pItem,iline);
+			m_TlU.m_ItemSel.ToggleSel(pItem,iline);
 		}
 		else if(nFlags&MK_SHIFT)
 		{
-			m_ItemSel.ClearAndDragSel(pItem,iline);
+			m_TlU.m_ItemSel.ClearAndDragSel(pItem,iline);
 		}
 		else
 		{
-			m_ItemSel.SetSel(pItem,iline);
+			m_TlU.m_ItemSel.SetSel(pItem,iline);
 		}
 		m_iCurLine=iline;
 	}
@@ -426,7 +430,7 @@ void TreeListCtrl::OnLBDblClick(const CPoint& pt,UINT nFlags)
 {
 	m_iCurLine=-1;
 	int iline=LineNumFromPt((POINT*)&pt);
-	if(!m_ItemSel.valid(iline))
+	if(!m_TlU.m_ItemSel.valid(iline))
 		goto end;
 	{
 		ListCtrlIterator it=GetListIter(iline);
@@ -436,10 +440,10 @@ void TreeListCtrl::OnLBDblClick(const CPoint& pt,UINT nFlags)
 		assert(pItem!=NULL&&pItem->issel);
 		if(pItem->type==eITypeDir)
 		{
-			m_ItemSel.SetSel(NULL,-1);
+			m_TlU.m_ItemSel.SetSel(NULL,-1);
 			TLItemDir* dir=dynamic_cast<TLItemDir*>(pItem);
 			dir->OpenDir(!dir->isopen,false);
-			m_ItemSel.SetSel(pItem,iline);
+			m_TlU.m_ItemSel.SetSel(pItem,iline);
 			UpdateListStat();
 		}
 	}
@@ -448,21 +452,21 @@ end:
 }
 void TreeListCtrl::OnRBDown(const CPoint& pt,UINT nFlags)
 {
-	m_ItemSel.EndDragSel();
+	m_TlU.m_ItemSel.EndDragSel();
 	Invalidate();
 }
 void TreeListCtrl::OnRBUp(const CPoint& pt,UINT nFlags)
 {
-	m_ItemSel.EndDragSel();
+	m_TlU.m_ItemSel.EndDragSel();
 	Invalidate();
 }
 void TreeListCtrl::OnMMove(const CPoint& pt,UINT nFlags)
 {
 	int iline=LineNumFromPt((POINT*)&pt);
-	if((nFlags&MK_LBUTTON)&&m_ItemSel.valid(iline)&&m_ItemSel.valid(m_iCurLine)
+	if((nFlags&MK_LBUTTON)&&m_TlU.m_ItemSel.valid(iline)&&m_TlU.m_ItemSel.valid(m_iCurLine)
 		&&iline!=m_iCurLine)
 	{
-		m_ItemSel.DragSelTo(iline);
+		m_TlU.m_ItemSel.DragSelTo(iline);
 		m_iCurLine=iline;
 		Invalidate();
 	}
