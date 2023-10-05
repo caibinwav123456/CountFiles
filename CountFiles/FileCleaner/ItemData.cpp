@@ -543,7 +543,7 @@ void ItemSelector::SortSelection(SortedSelItemNode& tree)
 }
 bool ItemSelector::valid(int iline)
 {
-	return iline>=0&&iline<(int)m_pOwner->m_TlU.m_nTotalLine;
+	return iline>=0&&iline<(int)m_pOwner->m_pCurTlU->m_nTotalLine;
 }
 void SortedSelItemNode::clear()
 {
