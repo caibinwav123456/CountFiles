@@ -23,7 +23,7 @@ COLORREF GetDispColor(E_FOLDER_STATE state)
 		return RGB(0,0,0);
 	}
 }
-TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_nTotalLine(0),m_pRootItem(NULL),m_ItemSel(this),m_iCurLine(-1)
+TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_nTotalLine(0),m_ItemSel(this),m_iCurLine(-1)
 {
 
 }
@@ -38,7 +38,8 @@ inline void TreeListCtrl::GetCanvasRect(RECT* rc)
 }
 void TreeListCtrl::SetTabInfo(const TabInfo* tab)
 {
-	m_Tab=*tab->left;
+	m_TlU.m_treeLeft.m_Tab=*tab->left;
+	m_TlU.m_treeRight.m_Tab=*tab->right;
 }
 int TreeListCtrl::Init()
 {
@@ -64,40 +65,96 @@ void TreeListCtrl::Exit()
 	m_bmpFolderExp.DeleteObject();
 	m_bmpFolderExpMask.DeleteObject();
 }
-int TreeListCtrl::Load(const char* lfile,const char* efile)
+int TLUnit::LoadCore(TLCore& core,const char* lfile,const char* efile)
+{
+	int ret=0;
+	if(0!=(ret=core.m_ListLoader.Load(lfile,efile)))
+		return ret;
+	TLItemDir* pRoot=new TLItemDir(&core.m_ListLoader);
+	core.m_pRootItem=core.m_pBaseItem=pRoot;
+	pRoot->type=eITypeDir;
+	pRoot->dirnode=core.m_ListLoader.GetRootNode();
+	return 0;
+}
+int TLUnit::InitialExpand(TLCore& core)
+{
+	return core.m_pBaseItem->OpenDir(true,false);
+}
+int TLUnit::UnLoadCore(TLCore& core)
+{
+	if(core.m_pBaseItem!=NULL)
+		core.m_pBaseItem->parent=core.m_pBaseParent;
+	if(core.m_pRootItem!=NULL)
+	{
+		core.m_pRootItem->Detach();
+		core.m_pRootItem->Release();
+		delete core.m_pRootItem;
+	}
+	core.m_pBaseItem=core.m_pRootItem=NULL;
+	core.m_ListLoader.Unload();
+}
+int TLUnit::Load(UINT mask,const char* lfile,const char* efile,const char* lfileref,const char* efileref)
 {
 	UnLoad();
 	if(lfile==NULL||*lfile==0)
 		return 0;
 	int ret=0;
-	if(0!=(ret=m_ListLoader.Load(lfile,efile)))
-		return ret;
-	TLItemDir* pRoot=new TLItemDir(&m_ListLoader);
-	m_pRootItem=pRoot;
-	pRoot->type=eITypeDir;
-	pRoot->dirnode=m_ListLoader.GetRootNode();
-	if(0!=(ret=pRoot->OpenDir(true,false)))
+	bool loadleft=(mask&FILE_LIST_ATTRIB_MAIN),
+		loadright=(mask&FILE_LIST_ATTRIB_REF);
+	ASSERT(loadleft||loadright);
+	if(loadleft&&lfile!=NULL&&*lfile!=0)
 	{
-		UnLoad();
-		return ret;
+		if(0!=(ret=LoadCore(m_treeLeft,lfile,efile)))
+			goto fail;
 	}
-	UpdateListStat();
+	if(loadright&&lfileref!=NULL&&*lfileref!=0)
+	{
+		if(0!=(ret=LoadCore(m_treeRight,lfileref,efileref)))
+			goto fail;
+	}
+	if(loadleft&&loadright)
+	{
+		m_pItemJoint=new TLItemDir(NULL);
+		TLItemSplice* splice=m_treeLeft.m_pBaseItem->subpairs=
+			m_treeRight.m_pBaseItem->subpairs=new TLItemSplice;
+		splice->map.push_back(TLItemPair(m_treeLeft.m_pBaseItem,m_treeRight.m_pBaseItem));
+		m_treeLeft.m_pBaseItem->parent=
+			m_treeRight.m_pBaseItem->parent=m_pItemJoint;
+		InitialExpand(m_treeLeft);
+	}
+	else if(loadleft)
+	{
+		InitialExpand(m_treeLeft);
+	}
+	else //loadright
+	{
+		InitialExpand(m_treeRight);
+	}
 	return 0;
+fail:
+	UnLoad();
+	return ret;
+}
+void TLUnit::UnLoad()
+{
+	UnLoadCore(m_treeLeft);
+	UnLoadCore(m_treeRight);
+	if(m_pItemJoint!=NULL)
+	{
+		delete m_pItemJoint;
+		m_pItemJoint=NULL;
+	}
+}
+int TreeListCtrl::Load(UINT mask,const char* lfile,const char* efile,const char* lfileref,const char* efileref)
+{
+	int ret=m_TlU.Load(mask,lfile,efile,lfileref,efileref);
+	UpdateListStat();
+	return ret;
 }
 void TreeListCtrl::UnLoad()
 {
 	m_ItemSel.SetSel(NULL,-1);
-	if(m_pRootItem!=NULL)
-	{
-		TLItemDir* root=dynamic_cast<TLItemDir*>(m_pRootItem);
-		if(root!=NULL)
-		{
-			root->Release();
-			delete root;
-		}
-	}
-	m_pRootItem=NULL;
-	m_ListLoader.Unload();
+	m_TlU.UnLoad();
 	UpdateListStat();
 }
 void TreeListCtrl::Invalidate()
