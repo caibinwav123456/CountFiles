@@ -32,6 +32,7 @@ COLORREF GetDispColor(E_FOLDER_STATE state);
 struct TLItem;
 struct TLItemDir;
 struct ItStkItem;
+struct TLCore;
 struct TLUnit;
 class ListCtrlIterator;
 class TreeListCtrl;
@@ -95,6 +96,8 @@ struct TLItemPair
 {
 	TLItem* left;
 	TLItem* right;
+	TLItemPair(){}
+	TLItemPair(TLItem* l,TLItem* r):left(l),right(r){}
 };
 struct TLItemSplice
 {
@@ -172,13 +175,32 @@ struct ItStkItem
 	ItStkItem* next;
 	ItStkItem(TLItem* pItem):m_pLItem(pItem),parentidx(-1),next(NULL){}
 };
-struct TLUnit
+struct TLCore
 {
 	FileListLoader m_ListLoader;
-	TLItem* m_pRootItem;
-	TLItem* m_pBaseItem;
-	TLItem* m_pBaseParent;
-	TLUnit():m_pRootItem(NULL),m_pBaseItem(NULL),m_pBaseParent(NULL){}
+	TreeListTabGrid m_Tab;
+	TLItemDir* m_pRootItem;
+	TLItemDir* m_pBaseItem;
+	TLItemDir* m_pBaseParent;
+	TLUnit* m_pTlUnit;
+	TLCore(TLUnit* tl)
+		:m_pTlUnit(tl)
+		,m_pRootItem(NULL)
+		,m_pBaseItem(NULL)
+		,m_pBaseParent(NULL){}
+};
+struct TLUnit
+{
+	TLCore m_treeLeft;
+	TLCore m_treeRight;
+	TLItemDir* m_pItemJoint;
+	TLUnit():m_treeLeft(this),m_treeRight(this),m_pItemJoint(NULL){}
+	int Load(UINT mask,const char* lfile,const char* efile,const char* lfileref,const char* efileref);
+	void UnLoad();
+	int LoadCore(TLCore& core,const char* lfile,const char* efile);
+	int UnLoadCore(TLCore& core);
+	int InitialExpand(TLCore& core);
+	bool CompareMode(){return m_pItemJoint!=NULL;}
 };
 class ListCtrlIterator
 {
@@ -214,7 +236,7 @@ public:
 	int Init();
 	void Exit();
 
-	int Load(const char* lfile,const char* efile);
+	int Load(UINT mask,const char* lfile,const char* efile,const char* lfileref,const char* efileref);
 	void UnLoad();
 
 	void GetCanvasRect(RECT* rc);
@@ -252,11 +274,9 @@ private:
 
 //List data
 protected:
-	FileListLoader m_ListLoader;
+	TLUnit m_TlU;
 	uint m_nTotalLine;
-	TLItem* m_pRootItem;
 	ItemSelector m_ItemSel;
-	TreeListTabGrid m_Tab;
 
 //private functions
 private:

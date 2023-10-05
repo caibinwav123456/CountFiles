@@ -165,32 +165,59 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 {
 	int ret=0;
 	FListLoadData* lpData=(FListLoadData*)wParam;
-	string strList;
-	string strErrList;
-	string path=t2astr(lpData->left);
+	string strList,strListRef;
+	string strErrList,strErrListRef;
 	dword type=0;
+	bool bUpdate=false;
 	m_TreeList.UnLoad();
-	if((ret=sys_fstat((char*)path.c_str(),&type))!=0)
+	if(lpData->mask&FILE_LIST_ATTRIB_MAIN)
 	{
-		PDXShowMessage(_T("\'%s\': %s"),(LPCTSTR)lpData->left,a2t(get_error_desc(ret)));
-		goto fail;
-	}
-	if(type==FILE_TYPE_DIR)
-	{
-		CDlgLoad dlg(NULL,lpData->left);
-		if(dlg.DoModal()!=IDOK)
+		string path=t2astr(lpData->left);
+		if((ret=sys_fstat((char*)path.c_str(),&type))!=0)
+		{
+			PDXShowMessage(_T("\'%s\': %s"),(LPCTSTR)lpData->left,a2t(get_error_desc(ret)));
 			goto fail;
-		strList=CProgramData::GetCacheFilePath();
-		strErrList=CProgramData::GetCacheErrFilePath();
+		}
+		if(type==FILE_TYPE_DIR)
+		{
+			CDlgLoad dlg(NULL,lpData->left);
+			if(dlg.DoModal()!=IDOK)
+				goto fail;
+			strList=CProgramData::GetCacheFilePath();
+			strErrList=CProgramData::GetCacheErrFilePath();
+		}
+		else
+		{
+			strList=path;
+			string patherr=CProgramData::GetErrListFilePath(path);
+			if(sys_fstat((char*)patherr.c_str(),&type)==0&&type==FILE_TYPE_NORMAL)
+				strErrList=patherr;
+		}
+		bUpdate=true;
 	}
-	else
+	if(lpData->mask&FILE_LIST_ATTRIB_REF)
 	{
-		strList=path;
-		string patherr=CProgramData::GetErrListFilePath(path);
-		if(sys_fstat((char*)patherr.c_str(),&type)==0&&type==FILE_TYPE_NORMAL)
-			strErrList=patherr;
+		string path=t2astr(lpData->right);
+		if((ret=sys_fstat((char*)path.c_str(),&type))!=0)
+		{
+			PDXShowMessage(_T("\'%s\': %s"),(LPCTSTR)lpData->left,a2t(get_error_desc(ret)));
+			goto fail;
+		}
+		else if(type==FILE_TYPE_DIR)
+		{
+			PDXShowMessage(_T("\'%s\': %s"),(LPCTSTR)lpData->left,_T("reference path can not be a directory"));
+			goto fail;
+		}
+		else
+		{
+			strListRef=path;
+			string patherr=CProgramData::GetErrListFilePath(path);
+			if(sys_fstat((char*)patherr.c_str(),&type)==0&&type==FILE_TYPE_NORMAL)
+				strErrListRef=patherr;
+		}
+		bUpdate=true;
 	}
-	if(0!=(ret=m_TreeList.Load(strList.c_str(),strErrList.c_str())))
+	if(bUpdate&&0!=(ret=m_TreeList.Load(lpData->mask,strList.c_str(),strErrList.c_str(),strListRef.c_str(),strErrListRef.c_str())))
 	{
 		PDXShowMessage(_T("Load file list failed: %s"),a2t(get_error_desc(ret)));
 		goto fail;
