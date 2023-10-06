@@ -200,7 +200,9 @@ struct TLUnit
 	TLItemDir* m_pItemJoint;
 	ItemSelector m_ItemSel;
 	uint m_nTotalLine;
-	TLUnit(TreeListCtrl* pOwner,TreeListTabGrid* tabLeft,TreeListTabGrid* tabRight):m_ItemSel(pOwner),m_treeLeft(this,tabLeft),m_treeRight(this,tabRight),m_pItemJoint(NULL),m_nTotalLine(0){}
+	TLUnit(TreeListCtrl* pOwner,TreeListTabGrid* tabLeft,TreeListTabGrid* tabRight)
+		:m_ItemSel(pOwner),m_treeLeft(this,tabLeft),m_treeRight(this,tabRight)
+		,m_pItemJoint(NULL),m_nTotalLine(0){}
 	int Load(UINT mask,const char* lfile,const char* efile,const char* lfileref,const char* efileref);
 	void UnLoad();
 	int LoadCore(TLCore& core,const char* lfile,const char* efile);
