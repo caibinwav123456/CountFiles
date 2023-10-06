@@ -66,15 +66,14 @@ static inline int log_rec(const string& path,uint npos,dword type,byte* buf,uint
 {
 	int ret=0;
 	param->rec_len+=buflen;
-	if(0!=(ret=callback->cb_info(buf,buflen,callback->param)))
-		log_error(path.c_str()+npos,type,ret,callback);
+	fail_op(ret,0,callback->cb_info(buf,buflen,callback->param),
+		log_error(path.c_str()+npos,type,ret,callback));
 	return ret;
 }
 static inline int query_file_info(const string& path,uint npos,UInteger64& size,CDateTime& date,const intf_cntfile* callback)
 {
 	int ret=0;
-	if(0!=(ret=sys_get_file_time((char*)path.c_str(),NULL,&date,NULL)))
-		return ret;
+	return_ret(ret,0,sys_get_file_time((char*)path.c_str(),NULL,&date,NULL));
 	void* hFile=sys_fopen((char*)path.c_str(),FILE_READ|FILE_OPEN_EXISTING);
 	if(!VALID(hFile))
 		return ERR_OPEN_FILE_FAILED;
@@ -101,26 +100,22 @@ static int log_file_info(const string& path,uint npos,const string& name,dword t
 	}
 	else
 	{
-		if(0!=(ret=query_file_info(path,npos,size,date,callback)))
-			return log_error(path.c_str()+npos,type,ret,callback);
+		return_ret_val(ret,0,query_file_info(path,npos,size,date,callback),
+			log_error(path.c_str()+npos,type,ret,callback));
 	}
 
-	if(0!=(ret=log_rec(path,npos,type,(byte*)Tag,strlen((const char*)Tag),callback,param)))
-		return ret;
+	return_ret(ret,0,log_rec(path,npos,type,(byte*)Tag,strlen((const char*)Tag),callback,param));
 	if(bDir)
 	{
 		sprintf((char*)buf,"%s%u ",TAG_DRSIZE,ref_param->rec_len);
-		if(0!=(ret=log_rec(path,npos,type,buf,strlen((char*)buf),callback,param)))
-			return ret;
+		return_ret(ret,0,log_rec(path,npos,type,buf,strlen((char*)buf),callback,param));
 	}
 	pathname=string("\"")+name+"\" ";
-	if(0!=(ret=log_rec(path,npos,type,(byte*)pathname.c_str(),pathname.size(),callback,param)))
-		return ret;
+	return_ret(ret,0,log_rec(path,npos,type,(byte*)pathname.c_str(),pathname.size(),callback,param));
 	strsize=FormatI64(size);
 	date.Format(strdate,FORMAT_DATE|FORMAT_TIME|FORMAT_WEEKDAY);
 	sprintf((char*)buf,"%s%s %s\n",TAG_SIZE,strsize.c_str(),strdate.c_str());
-	if(0!=(ret=log_rec(path,npos,type,buf,strlen((char*)buf),callback,param)))
-		return ret;
+	return_ret(ret,0,log_rec(path,npos,type,buf,strlen((char*)buf),callback,param));
 	param->total_size+=size;
 	if(param->start_flag)
 	{
@@ -129,8 +124,7 @@ static int log_file_info(const string& path,uint npos,const string& name,dword t
 	}
 	else if(param->update_time<date)
 		param->update_time=date;
-	if(0!=(ret=log_end_rec(path,npos,callback)))
-		return ret;
+	return_ret(ret,0,log_end_rec(path,npos,callback));
 
 	return 0;
 }
@@ -153,10 +147,9 @@ static int recurse_cnt_file(const string& path,uint npos,const string& name,file
 	file_cnt_param next_param;
 	next_param.user_callback=param->user_callback;
 	init_param(&next_param);
-	if(0!=(ret=sys_fstat((char*)path.c_str(),NULL)))
-		return log_error(path.c_str()+npos,type,ret,param->user_callback);
-	if(0!=(ret=sys_ftraverse((char*)(path).c_str(),cb_poll_file,&flist)))
-		return ret;
+	return_ret_val(ret,0,sys_fstat((char*)path.c_str(),NULL),
+		log_error(path.c_str()+npos,type,ret,param->user_callback));
+	return_ret(ret,0,sys_ftraverse((char*)(path).c_str(),cb_poll_file,&flist));
 	for(int i=0;i<(int)flist.list.size();i++)
 	{
 		switch(flist.list[i].type)
@@ -175,15 +168,13 @@ static int recurse_cnt_file(const string& path,uint npos,const string& name,file
 	sort(ref.drefs.begin(),ref.drefs.end(),less_rec);
 	for(int i=0;i<(int)ref.frefs.size();i++)
 	{
-		if(0!=(ret=recurse_cnt_file(path+dir_symbol+ref.frefs[i]->name,npos,ref.frefs[i]->name,&next_param,
-			ref.frefs[i]->type,recurse_lvl+1)))
-			return ret;
+		return_ret(ret,0,recurse_cnt_file(path+dir_symbol+ref.frefs[i]->name,npos,ref.frefs[i]->name,&next_param,
+			ref.frefs[i]->type,recurse_lvl+1));
 	}
 	for(int i=0;i<(int)ref.drefs.size();i++)
 	{
-		if(0!=(ret=recurse_cnt_file(path+dir_symbol+ref.drefs[i]->name,npos,ref.drefs[i]->name,&next_param,
-			ref.drefs[i]->type,recurse_lvl+1)))
-			return ret;
+		return_ret(ret,0,recurse_cnt_file(path+dir_symbol+ref.drefs[i]->name,npos,ref.drefs[i]->name,&next_param,
+			ref.drefs[i]->type,recurse_lvl+1));
 	}
 	return log_file_info(path,npos,name,type,param,&next_param);
 }
@@ -202,10 +193,8 @@ int GenFileListInternal(const char* path,const intf_cntfile* callback)
 	file_cnt_param cnt_param;
 	cnt_param.user_callback=callback;
 	init_param(&cnt_param);
-	if(0!=(ret=sys_fstat((char*)strpath.c_str(),&type)))
-		goto end;
-	if(0!=(ret=recurse_cnt_file(strpath,pos,name,&cnt_param,type,0)))
-		goto end;
+	fail_goto(ret,0,sys_fstat((char*)strpath.c_str(),&type),end);
+	fail_goto(ret,0,recurse_cnt_file(strpath,pos,name,&cnt_param,type,0),end);
 end:
 	return ret;
 }

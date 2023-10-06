@@ -483,18 +483,15 @@ int CDateTime::FromString(const byte*& ptr,uint& len,char sepday,char septime,ch
 	const byte* buf=ptr;
 	byte tmpbuf[20];
 
-	if(0!=(ret=extract_next_decimal(num,ptr,len,sepday,tmpbuf,20)))
-		return ret;
+	return_ret(ret,0,extract_next_decimal(num,ptr,len,sepday,tmpbuf,20));
 	year=num;
 	pass_byte(sepday);
 
-	if(0!=(ret=extract_next_decimal(num,ptr,len,sepday,tmpbuf,20)))
-		return ret;
+	return_ret(ret,0,extract_next_decimal(num,ptr,len,sepday,tmpbuf,20));
 	month=num-1;
 	pass_byte(sepday);
 
-	if(0!=(ret=extract_next_decimal(num,ptr,len,sep,tmpbuf,20)))
-		return ret;
+	return_ret(ret,0,extract_next_decimal(num,ptr,len,sep,tmpbuf,20));
 	day=num-1;
 	pass_space;
 
@@ -512,18 +509,15 @@ int CDateTime::FromString(const byte*& ptr,uint& len,char sepday,char septime,ch
 	advance_ptr(ptr,len,3);
 	pass_byte(sep);
 
-	if(0!=(ret=extract_next_decimal(num,ptr,len,septime,tmpbuf,20)))
-		return ret;
+	return_ret(ret,0,extract_next_decimal(num,ptr,len,septime,tmpbuf,20));
 	hour=num;
 	pass_byte(septime);
 
-	if(0!=(ret=extract_next_decimal(num,ptr,len,septime,tmpbuf,20)))
-		return ret;
+	return_ret(ret,0,extract_next_decimal(num,ptr,len,septime,tmpbuf,20));
 	minute=num;
 	pass_byte(septime);
 
-	if(0!=(ret=extract_next_decimal(num,ptr,len,0,tmpbuf,20)))
-		return ret;
+	return_ret(ret,0,extract_next_decimal(num,ptr,len,0,tmpbuf,20));
 	second=num;
 
 	if(!ValidDate())

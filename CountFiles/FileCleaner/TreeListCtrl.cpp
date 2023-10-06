@@ -71,7 +71,7 @@ void TreeListCtrl::Exit()
 int TLUnit::InitialExpand()
 {
 	TLCore* pBase=GetPrimaryBase();
-	ASSERT(pBase!=NULL);
+	assert(pBase!=NULL);
 	return pBase->m_pBaseItem->OpenDir(true,false);
 }
 TLCore* TLUnit::GetPrimaryBase()
@@ -88,8 +88,7 @@ TLCore* TLUnit::GetPrimaryBase()
 int TLUnit::LoadCore(TLCore& core,const char* lfile,const char* efile)
 {
 	int ret=0;
-	if(0!=(ret=core.m_ListLoader.Load(lfile,efile)))
-		return ret;
+	return_ret(ret,0,core.m_ListLoader.Load(lfile,efile));
 	TLItemDir* pRoot=new TLItemDir(&core);
 	core.m_pRootItem=core.m_pBaseItem=pRoot;
 	pRoot->type=eITypeDir;
@@ -117,17 +116,11 @@ int TLUnit::Load(UINT mask,const char* lfile,const char* efile,const char* lfile
 	int ret=0;
 	bool loadleft=(mask&FILE_LIST_ATTRIB_MAIN),
 		loadright=(mask&FILE_LIST_ATTRIB_REF);
-	ASSERT(loadleft||loadright);
+	assert(loadleft||loadright);
 	if(loadleft&&lfile!=NULL&&*lfile!=0)
-	{
-		if(0!=(ret=LoadCore(m_treeLeft,lfile,efile)))
-			goto fail;
-	}
+		fail_goto(ret,0,LoadCore(m_treeLeft,lfile,efile),fail);
 	if(loadright&&lfileref!=NULL&&*lfileref!=0)
-	{
-		if(0!=(ret=LoadCore(m_treeRight,lfileref,efileref)))
-			goto fail;
-	}
+		fail_goto(ret,0,LoadCore(m_treeRight,lfileref,efileref),fail);
 	if(loadleft&&loadright)
 	{
 		m_pItemJoint=new TLItemDir(NULL);
@@ -137,8 +130,7 @@ int TLUnit::Load(UINT mask,const char* lfile,const char* efile,const char* lfile
 		m_treeLeft.m_pBaseItem->parent=
 			m_treeRight.m_pBaseItem->parent=m_pItemJoint;
 	}
-	if(0!=(ret=InitialExpand()))
-		goto fail;
+	fail_goto(ret,0,InitialExpand(),fail);
 	return 0;
 fail:
 	UnLoad();
@@ -278,7 +270,7 @@ void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter)
 }
 void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 {
-	ASSERT(m_Tab.mask&TLTAB_NAME);
+	assert(m_Tab.mask&TLTAB_NAME);
 	DrawLine(drawer,iter.m_iline,iter.m_pStkItem==NULL?NULL:iter.m_pStkItem->m_pLItem);
 	CPoint pos(m_Tab.rcTotal.left,LINE_HEIGHT*iter.m_iline);
 	drawer.SetClipRect(&CRect(pos,CPoint(m_Tab.arrTab[0].rect.right,pos.y+LINE_HEIGHT)));

@@ -119,10 +119,8 @@ int FindLine(UInteger64& off,const UInteger64& end,void* hlf)
 		if(tmpend>end)
 			tmpend=end;
 		uint len=(tmpend-tmpoff).low;
-		if(0!=(ret=sys_fseek(hlf,tmpoff.low,&tmpoff.high,SEEK_BEGIN)))
-			return ret;
-		if(0!=(ret=sys_fread(hlf,buf,len)))
-			return ret;
+		return_ret(ret,0,sys_fseek(hlf,tmpoff.low,&tmpoff.high,SEEK_BEGIN));
+		return_ret(ret,0,sys_fread(hlf,buf,len));
 		const byte* ptr=buf;
 		if(find_byte(ptr,len,'\n'))
 		{
@@ -141,15 +139,12 @@ int load_error_list(err_dir_node* enode,const UInteger64& off,const UInteger64& 
 	int ret=0;
 	while(tmpoff<end)
 	{
-		if(0!=(ret=FindLine(tmpoff,end,hef)))
-			return ret;
+		return_ret(ret,0,FindLine(tmpoff,end,hef));
 		offend=tmpoff;
 		uint reclen=(offend-offstart).low;
 		byte* recbuf=new byte[reclen];
-		if(0!=(ret=sys_fseek(hef,offstart.low,&offstart.high,SEEK_BEGIN)))
-			goto end_read;
-		if(0!=(ret=sys_fread(hef,recbuf,reclen)))
-			goto end_read;
+		fail_goto(ret,0,sys_fseek(hef,offstart.low,&offstart.high,SEEK_BEGIN),end_read);
+		fail_goto(ret,0,sys_fread(hef,recbuf,reclen),end_read);
 		ret=parse_error_rec(enode,name_stack,offstart,recbuf,reclen);
 end_read:
 		delete[] recbuf;
@@ -174,15 +169,12 @@ int retrieve_enode_info(efnode* node,err_node_info* pinfo,void* hef,LRUCache* ca
 	else
 	{
 		item=peinfo=new err_node_info;
-		if(0!=(ret=get_err_dir_node_name(node,peinfo->name,hef,&peinfo->type)))
-			goto end;
+		fail_goto(ret,0,get_err_dir_node_name(node,peinfo->name,hef,&peinfo->type),end);
 		{
 			uint len=(node->efl_end-node->efl_start).low;
 			char* buf=new char[len+1];
-			if(0!=(ret=sys_fseek(hef,node->efl_start.low,&node->efl_start.high,SEEK_BEGIN)))
-				goto end2;
-			if(0!=(ret=sys_fread(hef,buf,len)))
-				goto end2;
+			fail_goto(ret,0,sys_fseek(hef,node->efl_start.low,&node->efl_start.high,SEEK_BEGIN),end2);
+			fail_goto(ret,0,sys_fread(hef,buf,len),end2);
 			buf[len]=0;
 			peinfo->err_desc=buf;
 end2:
@@ -204,10 +196,8 @@ int get_err_dir_node_name(fnode* enode,string& name,void* hef,dword* type)
 	int ret=0;
 	uint len=(enode->fl_end-enode->fl_start).low;
 	char* buf=new char[len+1];
-	if(0!=(ret=sys_fseek(hef,enode->fl_start.low,&enode->fl_start.high,SEEK_BEGIN)))
-		goto end;
-	if(0!=(ret=sys_fread(hef,buf,len)))
-		goto end;
+	fail_goto(ret,0,sys_fseek(hef,enode->fl_start.low,&enode->fl_start.high,SEEK_BEGIN),end);
+	fail_goto(ret,0,sys_fread(hef,buf,len),end);
 	buf[len]=0;
 	name=buf;
 end:
