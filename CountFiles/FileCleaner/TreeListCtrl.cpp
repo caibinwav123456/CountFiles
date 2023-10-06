@@ -3,7 +3,7 @@
 #include "utility.h"
 #include "resource.h"
 #include <assert.h>
-COLORREF GetDispColor(E_FOLDER_STATE state)
+COLORREF __get_disp_color__(uint state)
 {
 	switch(state)
 	{
@@ -22,6 +22,19 @@ COLORREF GetDispColor(E_FOLDER_STATE state)
 	default:
 		return RGB(0,0,0);
 	}
+}
+COLORREF GetDispColor(E_FOLDER_STATE state)
+{
+	static struct ClrArray
+	{
+		COLORREF arr[eFSMax];
+		ClrArray()
+		{
+			for(uint i=0;i<eFSMax;i++)
+				arr[i]=__get_disp_color__(i);
+		}
+	}clr_array;
+	return clr_array.arr[state];
 }
 TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_iCurLine(-1)
 {
