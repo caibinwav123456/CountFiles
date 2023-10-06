@@ -58,11 +58,9 @@ int RevFindLine(UInteger64& off,void* hlf)
 	while(tmpoff>UInteger64(0))
 	{
 		start=(tmpoff>UInteger64(64)?tmpoff-UInteger64(64):0);
-		if(0!=(ret=sys_fseek(hlf,start.low,&start.high,SEEK_BEGIN)))
-			return ret;
+		return_ret(ret,0,sys_fseek(hlf,start.low,&start.high,SEEK_BEGIN));
 		uint len=(tmpoff-start).low;
-		if(0!=(ret=sys_fread(hlf,buf,len)))
-			return ret;
+		return_ret(ret,0,sys_fread(hlf,buf,len));
 		const byte* ptr=NULL;
 		if(rev_str(buf+len-1,buf,ptr))
 		{
@@ -103,8 +101,7 @@ static int parse_rec(const byte* buf,uint len,file_node_info* pinfo,UInteger64& 
 	if(memcmp(buf,TAG_TYPE_DIR,2)==0)
 	{
 		buf=ptr;
-		if(0!=(ret=match_tagged_size(tag_recsize,tmpsize,ptr,len,tmpbuf,100)))
-			return ret;
+		return_ret(ret,0,match_tagged_size(tag_recsize,tmpsize,ptr,len,tmpbuf,100));
 		pinfo->type=FILE_TYPE_DIR;
 		pass_space;
 	}
@@ -129,13 +126,11 @@ static int parse_rec(const byte* buf,uint len,file_node_info* pinfo,UInteger64& 
 	pass_byte('\"');
 	pass_space;
 
-	if(0!=(ret=match_tagged_size(tag_size,tmpsize,ptr,len,tmpbuf,100)))
-		return ret;
+	return_ret(ret,0,match_tagged_size(tag_size,tmpsize,ptr,len,tmpbuf,100));
 	pinfo->size=tmpsize;
 	pass_space;
 
-	if(0!=(ret=pinfo->mod_time.FromString(ptr,len)))
-		return ret;
+	return_ret(ret,0,pinfo->mod_time.FromString(ptr,len));
 	pass_byte('\n');
 
 	if(len!=0)
@@ -150,12 +145,9 @@ static int ReadRecContent(UInteger64 start,uint len,UInteger64& prevoff,void* hl
 	file_node_info dummyinfo;
 	file_node_info& info=(pinfo==NULL?dummyinfo:*pinfo);
 	UInteger64 recsize;
-	if(0!=(ret=sys_fseek(hlf,start.low,&start.high,SEEK_BEGIN)))
-		goto end;
-	if(0!=(ret=sys_fread(hlf,buf,len)))
-		goto end;
-	if(0!=(ret=parse_rec(buf,len,&info,recsize)))
-		goto end;
+	fail_goto(ret,0,sys_fseek(hlf,start.low,&start.high,SEEK_BEGIN),end);
+	fail_goto(ret,0,sys_fread(hlf,buf,len),end);
+	fail_goto(ret,0,parse_rec(buf,len,&info,recsize),end);
 	prevoff=start-recsize;
 end:
 	delete[] buf;
@@ -165,10 +157,8 @@ static int RevReadNode(void* hlf,UInteger64& off,file_node_info* pinfo=NULL)
 {
 	int ret=0;
 	UInteger64 tmpoff=off,prevoff;
-	if(0!=(ret=RevFindLine(tmpoff,hlf)))
-		return ret;
-	if(0!=(ret=ReadRecContent(tmpoff,(off-tmpoff).low,prevoff,hlf,pinfo)))
-		return ret;
+	return_ret(ret,0,RevFindLine(tmpoff,hlf));
+	return_ret(ret,0,ReadRecContent(tmpoff,(off-tmpoff).low,prevoff,hlf,pinfo));
 	off=prevoff;
 	return 0;
 }
@@ -262,11 +252,11 @@ int retrieve_node_info(fnode* node,file_node_info* pinfo,void* hlf,LRUCache* cac
 	{
 		item=pfinfo=new file_node_info;
 		UInteger64 tmpoff=node->fl_end;
-		if(0!=(ret=RevReadNode(hlf,tmpoff,pfinfo)))
+		fail_op(ret,0,RevReadNode(hlf,tmpoff,pfinfo),
 		{
 			delete pfinfo;
 			return ret;
-		}
+		})
 		cache->put(item,&node->handle);
 	}
 	*pinfo=*pfinfo;
@@ -294,13 +284,11 @@ int expand_dir(dir_node* node,bool expand,bool release,void* hlf,void* hef,LRUCa
 	fnode filenode;
 	file_node_info info;
 	UInteger64 off=node->fl_end;
-	if(0!=(ret=RevFindLine(off,hlf)))
-		goto fail;
+	fail_goto(ret,0,RevFindLine(off,hlf),fail);
 	while(off>node->fl_start)
 	{
 		UInteger64 endoff=off;
-		if(0!=(ret=RevReadNode(hlf,off,&info)))
-			goto fail;
+		fail_goto(ret,0,RevReadNode(hlf,off,&info),fail);
 		switch(info.type)
 		{
 		case FILE_TYPE_DIR:
@@ -326,8 +314,7 @@ int expand_dir(dir_node* node,bool expand,bool release,void* hlf,void* hef,LRUCa
 	if(node->enode!=NULL)
 	{
 		node->contents->err_contents=node->enode->err_contents;
-		if(0!=(ret=merge_error_list(node,hlf,hef,cache)))
-			goto fail;
+		fail_goto(ret,0,merge_error_list(node,hlf,hef,cache),fail);
 	}
 
 	return 0;
@@ -344,8 +331,7 @@ static int build_base_tree(dir_node*& base,void* hlf,const UInteger64& endrec)
 	base=new dir_node;
 	base->fl_start=base->fl_end=endrec;
 	file_node_info info;
-	if(0!=(ret=RevReadNode(hlf,base->fl_start,&info)))
-		return ret;
+	return_ret(ret,0,RevReadNode(hlf,base->fl_start,&info));
 	if(info.type!=FILE_TYPE_DIR)
 		return ERR_CORRUPTED_FILE;
 	return 0;
@@ -356,8 +342,7 @@ static int build_err_tree(err_dir_node*& ebase,void* hef,const UInteger64& off,c
 	if(base==NULL)
 		return ERR_INVALID_CALL;
 	ebase=new err_dir_node;
-	if(0!=(ret=load_error_list(ebase,off,end,hef)))
-		return ret;
+	return_ret(ret,0,load_error_list(ebase,off,end,hef));
 	if(ebase->empty())
 		return 0;
 	if(ebase->subdirs==NULL||ebase->subdirs->size()!=1)
@@ -385,19 +370,16 @@ int load_file_list(ctx_flist_loader* ctx,LRUCache* cache)
 	}
 	int ret=0;
 	UInteger64 off;
-	if(0!=(ret=sys_get_file_size(ctx->hlf,&off.low,&off.high)))
+	fail_op(ret,0,sys_get_file_size(ctx->hlf,&off.low,&off.high),
 	{
 		free_flist_file_data(ctx);
 		return ret;
-	}
-	if(0!=(ret=build_base_tree(ctx->base_node,ctx->hlf,off)))
-		goto fail;
+	})
+	fail_goto(ret,0,build_base_tree(ctx->base_node,ctx->hlf,off),fail);
 	if(VALID(ctx->hef))
 	{
-		if(0!=(ret=sys_get_file_size(ctx->hef,&off.low,&off.high)))
-			goto fail;
-		if(0!=(ret=build_err_tree(ctx->base_enode,ctx->hef,UInteger64(0),off,ctx->base_node)))
-			goto fail;
+		fail_goto(ret,0,sys_get_file_size(ctx->hef,&off.low,&off.high),fail);
+		fail_goto(ret,0,build_err_tree(ctx->base_enode,ctx->hef,UInteger64(0),off,ctx->base_node),fail);
 	}
 	return 0;
 fail:

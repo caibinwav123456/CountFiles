@@ -83,13 +83,12 @@ int TLItemDir::OpenDir(bool open,bool release)
 	{
 		if(open_length>0)
 			goto end;
-		if(0!=(ret=ctx->m_ListLoader.ExpandNode(dirnode,true,release)))
-			goto fail;
-		if(0!=(ret=construct_list()))
+		fail_goto(ret,0,ctx->m_ListLoader.ExpandNode(dirnode,true,release),fail);
+		fail_op(ret,0,construct_list(),
 		{
 			ctx->m_ListLoader.ExpandNode(dirnode,false,true);
 			goto fail;
-		}
+		});
 		goto end;
 	}
 	else if(release)
@@ -98,8 +97,8 @@ int TLItemDir::OpenDir(bool open,bool release)
 		ret=ctx->m_ListLoader.ExpandNode(dirnode,false,true);
 		goto end;
 	}
-	else if(0!=(ret=ctx->m_ListLoader.ExpandNode(dirnode,false)))
-		goto fail;
+	else
+		fail_goto(ret,0,ctx->m_ListLoader.ExpandNode(dirnode,false),fail);
 	goto end;
 fail:
 	isopen=false;

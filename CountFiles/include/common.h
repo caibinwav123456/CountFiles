@@ -20,6 +20,14 @@ typedef unsigned long dword;
 #endif
 #define hiword(x) ((x)>>16)
 #define loword(x) ((x)&0xffff)
+#define fail_op(ret,retok,expression,op) \
+	if((ret=expression)!=retok) \
+		op
+#define fail_goto(ret,retok,expression,tag) \
+	fail_op(ret,retok,expression,goto tag)
+#define return_ret_val(ret,retok,expression,retval) \
+	fail_op(ret,retok,expression,return retval)
+#define return_ret(ret,retok,expression) return_ret_val(ret,retok,expression,ret)
 #if (defined(DEBUG) || defined(_DEBUG)) && !defined(NDEBUG)
 #define verify(m) assert(m)
 #else

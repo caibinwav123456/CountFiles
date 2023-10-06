@@ -119,8 +119,7 @@ int _tmain(int argc,TCHAR** argv)
 	FileObject obj;
 	intf_cntfile callback;
 	const char* cnt_path;
-	if(0!=(ret=parse_options(argc,argv,obj.file,cnt_path,obj.err_file,obj.bMute)))
-		return ret;
+	return_ret(ret,0,parse_options(argc,argv,obj.file,cnt_path,obj.err_file,obj.bMute));
 	obj.hFile=sys_fopen((char*)obj.file,FILE_WRITE|FILE_CREATE_ALWAYS);
 	obj.hFileErr=NULL;
 
@@ -143,12 +142,12 @@ int _tmain(int argc,TCHAR** argv)
 	callback.cb_info=cb_wr_file_info;
 	callback.cb_error=cb_wr_file_err;
 	callback.cb_rec=NULL;
-	if(0!=(ret=GenFileList(cnt_path,&callback)))
+	fail_op(ret,0,GenFileList(cnt_path,&callback),
 	{
 		clean_write_obj(&obj,true);
 		printf("GenFileList failed: %s\n",get_error_desc(ret));
 		return ret;
-	}
+	})
 	clean_write_obj(&obj,false);
 	return 0;
 }
