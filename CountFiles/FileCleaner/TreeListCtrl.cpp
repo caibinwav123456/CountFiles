@@ -145,7 +145,6 @@ void TLUnit::UnLoad()
 		delete m_pItemJoint;
 		m_pItemJoint=NULL;
 	}
-	m_nTotalLine=0;
 }
 int TreeListCtrl::Load(UINT mask,const char* lfile,const char* efile,const char* lfileref,const char* efileref)
 {
