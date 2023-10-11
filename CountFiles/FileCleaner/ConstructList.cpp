@@ -5,7 +5,6 @@
 void TLItemDir::clear()
 {
 	subitems.clear();
-	subpairs->clear();
 	for(int i=0;i<(int)subfiles.size();i++)
 	{
 		subfiles[i]->Release();
@@ -26,11 +25,12 @@ void TLItemDir::clear()
 	errdirs.clear();
 	for(int i=0;i<(int)subdirs.size();i++)
 	{
-		subdirs[i]->Detach();
 		subdirs[i]->Release();
+		subdirs[i]->Detach();
 		delete subdirs[i];
 	}
 	subdirs.clear();
+	subpairs->clear();
 	open_length=0;
 	dir_border=0;
 }

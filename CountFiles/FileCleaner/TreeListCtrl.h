@@ -103,6 +103,7 @@ struct TLItemPair
 struct TLItemSplice
 {
 	vector<TLItemPair> map;
+	vector<TLItemPair*> jntitems;
 	void clear();
 };
 struct TLItem
@@ -120,7 +121,9 @@ struct TLItem
 	int parentidx;
 	int org;
 	bool issel;
-	TLItem():type(eITypeNone),state(eFSNone),node(NULL),parent(NULL),parentidx(-1),org(-1),issel(false)
+	TLItem():type(eITypeNone),state(eFSNone)
+		,node(NULL),parent(NULL),parentidx(-1)
+		,org(-1),issel(false)
 	{
 	}
 	virtual ~TLItem(){}
@@ -173,10 +176,13 @@ private:
 };
 struct ItStkItem
 {
-	TLItem* m_pLItem;
+	TLItem* m_pItem;
+	TLItemPair* m_pJItem;
 	int parentidx;
 	ItStkItem* next;
-	ItStkItem(TLItem* pItem):m_pLItem(pItem),parentidx(-1),next(NULL){}
+	ItStkItem(TLItem* pItem,TLItemPair* pJItem=NULL)
+		:m_pItem(pItem),m_pJItem(pJItem)
+		,parentidx(-1),next(NULL){}
 };
 struct TLCore
 {
@@ -203,7 +209,8 @@ struct TLUnit
 	TLUnit(TreeListCtrl* pOwner,TreeListTabGrid* tabLeft,TreeListTabGrid* tabRight)
 		:m_ItemSel(pOwner),m_treeLeft(this,tabLeft),m_treeRight(this,tabRight)
 		,m_pItemJoint(NULL),m_nTotalLine(0){}
-	int Load(UINT mask,const char* lfile,const char* efile,const char* lfileref,const char* efileref);
+	int Load(UINT mask,const char* lfile,const char* efile,
+		const char* lfileref,const char* efileref);
 	void UnLoad();
 	int LoadCore(TLCore& core,const char* lfile,const char* efile);
 	int UnLoadCore(TLCore& core);
@@ -245,7 +252,8 @@ public:
 	int Init();
 	void Exit();
 
-	int Load(UINT mask,const char* lfile,const char* efile,const char* lfileref,const char* efileref);
+	int Load(UINT mask,const char* lfile,const char* efile,
+		const char* lfileref,const char* efileref);
 	void UnLoad();
 
 	void GetCanvasRect(RECT* rc);
