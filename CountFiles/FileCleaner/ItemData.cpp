@@ -9,7 +9,7 @@ TLItem** TLItem::GetPeerItem(TLItem*** _this)
 			*_this=NULL;
 		return NULL;
 	}
-	TLItemPair* tuple=&parent->subpairs->map[parentidx];
+	TLItemPair* tuple=&parent->subpairs->jntitems[parentidx];
 	assert(!(tuple->left==NULL&&tuple->right==NULL));
 	assert(tuple->left!=tuple->right);
 	assert(tuple->left==this||tuple->right==this);
@@ -30,6 +30,7 @@ void TLItemSplice::clear()
 {
 	if(this==NULL)
 		return;
+	jntitems.clear();
 #define restore_parentidx(pair,domain) if(pair.domain!=NULL)pair.domain->parentidx=-1;
 	for(int i=0;i<(int)map.size();i++)
 	{
@@ -146,7 +147,7 @@ ItStkItem* TLItem::FromLineNum(int iline,int& lvl)
 		TLItem* item=cur->subitems[stack->parentidx];
 		if(iacc==iline)
 		{
-			stack->m_pLItem=item;
+			stack->m_pItem=item;
 			lvl=level;
 			return stack;
 		}
@@ -156,7 +157,7 @@ ItStkItem* TLItem::FromLineNum(int iline,int& lvl)
 			iacc++;
 			cur=dynamic_cast<TLItemDir*>(item);
 			assert(cur!=NULL);
-			stack->m_pLItem=item;
+			stack->m_pItem=item;
 			stack=push_item_stack(stack);
 			level++;
 		}
@@ -218,24 +219,24 @@ void ListCtrlIterator::operator++(int)
 	m_iline++;
 	if(m_iline<=0)
 		return;
-	if(m_pStkItem->m_pLItem->type==eITypeDir)
+	if(m_pStkItem->m_pItem->type==eITypeDir)
 	{
-		TLItemDir* dir=dynamic_cast<TLItemDir*>(m_pStkItem->m_pLItem);
+		TLItemDir* dir=dynamic_cast<TLItemDir*>(m_pStkItem->m_pItem);
 		assert(dir!=NULL);
 		if(dir->isopen&&!dir->subitems.empty())
 		{
 			m_pStkItem=push_item_stack(m_pStkItem);
-			m_pStkItem->m_pLItem=dir->subitems[0];
+			m_pStkItem->m_pItem=dir->subitems[0];
 			lvl++;
 			return;
 		}
 	}
 	for(;;)
 	{
-		if(m_pStkItem->parentidx+1<(int)m_pStkItem->m_pLItem->parent->subitems.size())
+		if(m_pStkItem->parentidx+1<(int)m_pStkItem->m_pItem->parent->subitems.size())
 		{
 			m_pStkItem->parentidx++;
-			m_pStkItem->m_pLItem=m_pStkItem->m_pLItem->parent->subitems[m_pStkItem->parentidx];
+			m_pStkItem->m_pItem=m_pStkItem->m_pItem->parent->subitems[m_pStkItem->parentidx];
 			return;
 		}
 		if(lvl==0)
@@ -267,7 +268,7 @@ void ListCtrlIterator::operator--(int)
 	if(m_pStkItem->parentidx>0)
 	{
 		m_pStkItem->parentidx--;
-		m_pStkItem->m_pLItem=m_pStkItem->m_pLItem->parent->subitems[m_pStkItem->parentidx];
+		m_pStkItem->m_pItem=m_pStkItem->m_pItem->parent->subitems[m_pStkItem->parentidx];
 		goto second_phase;
 	}
 	if(lvl==0)
@@ -280,15 +281,15 @@ void ListCtrlIterator::operator--(int)
 second_phase:
 	for(;;)
 	{
-		if(m_pStkItem->m_pLItem->type!=eITypeDir)
+		if(m_pStkItem->m_pItem->type!=eITypeDir)
 			break;
-		TLItemDir* dir=dynamic_cast<TLItemDir*>(m_pStkItem->m_pLItem);
+		TLItemDir* dir=dynamic_cast<TLItemDir*>(m_pStkItem->m_pItem);
 		assert(dir!=NULL);
 		if((!dir->isopen)||dir->subitems.empty())
 			break;
 		m_pStkItem=push_item_stack(m_pStkItem);
 		m_pStkItem->parentidx=dir->subitems.size()-1;
-		m_pStkItem->m_pLItem=dir->subitems.back();
+		m_pStkItem->m_pItem=dir->subitems.back();
 		lvl++;
 	}
 }
@@ -464,7 +465,7 @@ bool ItemSelector::ClearAndDragSel(TLItem* item,int iline)
 		ListCtrlIterator itds(m_pOwner->m_pRootItem,pos);
 		if(itds.m_pStkItem==NULL)
 			return false;
-		SetSel(itds.m_pStkItem->m_pLItem,pos);
+		SetSel(itds.m_pStkItem->m_pItem,pos);
 		DragSelTo(iline);
 		return true;
 	}
@@ -485,13 +486,13 @@ void ItemSelector::EndDragSel()
 				continue;
 			if(m_bCancelRgn)
 			{
-				if(stk->m_pLItem->issel)
-					CancelSel(stk->m_pLItem,itstart.m_iline);
+				if(stk->m_pItem->issel)
+					CancelSel(stk->m_pItem,itstart.m_iline);
 			}
 			else
 			{
-				if(!stk->m_pLItem->issel)
-					AddSel(stk->m_pLItem,itstart.m_iline);
+				if(!stk->m_pItem->issel)
+					AddSel(stk->m_pItem,itstart.m_iline);
 			}
 		}
 	}
