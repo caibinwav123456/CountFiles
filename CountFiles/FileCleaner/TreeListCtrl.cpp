@@ -138,12 +138,16 @@ int TLUnit::Load(UINT mask,const char* lfile,const char* efile,
 	if(loadleft&&loadright)
 	{
 		m_pItemJoint=new TLItemDir(NULL);
-		TLItemSplice* splice=m_treeLeft.m_pBaseItem->subpairs=
+		m_treeLeft.m_pBaseItem->subpairs=
 			m_treeRight.m_pBaseItem->subpairs=new TLItemSplice;
+		TLItemSplice* splice=new TLItemSplice;
 		splice->map.push_back(TLItemPair(m_treeLeft.m_pBaseItem,m_treeRight.m_pBaseItem));
 		splice->jntitems.push_back(&splice->map[0]);
+		m_pItemJoint->subpairs=splice;
 		m_treeLeft.m_pBaseItem->parent=
 			m_treeRight.m_pBaseItem->parent=m_pItemJoint;
+		m_treeLeft.m_pBaseItem->parentidx=
+			m_treeRight.m_pBaseItem->parentidx=0;
 	}
 	fail_goto(ret,0,InitialExpand(),fail);
 	return 0;
@@ -157,6 +161,8 @@ void TLUnit::UnLoad()
 	UnLoadCore(m_treeRight);
 	if(m_pItemJoint!=NULL)
 	{
+		assert(m_pItemJoint->subpairs!=NULL);
+		delete m_pItemJoint->subpairs;
 		delete m_pItemJoint;
 		m_pItemJoint=NULL;
 	}

@@ -1,17 +1,33 @@
 #include "pch.h"
 #include "TreeListCtrl.h"
 #include <assert.h>
-TLItem** TLItem::GetPeerItem(TLItem*** _this)
+#define assert_valid_tuple(tuple) \
+	assert(!((tuple)->left==NULL&&(tuple)->right==NULL)); \
+	assert((tuple)->left!=(tuple)->right);
+TLItemPair* TLItem::GetCouple()
 {
 	if(parent==NULL||parent->subpairs==NULL)
+		return NULL;
+	if(parentidx<0)
+		return NULL;
+	return parent->subpairs->jntitems[parentidx];
+}
+TLItemSplice* TLItemPair::GetSuper()
+{
+	assert_valid_tuple(this);
+	TLItem* item=left!=NULL?left:right;
+	return item->parent==NULL?NULL:item->parent->subpairs;
+}
+TLItem** TLItem::GetPeerItem(TLItem*** _this)
+{
+	TLItemPair* tuple=GetCouple();
+	if(tuple==NULL)
 	{
 		if(_this!=NULL)
 			*_this=NULL;
 		return NULL;
 	}
-	TLItemPair* tuple=&parent->subpairs->jntitems[parentidx];
-	assert(!(tuple->left==NULL&&tuple->right==NULL));
-	assert(tuple->left!=tuple->right);
+	assert_valid_tuple(tuple);
 	assert(tuple->left==this||tuple->right==this);
 	if(tuple->left==this)
 	{
@@ -25,19 +41,6 @@ TLItem** TLItem::GetPeerItem(TLItem*** _this)
 			*_this=&tuple->right;
 		return &tuple->left;
 	}
-}
-void TLItemSplice::clear()
-{
-	if(this==NULL)
-		return;
-	jntitems.clear();
-#define restore_parentidx(pair,domain) if(pair.domain!=NULL)pair.domain->parentidx=-1;
-	for(int i=0;i<(int)map.size();i++)
-	{
-		restore_parentidx(map[i],left);
-		restore_parentidx(map[i],right);
-	}
-	map.clear();
 }
 bool assert_peer_diritem(TLItem* item)
 {
