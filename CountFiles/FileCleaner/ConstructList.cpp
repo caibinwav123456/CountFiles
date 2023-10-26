@@ -106,6 +106,33 @@ bool operator<(const path_value_t& a,const path_value_t& b)
 		&strb=b.pval!=NULL?*b.pval:b.val;
 	return compare_pathname(stra,strb)<0;
 }
+inline void get_node_name(TLItem* node,path_value_t& v,FileListLoader* ctx)
+{
+	file_node_info info;
+	int ret=0;
+	switch(node->type)
+	{
+	case eITypeDir:
+		ret=ctx->GetNodeInfo(node->dirnode,&info);
+		break;
+	case eITypeFile:
+		ret=ctx->GetNodeInfo(node->filenode,&info);
+		break;
+	default:
+		assert(false);
+	}
+	if(ret!=0)
+		throw ret;
+	v.val=info.name;
+}
+inline void get_errnode_name(TLItem* node,path_value_t& v,FileListLoader* ctx)
+{
+	err_node_info info;
+	int ret=ctx->GetNodeErrInfo(node->errnode,&info);
+	if(ret!=0)
+		throw ret;
+	v.val=info.name;
+}
 template<class T>
 struct iterator_base_ctx:public iterator_base<T>
 {
@@ -118,11 +145,7 @@ struct dir_iterator:public iterator_base_ctx<TLItemDir*>
 	path_value_t operator*()
 	{
 		path_value_t v;
-		file_node_info info;
-		int ret=ctx->GetNodeInfo((*it)->dirnode,&info);
-		if(ret!=0)
-			throw ret;
-		v.val=info.name;
+		get_node_name(*it,v,ctx);
 		return v;
 	}
 };
@@ -132,11 +155,7 @@ struct errdir_iterator:public iterator_base_ctx<TLItemErrDir*>
 	path_value_t operator*()
 	{
 		path_value_t v;
-		err_node_info info;
-		int ret=ctx->GetNodeErrInfo((*it)->errnode,&info);
-		if(ret!=0)
-			throw ret;
-		v.val=info.name;
+		get_errnode_name(*it,v,ctx);
 		return v;
 	}
 };
@@ -146,11 +165,7 @@ struct file_iterator:public iterator_base_ctx<TLItemFile*>
 	path_value_t operator*()
 	{
 		path_value_t v;
-		file_node_info info;
-		int ret=ctx->GetNodeInfo((*it)->filenode,&info);
-		if(ret!=0)
-			throw ret;
-		v.val=info.name;
+		get_node_name(*it,v,ctx);
 		return v;
 	}
 };
@@ -160,11 +175,7 @@ struct errfile_iterator:public iterator_base_ctx<TLItemErrFile*>
 	path_value_t operator*()
 	{
 		path_value_t v;
-		err_node_info info;
-		int ret=ctx->GetNodeErrInfo((*it)->errnode,&info);
-		if(ret!=0)
-			throw ret;
-		v.val=info.name;
+		get_errnode_name(*it,v,ctx);
 		return v;
 	}
 };
@@ -180,22 +191,10 @@ struct grp_dir_iterator:public iterator_base_ctx<TLItem*>
 		switch((*it)->type)
 		{
 		case eITypeDir:
-			{
-				file_node_info info;
-				int ret=ctx->GetNodeInfo((*it)->dirnode,&info);
-				if(ret!=0)
-					throw ret;
-				v.val=info.name;
-			}
+			get_node_name(*it,v,ctx);
 			break;
 		case eITypeErrDir:
-			{
-				err_node_info info;
-				int ret=ctx->GetNodeErrInfo((*it)->errnode,&info);
-				if(ret!=0)
-					throw ret;
-				v.val=info.name;
-			}
+			get_errnode_name(*it,v,ctx);
 			break;
 		default:
 			assert(false);
@@ -215,22 +214,10 @@ struct grp_file_iterator:public iterator_base_ctx<TLItem*>
 		switch((*it)->type)
 		{
 		case eITypeFile:
-			{
-				file_node_info info;
-				int ret=ctx->GetNodeInfo((*it)->dirnode,&info);
-				if(ret!=0)
-					throw ret;
-				v.val=info.name;
-			}
+			get_node_name(*it,v,ctx);
 			break;
 		case eITypeErrFile:
-			{
-				err_node_info info;
-				int ret=ctx->GetNodeErrInfo((*it)->errnode,&info);
-				if(ret!=0)
-					throw ret;
-				v.val=info.name;
-			}
+			get_errnode_name(*it,v,ctx);
 			break;
 		default:
 			assert(false);
