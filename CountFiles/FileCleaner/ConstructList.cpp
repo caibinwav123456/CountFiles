@@ -2,7 +2,32 @@
 #include "TreeListCtrl.h"
 #include "utility.h"
 #include <assert.h>
+void TLItemSplice::clear()
+{
+	if(this==NULL)
+		return;
+	jntitems.clear();
+#define restore_parentidx(pair,domain) if(pair.domain!=NULL)pair.domain->parentidx=-1;
+	for(int i=0;i<(int)map.size();i++)
+	{
+		restore_parentidx(map[i],left);
+		restore_parentidx(map[i],right);
+	}
+	map.clear();
+	open_length=0;
+	dir_border=0;
+}
 void TLItemDir::clear()
+{
+	clear_grp();
+	TLItem** peer=GetPeerItem();
+	if(peer!=NULL)
+	{
+		assert(dynamic_cast<TLItemDir*>(*peer)!=NULL);
+		(dynamic_cast<TLItemDir*>(*peer))->clear_grp();
+	}
+}
+void TLItemDir::clear_grp()
 {
 	subitems.clear();
 	for(int i=0;i<(int)subfiles.size();i++)
@@ -143,6 +168,76 @@ struct errfile_iterator:public iterator_base_ctx<TLItemErrFile*>
 		return v;
 	}
 };
+struct grp_dir_iterator:public iterator_base_ctx<TLItem*>
+{
+	grp_dir_iterator(vector<TLItem*>& itemlist,uint border,FileListLoader* loader):iterator_base_ctx<TLItem*>(itemlist,loader)
+	{
+		end=itemlist.begin()+border;
+	}
+	path_value_t operator*()
+	{
+		path_value_t v;
+		switch((*it)->type)
+		{
+		case eITypeDir:
+			{
+				file_node_info info;
+				int ret=ctx->GetNodeInfo((*it)->dirnode,&info);
+				if(ret!=0)
+					throw ret;
+				v.val=info.name;
+			}
+			break;
+		case eITypeErrDir:
+			{
+				err_node_info info;
+				int ret=ctx->GetNodeErrInfo((*it)->errnode,&info);
+				if(ret!=0)
+					throw ret;
+				v.val=info.name;
+			}
+			break;
+		default:
+			assert(false);
+		}
+		return v;
+	}
+};
+struct grp_file_iterator:public iterator_base_ctx<TLItem*>
+{
+	grp_file_iterator(vector<TLItem*>& itemlist,uint border,FileListLoader* loader):iterator_base_ctx<TLItem*>(itemlist,loader)
+	{
+		it=itemlist.begin()+border;
+	}
+	path_value_t operator*()
+	{
+		path_value_t v;
+		switch((*it)->type)
+		{
+		case eITypeFile:
+			{
+				file_node_info info;
+				int ret=ctx->GetNodeInfo((*it)->dirnode,&info);
+				if(ret!=0)
+					throw ret;
+				v.val=info.name;
+			}
+			break;
+		case eITypeErrFile:
+			{
+				err_node_info info;
+				int ret=ctx->GetNodeErrInfo((*it)->errnode,&info);
+				if(ret!=0)
+					throw ret;
+				v.val=info.name;
+			}
+			break;
+		default:
+			assert(false);
+		}
+		return v;
+	}
+};
 static int merge_callback_dir(dir_iterator it1,errdir_iterator it2,E_MERGE_SIDE side,void* param)
 {
 	vector<TLItem*>* plist=(vector<TLItem*>*)param;
@@ -151,12 +246,10 @@ static int merge_callback_dir(dir_iterator it1,errdir_iterator it2,E_MERGE_SIDE 
 	{
 	case eMSLeft:
 		element1=*(it1.it);
-		element1->parentidx=plist->size();
 		plist->push_back(element1);
 		break;
 	case eMSRight:
 		element2=*(it2.it);
-		element2->parentidx=plist->size();
 		plist->push_back(element2);
 		break;
 	default:
@@ -172,12 +265,10 @@ static int merge_callback_file(file_iterator it1,errfile_iterator it2,E_MERGE_SI
 	{
 	case eMSLeft:
 		element1=*(it1.it);
-		element1->parentidx=plist->size();
 		plist->push_back(element1);
 		break;
 	case eMSRight:
 		element2=*(it2.it);
-		element2->parentidx=plist->size();
 		plist->push_back(element2);
 		break;
 	default:
@@ -185,7 +276,120 @@ static int merge_callback_file(file_iterator it1,errfile_iterator it2,E_MERGE_SI
 	}
 	return 0;
 }
+static int merge_callback_grp_dir(grp_dir_iterator it1,grp_dir_iterator it2,E_MERGE_SIDE side,void* param)
+{
+	assert((*it1.it)->type==eITypeDir||(*it1.it)->type==eITypeErrDir);
+	assert((*it2.it)->type==eITypeDir||(*it2.it)->type==eITypeErrDir);
+	TLItemSplice* splice=(TLItemSplice*)param;
+	TLItemPair tuple;
+	switch(side)
+	{
+	case eMSLeft:
+		tuple.left=*it1.it;
+		tuple.right=NULL;
+		break;
+	case eMSRight:
+		tuple.left=NULL;
+		tuple.right=*it2.it;
+		break;
+	case eMSBoth:
+		tuple.left=*it1.it;
+		tuple.right=*it2.it;
+		if((*it1.it)->type==eITypeDir&&(*it2.it)->type==eITypeDir)
+		{
+			TLItemDir *ldir=(TLItemDir*)tuple.left,
+				*rdir=(TLItemDir*)tuple.right;
+			ldir->subpairs=rdir->subpairs=new TLItemSplice;
+		}
+		break;
+	}
+	splice->map.push_back(tuple);
+	splice->jntitems.push_back(&splice->map.back());
+	return 0;
+}
+static int merge_callback_grp_file(grp_file_iterator it1,grp_file_iterator it2,E_MERGE_SIDE side,void* param)
+{
+	assert((*it1.it)->type==eITypeFile||(*it1.it)->type==eITypeErrFile);
+	assert((*it2.it)->type==eITypeFile||(*it2.it)->type==eITypeErrFile);
+	TLItemSplice* splice=(TLItemSplice*)param;
+	TLItemPair tuple;
+	switch(side)
+	{
+	case eMSLeft:
+		tuple.left=*it1.it;
+		tuple.right=NULL;
+		break;
+	case eMSRight:
+		tuple.left=NULL;
+		tuple.right=*it2.it;
+		break;
+	case eMSBoth:
+		tuple.left=*it1.it;
+		tuple.right=*it2.it;
+		break;
+	}
+	splice->map.push_back(tuple);
+	splice->jntitems.push_back(&splice->map.back());
+	return 0;
+}
+int join_list(TLItemDir* llist,TLItemDir* rlist)
+{
+	assert(llist->subpairs!=NULL&&rlist->subpairs!=NULL);
+	assert(llist->subpairs==rlist->subpairs);
+	TLItemSplice* splice=llist->subpairs;
+	try
+	{
+		grp_dir_iterator grpitdir1(llist->subitems,llist->dir_border,&llist->ctx->m_ListLoader);
+		grp_dir_iterator grpitdir2(rlist->subitems,rlist->dir_border,&rlist->ctx->m_ListLoader);
+		merge_ordered_list(grpitdir1,grpitdir2,merge_callback_grp_dir,(void*)splice);
+		splice->dir_border=splice->map.size();
+		grp_file_iterator grpitfile1(llist->subitems,llist->dir_border,&llist->ctx->m_ListLoader);
+		grp_file_iterator grpitfile2(rlist->subitems,rlist->dir_border,&rlist->ctx->m_ListLoader);
+		merge_ordered_list(grpitfile1,grpitfile2,merge_callback_grp_file,(void*)splice);
+		splice->open_length=1+splice->map.size();
+	}
+	catch(int err)
+	{
+		llist->clear();
+		rlist->clear();
+		return err;
+	}
+	return 0;
+}
 int TLItemDir::construct_list()
+{
+	int ret=0;
+	fail_goto(ret,0,construct_list_grp(),fail);
+	TLItem** peer=GetPeerItem();
+	if(peer!=NULL&&*peer!=NULL)
+	{
+		TLItemPair* tuple=GetCouple();
+		TLItemDir* dir=dynamic_cast<TLItemDir*>(*peer);
+		assert(dir!=NULL);
+		fail_goto(ret,0,dir->construct_list_grp(),fail);
+		fail_goto(ret,0,join_list((TLItemDir*)tuple->left,(TLItemDir*)tuple->right),fail);
+		for(int i=0;i<(int)subpairs->jntitems.size();i++)
+		{
+			TLItemPair* couple=subpairs->jntitems[i];
+			if(couple->left!=NULL)
+				couple->left->parentidx=i;
+			if(couple->right!=NULL)
+				couple->right->parentidx=i;
+		}
+	}
+	else
+	{
+		for(int i=0;i<(int)subitems.size();i++)
+		{
+			subitems[i]->parentidx=i;
+		}
+	}
+	return 0;
+fail:
+	clear();
+	return ret;
+}
+int TLItemDir::construct_list_grp()
 {
 	int ret=0;
 	bool construct_all=open_length==0;

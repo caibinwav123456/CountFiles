@@ -33,6 +33,8 @@ COLORREF GetDispColor(E_FOLDER_STATE state);
 struct TLItem;
 struct TLItemDir;
 struct ItStkItem;
+struct TLItemSplice;
+struct TLItemPair;
 struct TLCore;
 struct TLUnit;
 class ListCtrlIterator;
@@ -99,11 +101,15 @@ struct TLItemPair
 	TLItem* right;
 	TLItemPair(){}
 	TLItemPair(TLItem* l,TLItem* r):left(l),right(r){}
+	TLItemSplice* GetSuper();
 };
 struct TLItemSplice
 {
 	vector<TLItemPair> map;
 	vector<TLItemPair*> jntitems;
+	uint open_length;
+	uint dir_border;
+	TLItemSplice():open_length(0),dir_border(0){}
 	void clear();
 };
 struct TLItem
@@ -133,6 +139,7 @@ struct TLItem
 		return 1;
 	}
 	TLItem** GetPeerItem(TLItem*** _this=NULL);
+	TLItemPair* GetCouple();
 	ItStkItem* FromLineNum(int iline,int& lvl);
 	int ToLineNum();
 };
@@ -173,6 +180,9 @@ private:
 	void clear();
 	int construct_list();
 	void update_displen(int diff);
+	void clear_grp();
+	int construct_list_grp();
+	friend int join_list(TLItemDir* llist,TLItemDir* rlist);
 };
 struct ItStkItem
 {
