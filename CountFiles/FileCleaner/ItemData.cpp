@@ -5,7 +5,7 @@ TLItemSplice* TLItem::GetSplice()
 {
 	if(this==NULL)
 		return NULL;
-	return parent==NULL?NULL:parent->subpairs;	
+	return parent==NULL?NULL:parent->subpairs;
 }
 TLItemPair* TLItem::GetCouple()
 {
