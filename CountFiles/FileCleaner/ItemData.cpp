@@ -1,22 +1,26 @@
 #include "pch.h"
 #include "TreeListCtrl.h"
 #include <assert.h>
-#define assert_valid_tuple(tuple) \
-	assert(!((tuple)->left==NULL&&(tuple)->right==NULL)); \
-	assert((tuple)->left!=(tuple)->right);
+TLItemSplice* TLItem::GetSplice()
+{
+	if(this==NULL)
+		return NULL;
+	return parent==NULL?NULL:parent->subpairs;	
+}
 TLItemPair* TLItem::GetCouple()
 {
-	if(parent==NULL||parent->subpairs==NULL)
+	TLItemSplice* splice=GetSplice();
+	if(splice==NULL)
 		return NULL;
 	if(parentidx<0)
 		return NULL;
-	return parent->subpairs->jntitems[parentidx];
+	return splice->jntitems[parentidx];
 }
 TLItemSplice* TLItemPair::GetSuper()
 {
 	assert_valid_tuple(this);
 	TLItem* item=left!=NULL?left:right;
-	return item->parent==NULL?NULL:item->parent->subpairs;
+	return item->GetSplice();
 }
 TLItem** TLItem::GetPeerItem(TLItem*** _this)
 {
@@ -62,9 +66,15 @@ void TLItemDir::Detach()
 		*_this=NULL;
 	subpairs=NULL;
 }
+uint* TLItemDir::ptr_disp_len()
+{
+	TLItemSplice* splice=GetSplice();
+	return splice==NULL?&open_length:&splice->open_length;
+}
 uint TLItemDir::GetDispLength()
 {
-	return isopen?open_length:1;
+	uint* ptrlen=ptr_disp_len();
+	return isopen?*ptrlen:1;
 }
 bool TLItemDir::IsBase()
 {
@@ -74,39 +84,61 @@ void TLItemDir::update_displen(int diff)
 {
 	for(TLItemDir* pp=parent;pp!=NULL;pp=pp->parent)
 	{
-		assert(pp->open_length>0);
-		pp->open_length+=diff;
+		uint* plen=pp->ptr_disp_len();
+		assert(*plen>0);
+		*plen+=diff;
 	}
 }
 int TLItemDir::OpenDir(bool open,bool release)
 {
 	int ret=0;
 	uint oldlen=GetDispLength();
+	TLItem** peer=GetPeerItem();
+	TLItemDir* peerdir=NULL;
+	bool has_peer=false;
+	if(peer!=NULL&&*peer!=NULL&&(*peer)->type==eITypeDir)
+	{
+		peerdir=(TLItemDir*)*peer;
+		assert(peerdir->isopen==isopen);
+		has_peer=true;
+		peerdir->isopen=open;
+	}
 	isopen=open;
+	uint* plen=ptr_disp_len();
 	if(open)
 	{
-		if(open_length>0)
+		if(*plen>0)
 			goto end;
 		fail_goto(ret,0,ctx->m_ListLoader.ExpandNode(dirnode,true,release),fail);
-		fail_op(ret,0,construct_list(),
-		{
-			ctx->m_ListLoader.ExpandNode(dirnode,false,true);
-			goto fail;
-		});
+		if(has_peer)
+			fail_goto(ret,0,peerdir->ctx->m_ListLoader.ExpandNode(peerdir->dirnode,true,release),fail);
+		fail_goto(ret,0,construct_list(),fail);
 		goto end;
 	}
 	else if(release)
 	{
 		clear();
 		ret=ctx->m_ListLoader.ExpandNode(dirnode,false,true);
+		int retc=0;
+		if(has_peer)
+			retc=peerdir->ctx->m_ListLoader.ExpandNode(peerdir->dirnode,false,true);
+		if(ret==0)
+			ret=retc;
 		goto end;
 	}
 	else
+	{
 		fail_goto(ret,0,ctx->m_ListLoader.ExpandNode(dirnode,false),fail);
+		if(has_peer)
+			fail_goto(ret,0,peerdir->ctx->m_ListLoader.ExpandNode(dirnode,false),fail);
+	}
 	goto end;
 fail:
 	isopen=false;
 	clear();
+	ctx->m_ListLoader.ExpandNode(dirnode,false,true);
+	if(has_peer)
+		peerdir->ctx->m_ListLoader.ExpandNode(peerdir->dirnode,false,true);
 end:
 	update_displen(GetDispLength()-oldlen);
 	return ret;

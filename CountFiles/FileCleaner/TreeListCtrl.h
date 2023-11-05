@@ -95,6 +95,9 @@ private:
 	TreeListCtrl* m_pOwner;
 	bool m_bCancelRgn;
 };
+#define assert_valid_tuple(tuple) \
+	assert(!((tuple)->left==NULL&&(tuple)->right==NULL)); \
+	assert((tuple)->left!=(tuple)->right);
 struct TLItemPair
 {
 	TLItem* left;
@@ -139,9 +142,11 @@ struct TLItem
 		return 1;
 	}
 	TLItem** GetPeerItem(TLItem*** _this=NULL);
+	TLItemSplice* GetSplice();
 	TLItemPair* GetCouple();
 	ItStkItem* FromLineNum(int iline,int& lvl);
 	int ToLineNum();
+	void update_state();
 };
 struct TLItemFile:public TLItem
 {
@@ -183,6 +188,7 @@ private:
 	void clear_grp();
 	int construct_list_grp();
 	friend int join_list(TLItemDir* llist,TLItemDir* rlist);
+	uint* ptr_disp_len();
 };
 struct ItStkItem
 {

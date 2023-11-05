@@ -358,10 +358,15 @@ int TLItemDir::construct_list()
 		for(int i=0;i<(int)subpairs->jntitems.size();i++)
 		{
 			TLItemPair* couple=subpairs->jntitems[i];
+			assert_valid_tuple(couple);
 			if(couple->left!=NULL)
 				couple->left->parentidx=i;
 			if(couple->right!=NULL)
 				couple->right->parentidx=i;
+			if (couple->left != NULL)
+				couple->left->update_state();
+			else
+				couple->right->update_state();
 		}
 	}
 	else
@@ -369,6 +374,7 @@ int TLItemDir::construct_list()
 		for(int i=0;i<(int)subitems.size();i++)
 		{
 			subitems[i]->parentidx=i;
+			subitems[i]->update_state();
 		}
 	}
 	return 0;

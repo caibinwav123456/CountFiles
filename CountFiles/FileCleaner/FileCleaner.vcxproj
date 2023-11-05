@@ -221,6 +221,7 @@
     <ClCompile Include="BaseCombo.cpp" />
     <ClCompile Include="HeadBar.cpp" />
     <ClCompile Include="ContainerWnd.cpp" />
+    <ClCompile Include="ItemState.cpp" />
     <ClCompile Include="MainView.cpp" />
     <ClCompile Include="ConstructList.cpp" />
     <ClCompile Include="DlgLoad.cpp" />
