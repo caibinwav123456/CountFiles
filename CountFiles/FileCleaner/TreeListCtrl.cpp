@@ -318,7 +318,7 @@ void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,TLItem*
 		bool last=(sitem==sitem->parent->subitems.back());
 		if(level==iter.lvl)
 		{
-			int xposend=LINE_INDENT*(level-1)+CONN_END;
+			int xposend=xbase+LINE_INDENT*(level-1)+CONN_END;
 			drawer.DrawLine(&CPoint(xpos,ypos),&CPoint(xposend,ypos),CONN_COLOR,1,PS_DOT);
 		}
 		if(!last)

@@ -614,7 +614,10 @@ bool ItemSelector::ClearAndDragSel(ItStkItem* item,int iline)
 	else if(m_iDragStart>=0)
 	{
 		int pos=m_iDragStart;
-		SetSel(item,pos);
+		ListCtrlIterator it=m_pOwner->GetListIter(pos);
+		if(it.m_pStkItem==NULL)
+			return false;
+		SetSel(it.m_pStkItem,pos);
 		DragSelTo(iline);
 		return true;
 	}
