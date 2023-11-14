@@ -84,7 +84,7 @@ void TreeListCtrl::Exit()
 int TLUnit::InitialExpand()
 {
 	TLCore* pBase=GetPrimaryBase();
-	assert(pBase!=NULL);
+	assert(pBase!=NULL&&pBase->m_pBaseItem!=NULL);
 	return pBase->m_pBaseItem->OpenDir(true,false);
 }
 TLCore* TLUnit::GetPrimaryBase(int* side)
@@ -240,8 +240,8 @@ ListCtrlIterator TreeListCtrl::GetDrawIter(POINT* pt)
 ListCtrlIterator TreeListCtrl::GetListIter(int iline)
 {
 	int side;
-	TLItemDir* pBase=m_TlU.GetPrimaryBase(&side)->m_pBaseItem;
-	return ListCtrlIterator(pBase,iline,side,this);
+	TLCore* pCore=m_TlU.GetPrimaryBase(&side);
+	return ListCtrlIterator(pCore==NULL?NULL:pCore->m_pBaseItem,iline,side,this);
 }
 int TreeListCtrl::LineNumFromPt(POINT* pt)
 {
@@ -355,7 +355,7 @@ void TreeListCtrl::DrawLineGrp(CDrawer& drawer,const ListCtrlIterator& iter,TLCo
 				exp=(BOOL)dir->isopen;
 			}
 			DrawFolder(&drawer,&pos,item->state,exp);
-			pos.x+=LINE_HEIGHT;
+			pos.x+=LINE_INDENT;
 		}
 		break;
 	case eITypeFile:

@@ -74,8 +74,9 @@ void TLItem::update_state()
 		if(ppp==NULL||*ppp==NULL)
 		{
 			//already solo
-			//map_attrib(pp->state,pattr);
-			//merge_attrib(pattr,attr);
+			map_attrib(pp->state,pattr);
+			merge_attrib(pattr,attr);
+			pp->state=make_state(pattr);
 		}
 		else
 		{
