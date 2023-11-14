@@ -292,29 +292,22 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,int iline,TLItem* pItem)
 	if(pItem!=NULL&&m_TlU.m_ItemSel.IsFocus(iline))
 		drawer.DrawRect(&rcline,RGB(0,0,0),1,PS_DOT);
 }
-void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,TLItem* item,int side,int xbase,ConnBuffer& conbuf)
+void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,int side,int xbase)
 {
 	if(iter.m_pStkItem==NULL)
 		return;
-	vector<int>& buf=side<=0?conbuf.xleft:conbuf.xright;
 	ItStkItem* pstk=iter.m_pStkItem;
 	int level=iter.lvl;
 	int ystart=iter.m_iline*LINE_HEIGHT;
 	int yend=ystart+LINE_HEIGHT;
 	int ypos=ystart+CONN_Y;
-	if(item==NULL)
-	{
-		for(int i=0;i<(int)buf.size();i++)
-			drawer.DrawLine(&CPoint(buf[i],ystart),&CPoint(buf[i],yend),CONN_COLOR,1,PS_DOT);
-		return;
-	}
-	buf.clear();
 	for(;pstk->next!=NULL;pstk=pstk->next,level--)
 	{
 		assert(level>0);
 		int xpos=xbase+LINE_INDENT*(level-1)+CONN_START;
 		TLItem* sitem=pstk->get_item(side);
-		assert(sitem!=NULL);
+		if(sitem==NULL)
+			continue;
 		bool last=(sitem==sitem->parent->subitems.back());
 		if(level==iter.lvl)
 		{
@@ -322,21 +315,18 @@ void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,TLItem*
 			drawer.DrawLine(&CPoint(xpos,ypos),&CPoint(xposend,ypos),CONN_COLOR,1,PS_DOT);
 		}
 		if(!last)
-		{
 			drawer.DrawLine(&CPoint(xpos,ystart),&CPoint(xpos,yend),CONN_COLOR,1,PS_DOT);
-			buf.push_back(xpos);
-		}
 		else if(level==iter.lvl)
 			drawer.DrawLine(&CPoint(xpos,ystart),&CPoint(xpos,ypos),CONN_COLOR,1,PS_DOT);
 	}
 }
-void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter,ConnBuffer& conbuf)
+void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 {
 	DrawLine(drawer,iter.m_iline,iter.m_pStkItem==NULL?NULL:iter.m_pStkItem->m_pItem);
-	DrawLineGrp(drawer,iter,m_TlU.m_treeLeft,conbuf);
-	DrawLineGrp(drawer,iter,m_TlU.m_treeRight,conbuf);
+	DrawLineGrp(drawer,iter,m_TlU.m_treeLeft);
+	DrawLineGrp(drawer,iter,m_TlU.m_treeRight);
 }
-void TreeListCtrl::DrawLineGrp(CDrawer& drawer,const ListCtrlIterator& iter,TLCore& tltree,ConnBuffer& conbuf)
+void TreeListCtrl::DrawLineGrp(CDrawer& drawer,const ListCtrlIterator& iter,TLCore& tltree)
 {
 	TreeListTabGrid& tab=*tltree.m_pTab;
 	assert(tab.mask&TLTAB_NAME);
@@ -344,7 +334,7 @@ void TreeListCtrl::DrawLineGrp(CDrawer& drawer,const ListCtrlIterator& iter,TLCo
 	int side=(&tltree==&tltree.m_pTlUnit->m_treeLeft?-1:1);
 	TLItem* item=iter.m_pStkItem->get_item(side);
 	drawer.SetClipRect(&CRect(pos,CPoint(tab.arrTab[0].rect.right,pos.y+LINE_HEIGHT)));
-	DrawConn(drawer,iter,item,side,tab.rcTotal.left,conbuf);
+	DrawConn(drawer,iter,side,tab.rcTotal.left);
 	if(item==NULL)
 	{
 		drawer.SetClipRect(NULL);
@@ -435,10 +425,9 @@ void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 {
 	CDCDraw canvas(m_pWnd,pClientDC,buffered);
 	CDrawer drawer(&canvas);
-	ConnBuffer conbuf;
 	for(ListCtrlIterator it=GetDrawIter();it;it++)
 	{
-		DrawLine(drawer,it,conbuf);
+		DrawLine(drawer,it);
 	}
 
 	//Draw separator
