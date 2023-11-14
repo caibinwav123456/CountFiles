@@ -140,7 +140,7 @@ int TLUnit::Load(UINT mask,const char* lfile,const char* efile,
 	const char* lfileref,const char* efileref)
 {
 	UnLoad();
-	if(lfile==NULL||*lfile==0)
+	if((lfile==NULL||*lfile==0)&&(lfileref==NULL||*lfileref==0))
 		return 0;
 	int ret=0;
 	bool loadleft=(mask&FILE_LIST_ATTRIB_MAIN),
