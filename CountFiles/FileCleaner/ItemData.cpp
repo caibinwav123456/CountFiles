@@ -186,29 +186,39 @@ static inline void free_item_stack(ItStkItem* stk)
 }
 static inline void set_item_stack(ItStkItem* stk,TLItemDir* dir,uint idx,int side)
 {
-	if(dir->subpairs!=NULL)
-	{
-		stk->m_pJItem=dir->subpairs->jntitems[idx];
-		if(stk->m_pJItem->left==NULL)
-		{
-			stk->m_pItem=stk->m_pJItem->right;
-			stk->side=1;
-		}
-		else if(stk->m_pJItem->right==NULL)
-		{
-			stk->m_pItem=stk->m_pJItem->left;
-			stk->side=-1;
-		}
-		else
-		{
-			stk->m_pItem=(side<=0?stk->m_pJItem->left:stk->m_pJItem->right);
-			stk->side=side;
-		}
-	}
-	else
+	if(dir->subpairs==NULL)
 	{
 		stk->m_pJItem=NULL;
 		stk->m_pItem=dir->subitems[idx];
+		stk->side=side;
+		return;
+	}
+	stk->m_pJItem=dir->subpairs->jntitems[idx];
+	if(stk->m_pJItem->left==NULL)
+	{
+		stk->m_pItem=stk->m_pJItem->right;
+		stk->side=1;
+	}
+	else if(stk->m_pJItem->right==NULL)
+	{
+		stk->m_pItem=stk->m_pJItem->left;
+		stk->side=-1;
+	}
+	else if(stk->m_pJItem->left->type==eITypeDir
+		&&stk->m_pJItem->right->type!=eITypeDir)
+	{
+		stk->m_pItem=stk->m_pJItem->left;
+		stk->side=-1;
+	}
+	else if(stk->m_pJItem->left->type!=eITypeDir
+		&&stk->m_pJItem->right->type==eITypeDir)
+	{
+		stk->m_pItem=stk->m_pJItem->right;
+		stk->side=1;
+	}
+	else
+	{
+		stk->m_pItem=(side<=0?stk->m_pJItem->left:stk->m_pJItem->right);
 		stk->side=side;
 	}
 }
@@ -367,7 +377,7 @@ void ListCtrlIterator::operator--(int)
 	if(m_pStkItem->parentidx>0)
 	{
 		m_pStkItem->parentidx--;
-		set_item_stack(m_pStkItem,m_pStkItem->m_pItem->parent,m_pStkItem->parentidx,0);
+		set_item_stack(m_pStkItem,m_pStkItem->m_pItem->parent,m_pStkItem->parentidx,side);
 		side=m_pStkItem->side;
 		goto second_phase;
 	}

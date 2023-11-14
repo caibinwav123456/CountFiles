@@ -290,7 +290,7 @@ public:
 
 	int Load(UINT mask,const char* lfile,const char* efile,
 		const char* lfileref,const char* efileref);
-	void UnLoad();
+	void UnLoad(bool bAll=false);
 
 	void GetCanvasRect(RECT* rc);
 	void SetTabInfo(const TabInfo* tab);
