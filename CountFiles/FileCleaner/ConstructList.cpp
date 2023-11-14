@@ -418,6 +418,8 @@ int TLItemDir::construct_list()
 		for(int i=0;i<(int)subitems.size();i++)
 		{
 			subitems[i]->parentidx=i;
+			if(subitems[i]->type==eITypeDir||subitems[i]->type==eITypeFile)
+				subitems[i]->state=eFSSolo;
 			subitems[i]->update_state();
 		}
 	}
@@ -471,10 +473,12 @@ int TLItemDir::construct_list_grp()
 		for(int i=0;i<(int)subdirs.size();i++)
 		{
 			subdirs[i]->parentidx=-1;
+			subdirs[i]->state=eFSEqual;
 		}
 		for(int i=0;i<(int)subfiles.size();i++)
 		{
 			subfiles[i]->parentidx=-1;
+			subfiles[i]->state=eFSEqual;
 		}
 		for(int i=0;i<(int)errdirs.size();i++)
 		{
