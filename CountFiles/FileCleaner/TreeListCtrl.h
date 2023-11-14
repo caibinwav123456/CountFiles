@@ -39,6 +39,18 @@ struct TLCore;
 struct TLUnit;
 class ListCtrlIterator;
 class TreeListCtrl;
+struct ItStkItem
+{
+	TLItem* m_pItem;
+	TLItemPair* m_pJItem;
+	int side;
+	int parentidx;
+	ItStkItem* next;
+	ItStkItem(TLItem* pItem,TLItemPair* pJItem=NULL)
+		:m_pItem(pItem),m_pJItem(pJItem),side(0)
+		,parentidx(-1),next(NULL){}
+	TLItem* get_item(int _side);
+};
 struct SortedSelItemNode
 {
 	TLItem* pItem;
@@ -58,12 +70,23 @@ public:
 	struct SelItem
 	{
 		TLItem* item;
+		TLItemPair* pair;
+		int side;
 		int iline;
-		SelItem(TLItem* p=NULL,int i=-1):item(p),iline(i){}
+		SelItem(TLItem* item=NULL,TLItemPair* p=NULL,int i=-1,int s=0):pair(p),side(s),iline(i){}
+		SelItem(ItStkItem* stk,int i=-1)
+		{
+			item=stk->m_pItem;
+			pair=stk->m_pJItem;
+			side=stk->side;
+			iline=i;
+		}
 		void clear()
 		{
 			item=NULL;
+			pair=NULL;
 			iline=-1;
+			side=0;
 		}
 		bool operator<(const SelItem& other) const
 		{
@@ -76,14 +99,14 @@ public:
 	bool IsFocus(int iline);
 	bool IsSelected(TLItem* item,int iline);
 	bool InDragRegion(int iline,bool* cancel=NULL);
-	void SetSel(TLItem* item,int iline);
-	void AddSel(TLItem* item,int iline);
-	void CancelSel(TLItem* item,int iline);
-	void ToggleSel(TLItem* item,int iline);
+	void SetSel(ItStkItem* item,int iline);
+	void AddSel(ItStkItem* item,int iline);
+	void CancelSel(ItStkItem* item,int iline);
+	void ToggleSel(ItStkItem* item,int iline);
 	bool BeginDragSel(int iline,bool cancel);
 	bool DragSelTo(int iline);
 	bool CompoundSel(int iline);
-	bool ClearAndDragSel(TLItem* item,int iline);
+	bool ClearAndDragSel(ItStkItem* item,int iline);
 	void EndDragSel();
 	void SortSelection(SortedSelItemNode& tree);
 	bool valid(int iline);
@@ -144,7 +167,6 @@ struct TLItem
 	TLItem** GetPeerItem(TLItem*** _this=NULL);
 	TLItemSplice* GetSplice();
 	TLItemPair* GetCouple();
-	ItStkItem* FromLineNum(int iline,int& lvl);
 	int ToLineNum();
 	void update_state();
 };
@@ -181,6 +203,8 @@ struct TLItemDir:public TLItem
 	bool IsBase();
 	virtual void Release();
 	virtual uint GetDispLength();
+	ItStkItem* FromLineNum(int iline,int& lvl,int side=0);
+	size_t size() const;
 private:
 	void clear();
 	int construct_list();
@@ -189,16 +213,6 @@ private:
 	int construct_list_grp();
 	friend int join_list(TLItemDir* llist,TLItemDir* rlist);
 	uint* ptr_disp_len();
-};
-struct ItStkItem
-{
-	TLItem* m_pItem;
-	TLItemPair* m_pJItem;
-	int parentidx;
-	ItStkItem* next;
-	ItStkItem(TLItem* pItem,TLItemPair* pJItem=NULL)
-		:m_pItem(pItem),m_pJItem(pJItem)
-		,parentidx(-1),next(NULL){}
 };
 struct TLCore
 {
@@ -229,15 +243,15 @@ struct TLUnit
 		const char* lfileref,const char* efileref);
 	void UnLoad();
 	int LoadCore(TLCore& core,const char* lfile,const char* efile);
-	int UnLoadCore(TLCore& core);
+	void UnLoadCore(TLCore& core);
 	int InitialExpand();
 	bool IsCompareMode(){return m_pItemJoint!=NULL;}
-	TLCore* GetPrimaryBase();
+	TLCore* GetPrimaryBase(int* side=NULL);
 };
 class ListCtrlIterator
 {
 public:
-	ListCtrlIterator(TLItem* root,int iline,TreeListCtrl* pList=NULL);
+	ListCtrlIterator(TLItemDir* root,int iline,int side,TreeListCtrl* pList=NULL);
 	ListCtrlIterator(ListCtrlIterator& other);
 	~ListCtrlIterator();
 	operator bool();
@@ -255,6 +269,11 @@ public:
 private:
 	TreeListCtrl* m_pList;
 	bool end;
+};
+struct ConnBuffer
+{
+	vector<int> xleft;
+	vector<int> xright;
 };
 class TreeListCtrl
 {
@@ -326,8 +345,9 @@ protected:
 	int LineNumFromPt(POINT* pt);
 	bool EndOfDraw(int iline);
 	void DrawLine(CDrawer& drawer,int iline,TLItem* pItem=NULL);
-	void DrawConn(CDrawer& drawer,const ListCtrlIterator& iter);
-	void DrawLine(CDrawer& drawer,const ListCtrlIterator& iter);
+	void DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,TLItem* item,int side,int xbase,ConnBuffer& conbuf);
+	void DrawLine(CDrawer& drawer,const ListCtrlIterator& iter,ConnBuffer& conbuf);
+	void DrawLineGrp(CDrawer& drawer,const ListCtrlIterator& iter,TLCore& tltree,ConnBuffer& conbuf);
 	void UpdateListStat();
 };
 #endif

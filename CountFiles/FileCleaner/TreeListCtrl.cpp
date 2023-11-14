@@ -87,16 +87,31 @@ int TLUnit::InitialExpand()
 	assert(pBase!=NULL);
 	return pBase->m_pBaseItem->OpenDir(true,false);
 }
-TLCore* TLUnit::GetPrimaryBase()
+TLCore* TLUnit::GetPrimaryBase(int* side)
 {
+	int dummy;
+	if(side==NULL)
+		side=&dummy;
 	if(m_pItemJoint!=NULL)
+	{
+		*side=0;
 		return &m_treeLeft;
+	}
 	else if(m_treeLeft.m_pBaseItem!=NULL)
+	{
+		*side=-1;
 		return &m_treeLeft;
+	}
 	else if(m_treeRight.m_pBaseItem!=NULL)
+	{
+		*side=1;
 		return &m_treeRight;
+	}
 	else
+	{
+		*side=0;
 		return NULL;
+	}
 }
 int TLUnit::LoadCore(TLCore& core,const char* lfile,const char* efile)
 {
@@ -108,7 +123,7 @@ int TLUnit::LoadCore(TLCore& core,const char* lfile,const char* efile)
 	pRoot->dirnode=core.m_ListLoader.GetRootNode();
 	return 0;
 }
-int TLUnit::UnLoadCore(TLCore& core)
+void TLUnit::UnLoadCore(TLCore& core)
 {
 	if(core.m_pBaseItem!=NULL)
 		core.m_pBaseItem->parent=core.m_pBaseParent;
@@ -224,7 +239,9 @@ ListCtrlIterator TreeListCtrl::GetDrawIter(POINT* pt)
 }
 ListCtrlIterator TreeListCtrl::GetListIter(int iline)
 {
-	return ListCtrlIterator(m_pRootItem,iline,this);
+	int side;
+	TLItemDir* pBase=m_TlU.GetPrimaryBase(&side)->m_pBaseItem;
+	return ListCtrlIterator(pBase,iline,side,this);
 }
 int TreeListCtrl::LineNumFromPt(POINT* pt)
 {
@@ -264,40 +281,65 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,int iline,TLItem* pItem)
 	if(pItem!=NULL&&m_TlU.m_ItemSel.IsFocus(iline))
 		drawer.DrawRect(&rcline,RGB(0,0,0),1,PS_DOT);
 }
-void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter)
+void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,TLItem* item,int side,int xbase,ConnBuffer& conbuf)
 {
 	if(iter.m_pStkItem==NULL)
 		return;
+	vector<int>& buf=side<=0?conbuf.xleft:conbuf.xright;
 	ItStkItem* pstk=iter.m_pStkItem;
 	int level=iter.lvl;
 	int ystart=iter.m_iline*LINE_HEIGHT;
 	int yend=ystart+LINE_HEIGHT;
 	int ypos=ystart+CONN_Y;
+	if(item==NULL)
+	{
+		for(int i=0;i<(int)buf.size();i++)
+			drawer.DrawLine(&CPoint(buf[i],ystart),&CPoint(buf[i],yend),CONN_COLOR,1,PS_DOT);
+		return;
+	}
+	buf.clear();
 	for(;pstk->next!=NULL;pstk=pstk->next,level--)
 	{
 		assert(level>0);
-		int xpos=LINE_INDENT*(level-1)+CONN_START;
-		bool last=pstk->parentidx==(int)pstk->m_pItem->parent->subitems.size()-1;
+		int xpos=xbase+LINE_INDENT*(level-1)+CONN_START;
+		TLItem* sitem=pstk->get_item(side);
+		assert(sitem!=NULL);
+		bool last=(sitem==sitem->parent->subitems.back());
 		if(level==iter.lvl)
 		{
 			int xposend=LINE_INDENT*(level-1)+CONN_END;
 			drawer.DrawLine(&CPoint(xpos,ypos),&CPoint(xposend,ypos),CONN_COLOR,1,PS_DOT);
 		}
 		if(!last)
+		{
 			drawer.DrawLine(&CPoint(xpos,ystart),&CPoint(xpos,yend),CONN_COLOR,1,PS_DOT);
+			buf.push_back(xpos);
+		}
 		else if(level==iter.lvl)
 			drawer.DrawLine(&CPoint(xpos,ystart),&CPoint(xpos,ypos),CONN_COLOR,1,PS_DOT);
 	}
 }
-void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
+void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter,ConnBuffer& conbuf)
 {
-	assert(m_Tab.mask&TLTAB_NAME);
 	DrawLine(drawer,iter.m_iline,iter.m_pStkItem==NULL?NULL:iter.m_pStkItem->m_pItem);
-	CPoint pos(m_Tab.rcTotal.left,LINE_HEIGHT*iter.m_iline);
-	drawer.SetClipRect(&CRect(pos,CPoint(m_Tab.arrTab[0].rect.right,pos.y+LINE_HEIGHT)));
-	DrawConn(drawer,iter);
+	DrawLineGrp(drawer,iter,m_TlU.m_treeLeft,conbuf);
+	DrawLineGrp(drawer,iter,m_TlU.m_treeRight,conbuf);
+}
+void TreeListCtrl::DrawLineGrp(CDrawer& drawer,const ListCtrlIterator& iter,TLCore& tltree,ConnBuffer& conbuf)
+{
+	TreeListTabGrid& tab=*tltree.m_pTab;
+	assert(tab.mask&TLTAB_NAME);
+	CPoint pos(tab.rcTotal.left,LINE_HEIGHT*iter.m_iline);
+	int side=(&tltree==&tltree.m_pTlUnit->m_treeLeft?-1:1);
+	TLItem* item=iter.m_pStkItem->get_item(side);
+	drawer.SetClipRect(&CRect(pos,CPoint(tab.arrTab[0].rect.right,pos.y+LINE_HEIGHT)));
+	DrawConn(drawer,iter,item,side,tab.rcTotal.left,conbuf);
+	if(item==NULL)
+	{
+		drawer.SetClipRect(NULL);
+		return;
+	}
 	pos.x+=LINE_INDENT*iter.lvl;
-	TLItem* item=iter.m_pStkItem->m_pItem;
 	COLORREF clr=GetDispColor(item->state);
 	switch(item->type)
 	{
@@ -335,29 +377,29 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 			string date,time;
 			int tabidx=0;
 			if(item->type==eITypeDir)
-				m_ListLoader.GetNodeInfo(item->dirnode,&info);
+				tltree.m_ListLoader.GetNodeInfo(item->dirnode,&info);
 			else
-				m_ListLoader.GetNodeInfo(item->filenode,&info);
+				tltree.m_ListLoader.GetNodeInfo(item->filenode,&info);
 			info.mod_time.Format(date,FORMAT_DATE|FORMAT_WEEKDAY);
 			info.mod_time.Format(time,FORMAT_TIME);
-			drawer.DrawText(&CRect(pos,CPoint(m_Tab.arrTab[tabidx++].rect.right,pos.y+LINE_HEIGHT)),
+			drawer.DrawText(&CRect(pos,CPoint(tab.arrTab[tabidx++].rect.right,pos.y+LINE_HEIGHT)),
 				DT_ALIGN_LEFT,a2t(info.name),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-			if(m_Tab.mask&TLTAB_SIZE)
+			if(tab.mask&TLTAB_SIZE)
 			{
-				drawer.DrawText(&CRect(m_Tab.arrTab[tabidx].rect.left,pos.y,
-					m_Tab.arrTab[tabidx].rect.right-TABMARGIN_SIZE,pos.y+LINE_HEIGHT),DT_ALIGN_RIGHT,
+				drawer.DrawText(&CRect(tab.arrTab[tabidx].rect.left,pos.y,
+					tab.arrTab[tabidx].rect.right-TABMARGIN_SIZE,pos.y+LINE_HEIGHT),DT_ALIGN_RIGHT,
 					a2t(format_segmented_u64(info.size)),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 				tabidx++;
 			}
-			if(m_Tab.mask&TLTAB_MODIFY)
+			if(tab.mask&TLTAB_MODIFY)
 			{
-				int length=min(m_Tab.arrTab[tabidx].rect.left+MODIFY_DATE_PART_WIDTH,
-					m_Tab.arrTab[tabidx].rect.right);
-				drawer.DrawText(&CRect(m_Tab.arrTab[tabidx].rect.left,pos.y,
+				int length=min(tab.arrTab[tabidx].rect.left+MODIFY_DATE_PART_WIDTH,
+					tab.arrTab[tabidx].rect.right);
+				drawer.DrawText(&CRect(tab.arrTab[tabidx].rect.left,pos.y,
 					length,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
 					a2t(date),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-				drawer.DrawText(&CRect(m_Tab.arrTab[tabidx].rect.left+MODIFY_DATE_PART_WIDTH,pos.y,
-					m_Tab.arrTab[tabidx].rect.right,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
+				drawer.DrawText(&CRect(tab.arrTab[tabidx].rect.left+MODIFY_DATE_PART_WIDTH,pos.y,
+					tab.arrTab[tabidx].rect.right,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
 					a2t(time),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 				tabidx++;
 			}
@@ -368,11 +410,11 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 		{
 			err_node_info info;
 			int tabidx=0;
-			m_ListLoader.GetNodeErrInfo(item->errnode,&info);
-			drawer.DrawText(&CRect(pos,CPoint(m_Tab.arrTab[tabidx].rect.right,pos.y+LINE_HEIGHT)),
+			tltree.m_ListLoader.GetNodeErrInfo(item->errnode,&info);
+			drawer.DrawText(&CRect(pos,CPoint(tab.arrTab[tabidx].rect.right,pos.y+LINE_HEIGHT)),
 				DT_ALIGN_LEFT,a2t(info.name),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
-			drawer.DrawText(&CRect(m_Tab.arrTab[tabidx].rect.right,pos.y,
-				m_Tab.rcTotal.right,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
+			drawer.DrawText(&CRect(tab.arrTab[tabidx].rect.right,pos.y,
+				tab.rcTotal.right,pos.y+LINE_HEIGHT),DT_ALIGN_LEFT,
 				a2t(info.err_desc),TEXT_HEIGHT,clr,TRANSPARENT,VIEW_FONT);
 		}
 		break;
@@ -382,9 +424,10 @@ void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 {
 	CDCDraw canvas(m_pWnd,pClientDC,buffered);
 	CDrawer drawer(&canvas);
+	ConnBuffer conbuf;
 	for(ListCtrlIterator it=GetDrawIter();it;it++)
 	{
-		DrawLine(drawer,it);
+		DrawLine(drawer,it,conbuf);
 	}
 
 	//Draw separator
@@ -401,7 +444,7 @@ void TreeListCtrl::UpdateListStat()
 {
 	TLCore* pBase=m_TlU.GetPrimaryBase();
 	m_TlU.m_nTotalLine=(pBase==NULL||pBase->m_pBaseItem==NULL?
-		0:(pBase->m_pRootItem->GetDispLength()-1));
+		0:(pBase->m_pBaseItem->GetDispLength()-1));
 	SetScrollSizes(CSize(-1,m_TlU.m_nTotalLine*LINE_HEIGHT));
 }
 void TreeListCtrl::OnLBDown(const CPoint& pt,UINT nFlags)
@@ -414,22 +457,21 @@ void TreeListCtrl::OnLBDown(const CPoint& pt,UINT nFlags)
 		ListCtrlIterator it=GetListIter(iline);
 		if(it.m_pStkItem==NULL)
 			goto end;
-		TLItem* pItem=it.m_pStkItem->m_pItem;
 		if((nFlags&MK_CONTROL)&&(nFlags&MK_SHIFT))
 		{
 			m_TlU.m_ItemSel.CompoundSel(iline);
 		}
 		else if(nFlags&MK_CONTROL)
 		{
-			m_TlU.m_ItemSel.ToggleSel(pItem,iline);
+			m_TlU.m_ItemSel.ToggleSel(it.m_pStkItem,iline);
 		}
 		else if(nFlags&MK_SHIFT)
 		{
-			m_TlU.m_ItemSel.ClearAndDragSel(pItem,iline);
+			m_TlU.m_ItemSel.ClearAndDragSel(it.m_pStkItem,iline);
 		}
 		else
 		{
-			m_TlU.m_ItemSel.SetSel(pItem,iline);
+			m_TlU.m_ItemSel.SetSel(it.m_pStkItem,iline);
 		}
 		m_iCurLine=iline;
 	}
@@ -458,7 +500,7 @@ void TreeListCtrl::OnLBDblClick(const CPoint& pt,UINT nFlags)
 			m_TlU.m_ItemSel.SetSel(NULL,-1);
 			TLItemDir* dir=dynamic_cast<TLItemDir*>(pItem);
 			dir->OpenDir(!dir->isopen,false);
-			m_TlU.m_ItemSel.SetSel(pItem,iline);
+			m_TlU.m_ItemSel.SetSel(it.m_pStkItem,iline);
 			UpdateListStat();
 		}
 	}

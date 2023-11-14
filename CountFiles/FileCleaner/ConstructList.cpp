@@ -21,7 +21,7 @@ void TLItemDir::clear()
 {
 	clear_grp();
 	TLItem** peer=GetPeerItem();
-	if(peer!=NULL)
+	if(peer!=NULL&&*peer!=NULL)
 	{
 		assert(dynamic_cast<TLItemDir*>(*peer)!=NULL);
 		(dynamic_cast<TLItemDir*>(*peer))->clear_grp();
@@ -269,21 +269,44 @@ static int merge_callback_grp_dir(grp_dir_iterator it1,grp_dir_iterator it2,E_ME
 	assert((*it2.it)->type==eITypeDir||(*it2.it)->type==eITypeErrDir);
 	TLItemSplice* splice=(TLItemSplice*)param;
 	TLItemPair tuple;
+	int ret=0;
 	switch(side)
 	{
 	case eMSLeft:
 		tuple.left=*it1.it;
+		if(tuple.left->type==eITypeDir)
+			tuple.left->state=eFSSolo;
 		tuple.right=NULL;
 		break;
 	case eMSRight:
 		tuple.left=NULL;
 		tuple.right=*it2.it;
+		if(tuple.right->type==eITypeDir)
+			tuple.right->state=eFSSolo;
 		break;
 	case eMSBoth:
 		tuple.left=*it1.it;
 		tuple.right=*it2.it;
-		if((*it1.it)->type==eITypeDir&&(*it2.it)->type==eITypeDir)
+		if(tuple.left->type==eITypeDir&&tuple.right->type==eITypeDir)
 		{
+			file_node_info info1,info2;
+			fail_op(ret,0,it1.ctx->GetNodeInfo(tuple.left->dirnode,&info1),throw ret);
+			fail_op(ret,0,it2.ctx->GetNodeInfo(tuple.right->dirnode,&info2),throw ret);
+			if(info1.size==UInteger64(0)&&info2.size!=UInteger64(0))
+				tuple.right->state=eFSSolo;
+			else if(info1.size!=UInteger64(0)&&info2.size==UInteger64(0))
+				tuple.left->state=eFSSolo;
+			else if(info1.mod_time<info2.mod_time)
+			{
+				tuple.left->state=eFSOld;
+				tuple.right->state=eFSNew;
+			}
+			else if(info1.mod_time>info2.mod_time)
+			{
+				tuple.left->state=eFSNew;
+				tuple.right->state=eFSOld;
+			}
+
 			TLItemDir *ldir=(TLItemDir*)tuple.left,
 				*rdir=(TLItemDir*)tuple.right;
 			ldir->subpairs=rdir->subpairs=new TLItemSplice;
@@ -300,19 +323,40 @@ static int merge_callback_grp_file(grp_file_iterator it1,grp_file_iterator it2,E
 	assert((*it2.it)->type==eITypeFile||(*it2.it)->type==eITypeErrFile);
 	TLItemSplice* splice=(TLItemSplice*)param;
 	TLItemPair tuple;
+	int ret=0;
 	switch(side)
 	{
 	case eMSLeft:
 		tuple.left=*it1.it;
+		if(tuple.left->type==eITypeFile)
+			tuple.left->state=eFSSolo;
 		tuple.right=NULL;
 		break;
 	case eMSRight:
 		tuple.left=NULL;
 		tuple.right=*it2.it;
+		if(tuple.right->type==eITypeFile)
+			tuple.right->state=eFSSolo;
 		break;
 	case eMSBoth:
 		tuple.left=*it1.it;
 		tuple.right=*it2.it;
+		if(tuple.left->type==eITypeFile&&tuple.right->type==eITypeFile)
+		{
+			file_node_info info1,info2;
+			fail_op(ret,0,it1.ctx->GetNodeInfo(tuple.left->filenode,&info1),throw ret);
+			fail_op(ret,0,it2.ctx->GetNodeInfo(tuple.right->filenode,&info2),throw ret);
+			if(info1.mod_time<info2.mod_time)
+			{
+				tuple.left->state=eFSOld;
+				tuple.right->state=eFSNew;
+			}
+			else if(info1.mod_time>info2.mod_time)
+			{
+				tuple.left->state=eFSNew;
+				tuple.right->state=eFSOld;
+			}
+		}
 		break;
 	}
 	splice->map.push_back(tuple);
