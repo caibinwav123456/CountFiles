@@ -60,7 +60,7 @@ void TLItem::update_state()
 	for(cur=this,pp=parent;!pp->IsBase();cur=pp,pp=pp->parent)
 	{
 		state_attrib attr,peerattr,
-			pattr,ppeerattr; 
+			pattr,ppeerattr;
 		TLItem **peer=cur->GetPeerItem(),**ppp=pp->GetPeerItem();
 		if(peer==NULL||*peer==NULL)
 		{
