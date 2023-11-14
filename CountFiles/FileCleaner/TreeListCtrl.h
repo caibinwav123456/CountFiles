@@ -177,6 +177,7 @@ struct TLItemFile:public TLItem
 struct TLItemErrDir:public TLItem
 {
 	virtual void Release(){};
+	virtual uint GetDispLength();
 };
 struct TLItemErrFile:public TLItem
 {

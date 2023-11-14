@@ -68,13 +68,19 @@ void TLItemDir::Detach()
 }
 uint* TLItemDir::ptr_disp_len()
 {
-	TLItemSplice* splice=GetSplice();
-	return splice==NULL?&open_length:&splice->open_length;
+	return subpairs==NULL?&open_length:&subpairs->open_length;
 }
 uint TLItemDir::GetDispLength()
 {
 	uint* ptrlen=ptr_disp_len();
 	return isopen?*ptrlen:1;
+}
+uint TLItemErrDir::GetDispLength()
+{
+	TLItem** peer=GetPeerItem();
+	if(peer!=NULL&&*peer!=NULL&&(*peer)->type==eITypeDir)
+		return ((TLItemDir*)*peer)->GetDispLength();
+	return 1;
 }
 bool TLItemDir::IsBase()
 {
@@ -82,10 +88,10 @@ bool TLItemDir::IsBase()
 }
 void TLItemDir::update_displen(int diff)
 {
-	bool last=false;
-	for(TLItemDir* pp=parent;!last;pp=pp->parent)
+	for(TLItemDir* pp=parent;
+		pp!=ctx->m_pTlUnit->m_pItemJoint;
+		pp=pp->parent)
 	{
-		last=pp->IsBase();
 		uint* plen=pp->ptr_disp_len();
 		assert(*plen>0);
 		*plen+=diff;
@@ -265,7 +271,13 @@ int TLItem::ToLineNum()
 			return -1;
 		for(int i=0;i<item->parentidx;i++)
 		{
-			iline+=dir->subitems[i]->GetDispLength();
+			if(dir->subpairs!=NULL)
+			{
+				TLItemPair* tuple=dir->subpairs->jntitems[i];
+				iline+=(tuple->left!=NULL?tuple->left:tuple->right)->GetDispLength();
+			}
+			else
+				iline+=dir->subitems[i]->GetDispLength();
 		}
 		iline++;
 	}
@@ -457,7 +469,16 @@ void ItemSelector::SetSel(ItStkItem* item,int iline)
 {
 	for(set<SelItem>::iterator it=m_setSel.begin();it!=m_setSel.end();it++)
 	{
-		(*it).item->issel=false;
+		SelItem& selitem=(SelItem&)*it;
+		if(selitem.pair!=NULL)
+		{
+			if(selitem.pair->left!=NULL)
+				selitem.pair->left->issel=false;
+			if(selitem.pair->right!=NULL)
+				selitem.pair->right->issel=false;
+		}
+		else
+			selitem.item->issel=false;
 	}
 	m_setSel.clear();
 	m_iItemSel=-1;
@@ -478,12 +499,12 @@ void ItemSelector::AddSel(ItStkItem* item,int iline)
 	assert(m_setSel.find(SelItem(item,iline))==m_setSel.end());
 	if(item->m_pJItem!=NULL)
 	{
-		if(item->side<=0)
+		if(item->m_pJItem->left!=NULL)
 		{
 			assert(!item->m_pJItem->left->issel);
 			item->m_pJItem->left->issel=true;
 		}
-		if(item->side>=0)
+		if(item->m_pJItem->right!=NULL)
 		{
 			assert(!item->m_pJItem->right->issel);
 			item->m_pJItem->right->issel=true;
@@ -504,12 +525,12 @@ void ItemSelector::CancelSel(ItStkItem* item,int iline)
 	assert(m_setSel.find(SelItem(item,iline))!=m_setSel.end());
 	if(item->m_pJItem!=NULL)
 	{
-		if(item->side<=0)
+		if(item->m_pJItem->left!=NULL)
 		{
 			assert(item->m_pJItem->left->issel);
 			item->m_pJItem->left->issel=false;
 		}
-		if(item->side>=0)
+		if(item->m_pJItem->right!=NULL)
 		{
 			assert(item->m_pJItem->right->issel);
 			item->m_pJItem->right->issel=false;
