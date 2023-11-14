@@ -271,11 +271,6 @@ private:
 	TreeListCtrl* m_pList;
 	bool end;
 };
-struct ConnBuffer
-{
-	vector<int> xleft;
-	vector<int> xright;
-};
 class TreeListCtrl
 {
 	friend class ListCtrlIterator;
@@ -345,10 +340,10 @@ protected:
 	ListCtrlIterator GetListIter(int iline);
 	int LineNumFromPt(POINT* pt);
 	bool EndOfDraw(int iline);
-	void DrawLine(CDrawer& drawer,int iline,TLItem* pItem=NULL);
-	void DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,TLItem* item,int side,int xbase,ConnBuffer& conbuf);
-	void DrawLine(CDrawer& drawer,const ListCtrlIterator& iter,ConnBuffer& conbuf);
-	void DrawLineGrp(CDrawer& drawer,const ListCtrlIterator& iter,TLCore& tltree,ConnBuffer& conbuf);
+	void DrawLine(CDrawer& drawer,int iline,TLItem* pItem);
+	void DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,int side,int xbase);
+	void DrawLine(CDrawer& drawer,const ListCtrlIterator& iter);
+	void DrawLineGrp(CDrawer& drawer,const ListCtrlIterator& iter,TLCore& tltree);
 	void UpdateListStat();
 };
 #endif
