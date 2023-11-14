@@ -75,7 +75,7 @@ failed:
 }
 void TreeListCtrl::Exit()
 {
-	UnLoad();
+	UnLoad(true);
 	m_bmpFolder.DeleteObject();
 	m_bmpFolderMask.DeleteObject();
 	m_bmpFolderExp.DeleteObject();
@@ -190,11 +190,22 @@ int TreeListCtrl::Load(UINT mask,const char* lfile,const char* efile,
 	UpdateListStat();
 	return ret;
 }
-void TreeListCtrl::UnLoad()
+void TreeListCtrl::UnLoad(bool bAll)
 {
 	m_iCurLine=-1;
-	m_TlU.m_ItemSel.SetSel(NULL,-1);
-	m_TlU.UnLoad();
+	if(!bAll)
+	{
+		m_TlU.m_ItemSel.SetSel(NULL,-1);
+		m_TlU.UnLoad();
+	}
+	else
+	{
+		for(int i=0;i<(int)m_vecLists.size();i++)
+		{
+			m_vecLists[i]->m_ItemSel.SetSel(NULL,-1);
+			m_vecLists[i]->UnLoad();
+		}
+	}
 	UpdateListStat();
 }
 void TreeListCtrl::Invalidate()
