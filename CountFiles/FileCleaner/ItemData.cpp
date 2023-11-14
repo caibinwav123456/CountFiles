@@ -1,13 +1,13 @@
 #include "pch.h"
 #include "TreeListCtrl.h"
 #include <assert.h>
-TLItemSplice* TLItem::GetSplice()
+inline TLItemSplice* TLItem::GetSplice()
 {
 	if(this==NULL)
 		return NULL;
 	return parent==NULL?NULL:parent->subpairs;
 }
-TLItemPair* TLItem::GetCouple()
+inline TLItemPair* TLItem::GetCouple()
 {
 	TLItemSplice* splice=GetSplice();
 	if(splice==NULL)
@@ -16,7 +16,7 @@ TLItemPair* TLItem::GetCouple()
 		return NULL;
 	return splice->jntitems[parentidx];
 }
-TLItemSplice* TLItemPair::GetSuper()
+inline TLItemSplice* TLItemPair::GetSuper()
 {
 	assert_valid_tuple(this);
 	TLItem* item=left!=NULL?left:right;
@@ -82,8 +82,10 @@ bool TLItemDir::IsBase()
 }
 void TLItemDir::update_displen(int diff)
 {
-	for(TLItemDir* pp=parent;pp!=NULL;pp=pp->parent)
+	bool last=false;
+	for(TLItemDir* pp=parent;!last;pp=pp->parent)
 	{
+		last=pp->IsBase();
 		uint* plen=pp->ptr_disp_len();
 		assert(*plen>0);
 		*plen+=diff;
@@ -147,6 +149,19 @@ void TLItemDir::Release()
 {
 	OpenDir(false,true);
 }
+TLItem* ItStkItem::get_item(int _side)
+{
+	if(m_pJItem!=NULL)
+	{
+		if(_side<=0)
+			return m_pJItem->left;
+		else
+			return m_pJItem->right;
+	}
+	else if(_side==side)
+		return m_pItem;
+	return NULL;
+}
 static inline ItStkItem* push_item_stack(ItStkItem* stk)
 {
 	ItStkItem* newitem=new ItStkItem(NULL);
@@ -163,36 +178,69 @@ static inline void free_item_stack(ItStkItem* stk)
 		delete item;
 	}
 }
-ItStkItem* TLItem::FromLineNum(int iline,int& lvl)
+static inline void set_item_stack(ItStkItem* stk,TLItemDir* dir,uint idx,int side)
+{
+	if(dir->subpairs!=NULL)
+	{
+		stk->m_pJItem=dir->subpairs->jntitems[idx];
+		if(stk->m_pJItem->left==NULL)
+		{
+			stk->m_pItem=stk->m_pJItem->right;
+			stk->side=1;
+		}
+		else if(stk->m_pJItem->right==NULL)
+		{
+			stk->m_pItem=stk->m_pJItem->left;
+			stk->side=-1;
+		}
+		else
+		{
+			stk->m_pItem=(side<=0?stk->m_pJItem->left:stk->m_pJItem->right);
+			stk->side=side;
+		}
+	}
+	else
+	{
+		stk->m_pJItem=NULL;
+		stk->m_pItem=dir->subitems[idx];
+		stk->side=side;
+	}
+}
+size_t TLItemDir::size() const
+{
+	if(subpairs!=NULL)
+		return subpairs->jntitems.size();
+	return subitems.size();
+}
+ItStkItem* TLItemDir::FromLineNum(int iline,int& lvl,int side)
 {
 	if(iline<0)
 		return NULL;
-	TLItemDir* cur=dynamic_cast<TLItemDir*>(this);
-	assert(cur!=NULL);
+	TLItemDir* cur=this;
 	ItStkItem* stack=push_item_stack(NULL);
 	int iacc=0;
 	int level=0;
 	for(;;)
 	{
-		if(stack->parentidx>=(int)cur->subitems.size())
+		if(stack->parentidx>=(int)cur->size())
 		{
 			free_item_stack(stack);
 			return NULL;
 		}
-		TLItem* item=cur->subitems[stack->parentidx];
+		set_item_stack(stack,cur,stack->parentidx,side);
+		assert(stack->m_pItem!=NULL);
+		side=stack->side;
 		if(iacc==iline)
 		{
-			stack->m_pItem=item;
 			lvl=level;
 			return stack;
 		}
-		int displen=item->GetDispLength();
+		int displen=stack->m_pItem->GetDispLength();
 		if(iacc+displen>iline)
 		{
 			iacc++;
-			cur=dynamic_cast<TLItemDir*>(item);
+			cur=dynamic_cast<TLItemDir*>(stack->m_pItem);
 			assert(cur!=NULL);
-			stack->m_pItem=item;
 			stack=push_item_stack(stack);
 			level++;
 		}
@@ -209,8 +257,10 @@ int TLItem::ToLineNum()
 	if(item==NULL)
 		return -1;
 	int iline=0;
-	for(TLItemDir* dir=item->parent;!dir->IsBase();item=dir,dir=dir->parent)
+	bool last=false;
+	for(TLItemDir* dir=item->parent;!last;item=dir,dir=dir->parent)
 	{
+		last=dir->IsBase();
 		if(item->parentidx<0)
 			return -1;
 		for(int i=0;i<item->parentidx;i++)
@@ -221,12 +271,12 @@ int TLItem::ToLineNum()
 	}
 	return iline-1;
 }
-ListCtrlIterator::ListCtrlIterator(TLItem* root,int iline,TreeListCtrl* pList):m_pList(pList),m_pStkItem(NULL),lvl(0),m_iline(-1),end(false)
+ListCtrlIterator::ListCtrlIterator(TLItemDir* root,int iline,int side,TreeListCtrl* pList):m_pList(pList),m_pStkItem(NULL),lvl(0),m_iline(-1),end(false)
 {
 	if(root==NULL||iline<0)
 		return;
 	m_iline=iline;
-	m_pStkItem=root->FromLineNum(m_iline,lvl);
+	m_pStkItem=root->FromLineNum(m_iline,lvl,side);
 	if(m_pStkItem==NULL)
 		m_iline=-1;
 }
@@ -254,24 +304,25 @@ void ListCtrlIterator::operator++(int)
 	m_iline++;
 	if(m_iline<=0)
 		return;
+	int side=m_pStkItem->side;
 	if(m_pStkItem->m_pItem->type==eITypeDir)
 	{
 		TLItemDir* dir=dynamic_cast<TLItemDir*>(m_pStkItem->m_pItem);
 		assert(dir!=NULL);
-		if(dir->isopen&&!dir->subitems.empty())
+		if(dir->isopen&&dir->size()>0)
 		{
 			m_pStkItem=push_item_stack(m_pStkItem);
-			m_pStkItem->m_pItem=dir->subitems[0];
+			set_item_stack(m_pStkItem,dir,0,side);
 			lvl++;
 			return;
 		}
 	}
 	for(;;)
 	{
-		if(m_pStkItem->parentidx+1<(int)m_pStkItem->m_pItem->parent->subitems.size())
+		if(m_pStkItem->parentidx+1<(int)m_pStkItem->m_pItem->parent->size())
 		{
 			m_pStkItem->parentidx++;
-			m_pStkItem->m_pItem=m_pStkItem->m_pItem->parent->subitems[m_pStkItem->parentidx];
+			set_item_stack(m_pStkItem,m_pStkItem->m_pItem->parent,m_pStkItem->parentidx,side);
 			return;
 		}
 		if(lvl==0)
@@ -294,6 +345,7 @@ void ListCtrlIterator::operator--(int)
 	m_iline--;
 	if(m_iline<0)
 		return;
+	int side=m_pStkItem->side;
 	if(end)
 	{
 		assert(lvl==0&&m_pStkItem->next==NULL);
@@ -303,7 +355,8 @@ void ListCtrlIterator::operator--(int)
 	if(m_pStkItem->parentidx>0)
 	{
 		m_pStkItem->parentidx--;
-		m_pStkItem->m_pItem=m_pStkItem->m_pItem->parent->subitems[m_pStkItem->parentidx];
+		set_item_stack(m_pStkItem,m_pStkItem->m_pItem->parent,m_pStkItem->parentidx,0);
+		side=m_pStkItem->side;
 		goto second_phase;
 	}
 	if(lvl==0)
@@ -320,11 +373,12 @@ second_phase:
 			break;
 		TLItemDir* dir=dynamic_cast<TLItemDir*>(m_pStkItem->m_pItem);
 		assert(dir!=NULL);
-		if((!dir->isopen)||dir->subitems.empty())
+		if((!dir->isopen)||dir->size()==0)
 			break;
 		m_pStkItem=push_item_stack(m_pStkItem);
-		m_pStkItem->parentidx=dir->subitems.size()-1;
-		m_pStkItem->m_pItem=dir->subitems.back();
+		m_pStkItem->parentidx=dir->size()-1;
+		set_item_stack(m_pStkItem,dir,dir->size()-1,side);
+		side=m_pStkItem->side;
 		lvl++;
 	}
 }
@@ -399,7 +453,7 @@ bool ItemSelector::IsSelected(TLItem* item,int iline)
 		return !m_bCancelRgn;
 	return item->issel;
 }
-void ItemSelector::SetSel(TLItem* item,int iline)
+void ItemSelector::SetSel(ItStkItem* item,int iline)
 {
 	for(set<SelItem>::iterator it=m_setSel.begin();it!=m_setSel.end();it++)
 	{
@@ -416,33 +470,65 @@ void ItemSelector::SetSel(TLItem* item,int iline)
 	BeginDragSel(iline,false);
 	m_iItemSel=iline;
 }
-void ItemSelector::AddSel(TLItem* item,int iline)
+void ItemSelector::AddSel(ItStkItem* item,int iline)
 {
 	if(item==NULL)
 		return;
 	assert(valid(iline));
-	assert(item->issel==false);
 	assert(m_setSel.find(SelItem(item,iline))==m_setSel.end());
-	item->issel=true;
+	if(item->m_pJItem!=NULL)
+	{
+		if(item->side<=0)
+		{
+			assert(!item->m_pJItem->left->issel);
+			item->m_pJItem->left->issel=true;
+		}
+		if(item->side>=0)
+		{
+			assert(!item->m_pJItem->right->issel);
+			item->m_pJItem->right->issel=true;
+		}
+	}
+	else
+	{
+		assert(!item->m_pItem->issel);
+		item->m_pItem->issel=true;
+	}
 	m_setSel.insert(SelItem(item,iline));
 }
-void ItemSelector::CancelSel(TLItem* item,int iline)
+void ItemSelector::CancelSel(ItStkItem* item,int iline)
 {
 	if(item==NULL)
 		return;
 	assert(valid(iline));
-	assert(item->issel==true);
 	assert(m_setSel.find(SelItem(item,iline))!=m_setSel.end());
-	item->issel=false;
+	if(item->m_pJItem!=NULL)
+	{
+		if(item->side<=0)
+		{
+			assert(item->m_pJItem->left->issel);
+			item->m_pJItem->left->issel=false;
+		}
+		if(item->side>=0)
+		{
+			assert(item->m_pJItem->right->issel);
+			item->m_pJItem->right->issel=false;
+		}
+	}
+	else
+	{
+		assert(item->m_pItem->issel);
+		item->m_pItem->issel=false;
+	}
 	m_setSel.erase(SelItem(item,iline));
 }
-void ItemSelector::ToggleSel(TLItem* item,int iline)
+void ItemSelector::ToggleSel(ItStkItem* item,int iline)
 {
 	if(item==NULL)
 		return;
 	assert(valid(iline));
 	EndDragSel();
-	if(item->issel)
+	if(item->m_pItem->issel)
 	{
 		CancelSel(item,iline);
 		BeginDragSel(iline,true);
@@ -485,7 +571,7 @@ bool ItemSelector::CompoundSel(int iline)
 	m_iItemSel=iline;
 	return true;
 }
-bool ItemSelector::ClearAndDragSel(TLItem* item,int iline)
+bool ItemSelector::ClearAndDragSel(ItStkItem* item,int iline)
 {
 	if(item==NULL||!valid(iline))
 		return false;
@@ -497,10 +583,7 @@ bool ItemSelector::ClearAndDragSel(TLItem* item,int iline)
 	else if(m_iDragStart>=0)
 	{
 		int pos=m_iDragStart;
-		ListCtrlIterator itds(m_pOwner->m_pRootItem,pos);
-		if(itds.m_pStkItem==NULL)
-			return false;
-		SetSel(itds.m_pStkItem->m_pItem,pos);
+		SetSel(item,pos);
 		DragSelTo(iline);
 		return true;
 	}
@@ -512,8 +595,8 @@ void ItemSelector::EndDragSel()
 		goto end;
 	{
 		bool bRev=m_iDragStart>m_iDragEnd;
-		ListCtrlIterator itstart(m_pOwner->m_pRootItem,m_iDragStart),
-			itend(m_pOwner->m_pRootItem,m_iDragEnd);
+		ListCtrlIterator itstart=m_pOwner->GetListIter(m_iDragStart),
+			itend=m_pOwner->GetListIter(m_iDragEnd);
 		for(;bRev?itstart>=itend:itstart<=itend;bRev?itstart--:itstart++)
 		{
 			ItStkItem* stk=itstart.m_pStkItem;
@@ -522,12 +605,12 @@ void ItemSelector::EndDragSel()
 			if(m_bCancelRgn)
 			{
 				if(stk->m_pItem->issel)
-					CancelSel(stk->m_pItem,itstart.m_iline);
+					CancelSel(stk,itstart.m_iline);
 			}
 			else
 			{
 				if(!stk->m_pItem->issel)
-					AddSel(stk->m_pItem,itstart.m_iline);
+					AddSel(stk,itstart.m_iline);
 			}
 		}
 	}
