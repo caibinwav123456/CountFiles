@@ -259,7 +259,7 @@ BOOL CBaseBar::StartListLoad(UINT mask,UINT accept_type)
 		m_strBasePath=m_strComboBasePath;
 	if(mask&FILE_LIST_ATTRIB_REF)
 		m_strBasePathRef=m_strComboBasePathRef;
-	FListLoadData data(m_strBasePath,m_strBasePathRef,mask);
+	FListLoadData data(m_strBasePath,m_strBasePathRef,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
 	UpdateBaseBackBuffer((mask&FILE_LIST_ATTRIB_MAIN)?m_strComboBasePath:_T(""),
 		(mask&FILE_LIST_ATTRIB_REF)?m_strComboBasePathRef:_T(""));
 	if(!ValidatePaths(data,accept_type))
@@ -423,7 +423,7 @@ void CBaseBar::OnBnClickedButtonGo2()
 	// TODO: Add your control notification handler code here
 	UpdateData(TRUE);
 	m_btnGo2.EnableButton(FALSE);
-	StartListLoad(FILE_LIST_ATTRIB_REF,0);
+	StartListLoad(FILE_LIST_ATTRIB_REF,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
 }
 
 
@@ -476,7 +476,7 @@ void CBaseBar::OnCbnSelchangeComboBasePath2()
 	if(sel>=0)
 		m_comboBasePath2.GetLBText(sel,m_strComboBasePathRef);
 	m_btnGo2.EnableButton(FALSE);
-	StartListLoad(FILE_LIST_ATTRIB_REF,0);
+	StartListLoad(FILE_LIST_ATTRIB_REF,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
 }
 
 
@@ -520,5 +520,5 @@ void CBaseBar::OnCmdMenuImpFileRef()
 		return;
 	m_strComboBasePathRef=strImpFile;
 	m_btnGo2.EnableButton(FALSE);
-	StartListLoad(FILE_LIST_ATTRIB_REF,0);
+	StartListLoad(FILE_LIST_ATTRIB_REF,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
 }

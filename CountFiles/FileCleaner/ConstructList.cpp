@@ -21,10 +21,11 @@ void TLItemDir::clear()
 {
 	clear_grp();
 	TLItem** peer=GetPeerItem();
-	if(peer!=NULL&&*peer!=NULL)
+	if(peer!=NULL&&*peer!=NULL&&(*peer)->type==eITypeDir)
 	{
-		assert(dynamic_cast<TLItemDir*>(*peer)!=NULL);
-		(dynamic_cast<TLItemDir*>(*peer))->clear_grp();
+		TLItemDir* peerdir=dynamic_cast<TLItemDir*>(*peer);
+		assert(peerdir!=NULL);
+		peerdir->clear_grp();
 	}
 }
 void TLItemDir::clear_grp()
@@ -292,21 +293,6 @@ static int merge_callback_grp_dir(grp_dir_iterator it1,grp_dir_iterator it2,E_ME
 			file_node_info info1,info2;
 			fail_op(ret,0,it1.ctx->GetNodeInfo(tuple.left->dirnode,&info1),throw ret);
 			fail_op(ret,0,it2.ctx->GetNodeInfo(tuple.right->dirnode,&info2),throw ret);
-			if(info1.size==UInteger64(0)&&info2.size!=UInteger64(0))
-				tuple.right->state=eFSSolo;
-			else if(info1.size!=UInteger64(0)&&info2.size==UInteger64(0))
-				tuple.left->state=eFSSolo;
-			else if(info1.mod_time<info2.mod_time)
-			{
-				tuple.left->state=eFSOld;
-				tuple.right->state=eFSNew;
-			}
-			else if(info1.mod_time>info2.mod_time)
-			{
-				tuple.left->state=eFSNew;
-				tuple.right->state=eFSOld;
-			}
-
 			TLItemDir *ldir=(TLItemDir*)tuple.left,
 				*rdir=(TLItemDir*)tuple.right;
 			ldir->subpairs=rdir->subpairs=new TLItemSplice;
@@ -314,7 +300,6 @@ static int merge_callback_grp_dir(grp_dir_iterator it1,grp_dir_iterator it2,E_ME
 		break;
 	}
 	splice->map.push_back(tuple);
-	splice->jntitems.push_back(&splice->map.back());
 	return 0;
 }
 static int merge_callback_grp_file(grp_file_iterator it1,grp_file_iterator it2,E_MERGE_SIDE side,void* param)
@@ -356,11 +341,15 @@ static int merge_callback_grp_file(grp_file_iterator it1,grp_file_iterator it2,E
 				tuple.left->state=eFSNew;
 				tuple.right->state=eFSOld;
 			}
+			else if(info1.size!=info2.size)
+			{
+				tuple.left->state=eFSNew;
+				tuple.right->state=eFSNew;
+			}
 		}
 		break;
 	}
 	splice->map.push_back(tuple);
-	splice->jntitems.push_back(&splice->map.back());
 	return 0;
 }
 int join_list(TLItemDir* llist,TLItemDir* rlist)
@@ -385,6 +374,10 @@ int join_list(TLItemDir* llist,TLItemDir* rlist)
 		rlist->clear();
 		return err;
 	}
+	for(int i=0;i<(int)splice->map.size();i++)
+	{
+		splice->jntitems.push_back(&splice->map[i]);
+	}
 	return 0;
 }
 int TLItemDir::construct_list()
@@ -392,7 +385,7 @@ int TLItemDir::construct_list()
 	int ret=0;
 	fail_goto(ret,0,construct_list_grp(),fail);
 	TLItem** peer=GetPeerItem();
-	if(peer!=NULL&&*peer!=NULL)
+	if(peer!=NULL&&*peer!=NULL&&(*peer)->type==eITypeDir)
 	{
 		TLItemPair* tuple=GetCouple();
 		TLItemDir* dir=dynamic_cast<TLItemDir*>(*peer);
@@ -440,7 +433,6 @@ int TLItemDir::construct_list_grp()
 		assert(subfiles.empty());
 		assert(errdirs.empty());
 		assert(errfiles.empty());
-		assert(subpairs==NULL);
 	}
 	subitems.clear();
 	subpairs->clear();

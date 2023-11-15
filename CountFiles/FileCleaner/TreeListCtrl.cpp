@@ -126,11 +126,14 @@ int TLUnit::LoadCore(TLCore& core,const char* lfile,const char* efile)
 void TLUnit::UnLoadCore(TLCore& core)
 {
 	if(core.m_pBaseItem!=NULL)
-		core.m_pBaseItem->parent=core.m_pBaseParent;
+	{
+		if(core.m_pBaseItem!=core.m_pRootItem)
+			core.m_pBaseItem->parent=core.m_pBaseParent;
+	}
 	if(core.m_pRootItem!=NULL)
 	{
-		core.m_pRootItem->Detach();
 		core.m_pRootItem->Release();
+		core.m_pRootItem->Detach();
 		delete core.m_pRootItem;
 	}
 	core.m_pBaseItem=core.m_pRootItem=NULL;
