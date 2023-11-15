@@ -298,6 +298,25 @@ static int merge_callback_grp_dir(grp_dir_iterator it1,grp_dir_iterator it2,E_ME
 			file_node_info info1,info2;
 			fail_op(ret,0,it1.ctx->GetNodeInfo(tuple.left->dirnode,&info1),throw ret);
 			fail_op(ret,0,it2.ctx->GetNodeInfo(tuple.right->dirnode,&info2),throw ret);
+			if(info1.size==UInteger64(0)&&info2.size!=UInteger64(0))
+				tuple.right->state=eFSSolo;
+			else if(info1.size!=UInteger64(0)&&info2.size==UInteger64(0))
+				tuple.left->state=eFSSolo;
+			else if(info1.mod_time<info2.mod_time)
+			{
+				tuple.left->state=eFSOld;
+				tuple.right->state=eFSNew;
+			}
+			else if(info1.mod_time>info2.mod_time)
+			{
+				tuple.left->state=eFSNew;
+				tuple.right->state=eFSOld;
+			}
+			else if(info1.size!=info2.size)
+			{
+				tuple.left->state=eFSNew;
+				tuple.right->state=eFSNew;
+			}
 			TLItemDir *ldir=(TLItemDir*)tuple.left,
 				*rdir=(TLItemDir*)tuple.right;
 			ldir->subpairs=rdir->subpairs=new TLItemSplice;
