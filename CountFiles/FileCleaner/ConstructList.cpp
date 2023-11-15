@@ -27,6 +27,7 @@ void TLItemDir::clear()
 		assert(peerdir!=NULL);
 		peerdir->clear_grp();
 	}
+	subpairs->clear();
 }
 void TLItemDir::clear_grp()
 {
@@ -56,7 +57,6 @@ void TLItemDir::clear_grp()
 		delete subdirs[i];
 	}
 	subdirs.clear();
-	subpairs->clear();
 	open_length=0;
 	dir_border=0;
 }
