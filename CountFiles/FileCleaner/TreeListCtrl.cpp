@@ -67,6 +67,12 @@ int TreeListCtrl::Init()
 		goto failed;
 	if(!m_bmpFolderExpMask.LoadBitmap(IDB_FOLDER_EXP_MASK))
 		goto failed;
+	if(!m_bmpEqual.LoadBitmap(IDB_EQUAL))
+		goto failed;
+	if(!m_bmpDiff.LoadBitmap(IDB_DIFF))
+		goto failed;
+	if(!m_bmpDiffMask.LoadBitmap(IDB_DIFF_MASK))
+		goto failed;
 	SetScrollSizes(CSize(-1,m_TlU.m_nTotalLine*LINE_HEIGHT));
 	return 0;
 failed:
@@ -80,6 +86,9 @@ void TreeListCtrl::Exit()
 	m_bmpFolderMask.DeleteObject();
 	m_bmpFolderExp.DeleteObject();
 	m_bmpFolderExpMask.DeleteObject();
+	m_bmpEqual.DeleteObject();
+	m_bmpDiff.DeleteObject();
+	m_bmpDiffMask.DeleteObject();
 }
 int TLUnit::InitialExpand()
 {
@@ -324,11 +333,39 @@ void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,int sid
 			drawer.DrawLine(&CPoint(xpos,ystart),&CPoint(xpos,ypos),CONN_COLOR,1,PS_DOT);
 	}
 }
+void TreeListCtrl::DrawCmpIndicator(CDrawer& drawer,const ListCtrlIterator& iter)
+{
+	if(iter.m_pStkItem==NULL||iter.m_pStkItem->m_pJItem==NULL)
+		return;
+	TLItemPair* tuple=iter.m_pStkItem->m_pJItem;
+	if(tuple->left==NULL||tuple->right==NULL)
+		return;
+	if(tuple->left->type!=eITypeFile||tuple->right->type!=eITypeFile)
+		return;
+	assert((tuple->left->state==eFSEqual&&tuple->right->state==eFSEqual)||
+		(tuple->left->state!=eFSEqual&&tuple->right->state!=eFSEqual));
+	CRect rc;
+	GetCanvasRect(&rc);
+	bool bEqual=tuple->left->state==eFSEqual;
+	BITMAP bm;
+	CBitmap* pBmp=bEqual?&m_bmpEqual:&m_bmpDiff;
+	pBmp->GetBitmap(&bm);
+	int xpos=(max(rc.Width(),MIN_SCROLL_WIDTH)-bm.bmWidth)/2;
+	int ypos=iter.m_iline*LINE_HEIGHT+(LINE_HEIGHT-bm.bmHeight)/2;
+	if(bEqual)
+		drawer.DrawBitmap(pBmp,&CPoint(xpos,ypos),SRCAND);
+	else
+	{
+		drawer.DrawBitmap(&m_bmpDiffMask,&CPoint(xpos,ypos),SRCAND);
+		drawer.DrawBitmap(pBmp,&CPoint(xpos,ypos),SRCPAINT);
+	}
+}
 void TreeListCtrl::DrawLine(CDrawer& drawer,const ListCtrlIterator& iter)
 {
 	DrawLine(drawer,iter.m_iline,iter.m_pStkItem==NULL?NULL:iter.m_pStkItem->m_pItem);
 	DrawLineGrp(drawer,iter,m_TlU.m_treeLeft);
 	DrawLineGrp(drawer,iter,m_TlU.m_treeRight);
+	DrawCmpIndicator(drawer,iter);
 }
 void TreeListCtrl::DrawLineGrp(CDrawer& drawer,const ListCtrlIterator& iter,TLCore& tltree)
 {
