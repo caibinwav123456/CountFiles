@@ -35,18 +35,21 @@ void TLItemDir::clear_grp()
 	for(int i=0;i<(int)subfiles.size();i++)
 	{
 		subfiles[i]->Release();
+		subfiles[i]->Detach();
 		delete subfiles[i];
 	}
 	subfiles.clear();
 	for(int i=0;i<(int)errfiles.size();i++)
 	{
 		errfiles[i]->Release();
+		errfiles[i]->Detach();
 		delete errfiles[i];
 	}
 	errfiles.clear();
 	for(int i=0;i<(int)errdirs.size();i++)
 	{
 		errdirs[i]->Release();
+		errdirs[i]->Detach();
 		delete errdirs[i];
 	}
 	errdirs.clear();
