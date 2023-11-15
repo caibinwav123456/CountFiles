@@ -25,7 +25,9 @@ void TLItemDir::clear()
 	{
 		TLItemDir* peerdir=dynamic_cast<TLItemDir*>(*peer);
 		assert(peerdir!=NULL);
+		peerdir->nested=true;
 		peerdir->clear_grp();
+		peerdir->nested=false;
 	}
 	subpairs->clear();
 }
