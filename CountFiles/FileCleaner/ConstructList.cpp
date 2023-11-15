@@ -405,7 +405,7 @@ int TLItemDir::construct_list()
 				couple->left->parentidx=i;
 			if(couple->right!=NULL)
 				couple->right->parentidx=i;
-			if (couple->left != NULL)
+			if (couple->left!=NULL)
 				couple->left->update_state();
 			else
 				couple->right->update_state();
