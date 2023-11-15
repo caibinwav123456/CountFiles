@@ -215,5 +215,14 @@
     <Image Include="res\dot_line_v.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\diff.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\equal.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\diff_mask.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

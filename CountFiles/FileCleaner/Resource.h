@@ -38,6 +38,9 @@
 #define IDD_DIALOG_LOAD                 335
 #define IDB_BMP_DOT_H                   336
 #define IDB_BMP_DOT_V                   337
+#define IDB_DIFF                        338
+#define IDB_EQUAL                       339
+#define IDB_DIFF_MASK                   340
 #define IDC_COMBO_BASE_PATH             1000
 #define IDC_BUTTON_GO                   1001
 #define IDC_BUTTON_OPEN                 1002
@@ -59,7 +62,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        338
+#define _APS_NEXT_RESOURCE_VALUE        341
 #define _APS_NEXT_COMMAND_VALUE         32775
 #define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           310

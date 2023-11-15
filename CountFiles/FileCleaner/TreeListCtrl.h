@@ -319,6 +319,9 @@ private:
 	CBitmap m_bmpFolderMask;
 	CBitmap m_bmpFolderExp;
 	CBitmap m_bmpFolderExpMask;
+	CBitmap m_bmpEqual;
+	CBitmap m_bmpDiff;
+	CBitmap m_bmpDiffMask;
 
 	int m_iCurLine;
 
@@ -343,6 +346,7 @@ protected:
 	int LineNumFromPt(POINT* pt);
 	bool EndOfDraw(int iline);
 	void DrawLine(CDrawer& drawer,int iline,TLItem* pItem);
+	void DrawCmpIndicator(CDrawer& drawer,const ListCtrlIterator& iter);
 	void DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,int side,int xbase);
 	void DrawLine(CDrawer& drawer,const ListCtrlIterator& iter);
 	void DrawLineGrp(CDrawer& drawer,const ListCtrlIterator& iter,TLCore& tltree);
