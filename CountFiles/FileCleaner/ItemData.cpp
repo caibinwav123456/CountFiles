@@ -51,6 +51,16 @@ bool assert_peer_diritem(TLItem* item)
 	TLItem** peer=item->GetPeerItem();
 	return peer==NULL||*peer==NULL||dynamic_cast<TLItemDir*>(*peer)!=NULL;
 }
+void TLItem::Detach()
+{
+	assert(this!=NULL);
+	if(this==NULL)
+		return;
+	TLItem **_this;
+	GetPeerItem(&_this);
+	if(_this!=NULL)
+		*_this=NULL;
+}
 void TLItemDir::Detach()
 {
 	assert(this!=NULL);
@@ -62,7 +72,7 @@ void TLItemDir::Detach()
 	_other=GetPeerItem(&_this);
 	if(subpairs!=NULL&&(_other==NULL||*_other==NULL))
 		delete subpairs;
-	else if(_this!=NULL)
+	if(_this!=NULL)
 		*_this=NULL;
 	subpairs=NULL;
 }
@@ -125,7 +135,9 @@ int TLItemDir::OpenDir(bool open,bool release)
 	}
 	else if(release)
 	{
+		nested=true;
 		clear();
+		nested=false;
 		ret=ctx->m_ListLoader.ExpandNode(dirnode,false,true);
 		int retc=0;
 		if(has_peer)
@@ -148,7 +160,8 @@ fail:
 	if(has_peer)
 		peerdir->ctx->m_ListLoader.ExpandNode(peerdir->dirnode,false,true);
 end:
-	update_displen(GetDispLength()-oldlen);
+	if(parent==ctx->m_pTlUnit->m_pItemJoint||!parent->nested)
+		update_displen(GetDispLength()-oldlen);
 	return ret;
 }
 void TLItemDir::Release()

@@ -165,6 +165,7 @@ struct TLItem
 		return 1;
 	}
 	TLItem** GetPeerItem(TLItem*** _this=NULL);
+	virtual void Detach();
 	TLItemSplice* GetSplice();
 	TLItemPair* GetCouple();
 	int ToLineNum();
@@ -192,15 +193,16 @@ struct TLItemDir:public TLItem
 	vector<TLItemErrFile*> errfiles;
 	TLItemSplice* subpairs;
 	bool isopen;
+	bool nested;
 	uint open_length;
 	uint dir_border;
 	TLCore* ctx;
-	TLItemDir(TLCore* _ctx):subpairs(NULL),isopen(false),
+	TLItemDir(TLCore* _ctx):subpairs(NULL),isopen(false),nested(false),
 		open_length(0),dir_border(0),ctx(_ctx)
 	{
 	}
 	int OpenDir(bool open,bool release=false);
-	void Detach();
+	virtual void Detach();
 	bool IsBase();
 	virtual void Release();
 	virtual uint GetDispLength();

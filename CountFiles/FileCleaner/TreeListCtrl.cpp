@@ -137,6 +137,7 @@ void TLUnit::UnLoadCore(TLCore& core)
 		delete core.m_pRootItem;
 	}
 	core.m_pBaseItem=core.m_pRootItem=NULL;
+	core.m_pBaseParent=NULL;
 	core.m_ListLoader.Unload();
 }
 int TLUnit::Load(UINT mask,const char* lfile,const char* efile,
