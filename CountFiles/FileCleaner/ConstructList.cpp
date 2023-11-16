@@ -19,7 +19,9 @@ void TLItemSplice::clear()
 }
 void TLItemDir::clear()
 {
+	nested=true;
 	clear_grp();
+	nested=false;
 	TLItem** peer=GetPeerItem();
 	if(peer!=NULL&&*peer!=NULL&&(*peer)->type==eITypeDir)
 	{

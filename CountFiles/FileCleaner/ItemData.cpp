@@ -135,9 +135,7 @@ int TLItemDir::OpenDir(bool open,bool release)
 	}
 	else if(release)
 	{
-		nested=true;
 		clear();
-		nested=false;
 		ret=ctx->m_ListLoader.ExpandNode(dirnode,false,true);
 		int retc=0;
 		if(has_peer)
