@@ -273,8 +273,8 @@ static int merge_callback_file(file_iterator it1,errfile_iterator it2,E_MERGE_SI
 }
 static int merge_callback_grp_dir(grp_dir_iterator it1,grp_dir_iterator it2,E_MERGE_SIDE side,void* param)
 {
-	assert((*it1.it)->type==eITypeDir||(*it1.it)->type==eITypeErrDir);
-	assert((*it2.it)->type==eITypeDir||(*it2.it)->type==eITypeErrDir);
+	assert((!(bool)it1)||(*it1.it)->type==eITypeDir||(*it1.it)->type==eITypeErrDir);
+	assert((!(bool)it2)||(*it2.it)->type==eITypeDir||(*it2.it)->type==eITypeErrDir);
 	TLItemSplice* splice=(TLItemSplice*)param;
 	TLItemPair tuple;
 	int ret=0;
@@ -330,8 +330,8 @@ static int merge_callback_grp_dir(grp_dir_iterator it1,grp_dir_iterator it2,E_ME
 }
 static int merge_callback_grp_file(grp_file_iterator it1,grp_file_iterator it2,E_MERGE_SIDE side,void* param)
 {
-	assert((*it1.it)->type==eITypeFile||(*it1.it)->type==eITypeErrFile);
-	assert((*it2.it)->type==eITypeFile||(*it2.it)->type==eITypeErrFile);
+	assert((!(bool)it1)||(*it1.it)->type==eITypeFile||(*it1.it)->type==eITypeErrFile);
+	assert((!(bool)it2)||(*it2.it)->type==eITypeFile||(*it2.it)->type==eITypeErrFile);
 	TLItemSplice* splice=(TLItemSplice*)param;
 	TLItemPair tuple;
 	int ret=0;
