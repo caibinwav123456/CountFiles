@@ -73,7 +73,7 @@ public:
 		TLItemPair* pair;
 		int side;
 		int iline;
-		SelItem(TLItem* item=NULL,TLItemPair* p=NULL,int i=-1,int s=0):pair(p),side(s),iline(i){}
+		SelItem(TLItem* _item=NULL,TLItemPair* p=NULL,int i=-1,int s=0):item(_item),pair(p),side(s),iline(i){}
 		SelItem(ItStkItem* stk,int i=-1)
 		{
 			item=stk->m_pItem;
