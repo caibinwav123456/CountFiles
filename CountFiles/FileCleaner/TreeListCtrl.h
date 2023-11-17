@@ -135,7 +135,9 @@ struct TLItemSplice
 	vector<TLItemPair*> jntitems;
 	uint open_length;
 	uint dir_border;
-	TLItemSplice():open_length(0),dir_border(0){}
+	int lmax;
+	int rmax;
+	TLItemSplice():open_length(0),dir_border(0),lmax(-1),rmax(-1){}
 	void clear();
 };
 struct TLItem
