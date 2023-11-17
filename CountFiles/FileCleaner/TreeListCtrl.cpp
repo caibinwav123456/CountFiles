@@ -318,18 +318,26 @@ void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,int sid
 	{
 		assert(level>0);
 		int xpos=xbase+LINE_INDENT*(level-1)+CONN_START;
+		bool last;
 		TLItem* sitem=pstk->get_item(side);
-		if(sitem==NULL)
-			continue;
-		bool last=(sitem==sitem->parent->subitems.back());
-		if(level==iter.lvl)
+		if(pstk->m_pJItem!=NULL)
+		{
+			TLItemSplice* splice=pstk->m_pItem->parent->subpairs;
+			int maxidx=side<=0?splice->lmax:splice->rmax;
+			last=(pstk->m_pItem->parentidx>=maxidx);
+		}
+		else if(sitem!=NULL)
+			last=(sitem->parentidx==sitem->parent->subitems.size()-1);
+		else
+			last=true;
+		if(level==iter.lvl&&sitem!=NULL)
 		{
 			int xposend=xbase+LINE_INDENT*(level-1)+CONN_END;
 			drawer.DrawLine(&CPoint(xpos,ypos),&CPoint(xposend,ypos),CONN_COLOR,1,PS_DOT);
 		}
 		if(!last)
 			drawer.DrawLine(&CPoint(xpos,ystart),&CPoint(xpos,yend),CONN_COLOR,1,PS_DOT);
-		else if(level==iter.lvl)
+		else if(level==iter.lvl&&sitem!=NULL)
 			drawer.DrawLine(&CPoint(xpos,ystart),&CPoint(xpos,ypos),CONN_COLOR,1,PS_DOT);
 	}
 }

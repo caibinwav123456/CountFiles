@@ -16,6 +16,8 @@ void TLItemSplice::clear()
 	map.clear();
 	open_length=0;
 	dir_border=0;
+	lmax=-1;
+	rmax=-1;
 }
 void TLItemDir::clear()
 {
@@ -285,16 +287,19 @@ static int merge_callback_grp_dir(grp_dir_iterator it1,grp_dir_iterator it2,E_ME
 		if(tuple.left->type==eITypeDir)
 			tuple.left->state=eFSSolo;
 		tuple.right=NULL;
+		splice->lmax=splice->map.size();
 		break;
 	case eMSRight:
 		tuple.left=NULL;
 		tuple.right=*it2.it;
 		if(tuple.right->type==eITypeDir)
 			tuple.right->state=eFSSolo;
+		splice->rmax=splice->map.size();
 		break;
 	case eMSBoth:
 		tuple.left=*it1.it;
 		tuple.right=*it2.it;
+		splice->lmax=splice->rmax=splice->map.size();
 		if(tuple.left->type==eITypeDir&&tuple.right->type==eITypeDir)
 		{
 			file_node_info info1,info2;
@@ -342,16 +347,19 @@ static int merge_callback_grp_file(grp_file_iterator it1,grp_file_iterator it2,E
 		if(tuple.left->type==eITypeFile)
 			tuple.left->state=eFSSolo;
 		tuple.right=NULL;
+		splice->lmax=splice->map.size();
 		break;
 	case eMSRight:
 		tuple.left=NULL;
 		tuple.right=*it2.it;
 		if(tuple.right->type==eITypeFile)
 			tuple.right->state=eFSSolo;
+		splice->rmax=splice->map.size();
 		break;
 	case eMSBoth:
 		tuple.left=*it1.it;
 		tuple.right=*it2.it;
+		splice->lmax=splice->rmax=splice->map.size();
 		if(tuple.left->type==eITypeFile&&tuple.right->type==eITypeFile)
 		{
 			file_node_info info1,info2;
