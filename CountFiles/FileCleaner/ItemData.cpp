@@ -505,9 +505,8 @@ void ItemSelector::SetSel(ItStkItem* item,int iline)
 	m_iItemSel=-1;
 	m_iDragStart=m_iDragEnd=-1;
 	m_bCancelRgn=false;
-	if(item==NULL)
+	if(item==NULL||!valid(iline))
 		return;
-	assert(valid(iline));
 	AddSel(item,iline);
 	BeginDragSel(iline,false);
 	m_iItemSel=iline;
