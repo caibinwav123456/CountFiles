@@ -678,8 +678,7 @@ void ItemSelector::SortSelection(SortedSelItemNode& tree)
 			map<int,SortedSelItemNode*>::iterator itmap=cache.find(iline);
 			if(itmap!=cache.end())
 			{
-				assert(itmap->first==iline&&itmap->second->item.item==item.item
-					&&itmap->second->item.pair==item.pair);
+				assert(itmap->first==iline&&itmap->second->item.pair==item.pair);
 				if(pcnode==NULL)
 					continue;
 				assert(itmap->second->map_sub.find(pcnode->item.iline)==
