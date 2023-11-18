@@ -37,6 +37,8 @@ struct TLItemSplice;
 struct TLItemPair;
 struct TLCore;
 struct TLUnit;
+struct SortedSelItemNode;
+class ItemSelector;
 class ListCtrlIterator;
 class TreeListCtrl;
 struct ItStkItem
@@ -50,19 +52,6 @@ struct ItStkItem
 		:m_pItem(pItem),m_pJItem(pJItem),side(0)
 		,parentidx(-1),next(NULL){}
 	TLItem* get_item(int _side);
-};
-struct SortedSelItemNode
-{
-	TLItem* pItem;
-	int iline;
-	map<int,SortedSelItemNode*> map_sub;
-	SortedSelItemNode():pItem(NULL),iline(-1){}
-	~SortedSelItemNode()
-	{
-		clear();
-	}
-	void clear();
-	void extract();
 };
 class ItemSelector
 {
@@ -117,6 +106,17 @@ private:
 	int m_iDragEnd;
 	TreeListCtrl* m_pOwner;
 	bool m_bCancelRgn;
+};
+struct SortedSelItemNode
+{
+	ItemSelector::SelItem item;
+	map<int,SortedSelItemNode*> map_sub;
+	~SortedSelItemNode()
+	{
+		clear();
+	}
+	void clear();
+	void extract();
 };
 #define assert_valid_tuple(tuple) \
 	assert(!((tuple)->left==NULL&&(tuple)->right==NULL)); \
