@@ -668,40 +668,47 @@ void ItemSelector::SortSelection(SortedSelItemNode& tree)
 	tree.clear();
 	for(set<SelItem>::iterator it=m_setSel.begin();it!=m_setSel.end();it++)
 	{
-		TLItem* item=it->item;
-		int iline=it->iline;
+		ItemSelector::SelItem item=*it;
+		int iline=item.iline;
+		int side=item.side;
 		SortedSelItemNode* pcnode=NULL;
-		while(item!=NULL)
+		bool isbase=false;
+		do
 		{
 			map<int,SortedSelItemNode*>::iterator itmap=cache.find(iline);
 			if(itmap!=cache.end())
 			{
-				assert(itmap->first==iline&&itmap->second->pItem==item);
+				assert(itmap->first==iline&&itmap->second->item.item==item.item
+					&&itmap->second->item.pair==item.pair);
 				if(pcnode==NULL)
 					continue;
-				assert(itmap->second->map_sub.find(pcnode->iline)==
+				assert(itmap->second->map_sub.find(pcnode->item.iline)==
 					itmap->second->map_sub.end());
-				itmap->second->map_sub[pcnode->iline]=pcnode;
+				itmap->second->map_sub[pcnode->item.iline]=pcnode;
 				break;
 			}
 			else
 			{
 				SortedSelItemNode* node;
-				if(item->parent==NULL)
+				if(item.item->parent==NULL)
 					node=&tree;
 				else
 					node=new SortedSelItemNode;
-				node->pItem=item;
-				node->iline=iline;
+				node->item=item;
 				if(pcnode!=NULL)
-					node->map_sub[pcnode->iline]=pcnode;
+					node->map_sub[pcnode->item.iline]=pcnode;
 				cache[iline]=node;
 				pcnode=node;
 			}
-			assert(item->parent==NULL||item->parent->isopen);
-			item=item->parent;
-			iline=item->ToLineNum();
-		}
+			assert(item.item->parent==NULL||item.item->parent->isopen);
+			isbase=item.item->IsBase();
+			if(isbase)
+				continue;
+			item.item=item.item->parent;
+			item.pair=item.item->GetCouple();
+			item.side=side;
+			iline=item.iline=item.item->ToLineNum();
+		}while(!isbase);
 	}
 }
 bool ItemSelector::valid(int iline)
@@ -718,7 +725,7 @@ void SortedSelItemNode::clear()
 }
 void SortedSelItemNode::extract()
 {
-	if(pItem->issel)
+	if(item.item->issel)
 	{
 		clear();
 		return;
