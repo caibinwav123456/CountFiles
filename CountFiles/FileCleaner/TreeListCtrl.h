@@ -168,6 +168,10 @@ struct TLItem
 	}
 	TLItem** GetPeerItem(TLItem*** _this=NULL);
 	virtual void Detach();
+	virtual bool IsBase()
+	{
+		return false;
+	}
 	TLItemSplice* GetSplice();
 	TLItemPair* GetCouple();
 	int ToLineNum();
@@ -205,7 +209,7 @@ struct TLItemDir:public TLItem
 	}
 	int OpenDir(bool open,bool release=false);
 	virtual void Detach();
-	bool IsBase();
+	virtual bool IsBase();
 	virtual void Release();
 	virtual uint GetDispLength();
 	ItStkItem* FromLineNum(int iline,int& lvl,int side=0);

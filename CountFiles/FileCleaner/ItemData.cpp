@@ -280,14 +280,13 @@ ItStkItem* TLItemDir::FromLineNum(int iline,int& lvl,int side)
 }
 int TLItem::ToLineNum()
 {
-	TLItem *item=this;
-	if(item==NULL)
+	assert(this!=NULL);
+	if(this==NULL)
 		return -1;
 	int iline=0;
-	bool last=false;
-	for(TLItemDir* dir=item->parent;!last;item=dir,dir=dir->parent)
+	for(TLItem *item=this;!item->IsBase();item=item->parent)
 	{
-		last=dir->IsBase();
+		TLItemDir* dir=item->parent;
 		if(item->parentidx<0)
 			return -1;
 		for(int i=0;i<item->parentidx;i++)
