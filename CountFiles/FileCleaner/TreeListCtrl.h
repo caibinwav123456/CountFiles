@@ -231,6 +231,8 @@ struct TLCore
 	TLItemDir* m_pBaseItem;
 	TLItemDir* m_pBaseParent;
 	TLUnit* m_pTlUnit;
+	string m_strFile;
+	string m_strFileErr;
 	TLCore(TLUnit* tl,TreeListTabGrid* tab)
 		:m_pTlUnit(tl)
 		,m_pTab(tab)
@@ -256,6 +258,7 @@ struct TLUnit
 	int InitialExpand();
 	bool IsCompareMode(){return m_pItemJoint!=NULL;}
 	TLCore* GetPrimaryBase(int* side=NULL);
+	void GetListFilePath(int side,string& lfile,string& efile);
 };
 class ListCtrlIterator
 {
@@ -295,8 +298,10 @@ public:
 		const char* lfileref,const char* efileref);
 	void UnLoad(bool bAll=false);
 
+	int GetUnitCount(){return m_iVec;}
 	void GetCanvasRect(RECT* rc);
 	void SetTabInfo(const TabInfo* tab);
+	void GetListFilePath(int side,string& lfile,string& efile,int idx=-1);
 
 //Draw callbacks
 	void Draw(CDC* pClientDC,bool buffered);

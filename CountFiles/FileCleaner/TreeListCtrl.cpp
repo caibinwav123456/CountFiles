@@ -57,6 +57,10 @@ void TreeListCtrl::SetTabInfo(const TabInfo* tab)
 	m_tabLeft=*tab->left;
 	m_tabRight=*tab->right;
 }
+void TreeListCtrl::GetListFilePath(int side,string& lfile,string& efile,int idx)
+{
+	m_vecLists[idx<0?m_iVec:idx]->GetListFilePath(side,lfile,efile);
+}
 int TreeListCtrl::Init()
 {
 	if(!m_bmpFolder.LoadBitmap(IDB_FOLDER))
@@ -122,6 +126,16 @@ TLCore* TLUnit::GetPrimaryBase(int* side)
 		return NULL;
 	}
 }
+void TLUnit::GetListFilePath(int side,string& lfile,string& efile)
+{
+	TLCore* core;
+	if(side<=0)
+		core=&m_treeLeft;
+	else
+		core=&m_treeRight;
+	lfile=core->m_strFile;
+	efile=core->m_strFileErr;
+}
 int TLUnit::LoadCore(TLCore& core,const char* lfile,const char* efile)
 {
 	int ret=0;
@@ -156,8 +170,8 @@ int TLUnit::Load(UINT mask,const char* lfile,const char* efile,
 	if((lfile==NULL||*lfile==0)&&(lfileref==NULL||*lfileref==0))
 		return 0;
 	int ret=0;
-	bool loadleft=(mask&FILE_LIST_ATTRIB_MAIN),
-		loadright=(mask&FILE_LIST_ATTRIB_REF);
+	bool loadleft=!!(mask&FILE_LIST_ATTRIB_MAIN),
+		loadright=!!(mask&FILE_LIST_ATTRIB_REF);
 	assert(loadleft||loadright);
 	if(loadleft&&lfile!=NULL&&*lfile!=0)
 		fail_goto(ret,0,LoadCore(m_treeLeft,lfile,efile),fail);
@@ -178,6 +192,16 @@ int TLUnit::Load(UINT mask,const char* lfile,const char* efile,
 			m_treeRight.m_pBaseItem->parentidx=0;
 	}
 	fail_goto(ret,0,InitialExpand(),fail);
+	if(loadleft)
+	{
+		m_treeLeft.m_strFile=lfile;
+		m_treeLeft.m_strFileErr=efile;
+	}
+	if(loadright)
+	{
+		m_treeRight.m_strFile=lfileref;
+		m_treeRight.m_strFileErr=efileref;
+	}
 	return 0;
 fail:
 	UnLoad();
@@ -187,6 +211,10 @@ void TLUnit::UnLoad()
 {
 	UnLoadCore(m_treeLeft);
 	UnLoadCore(m_treeRight);
+	m_treeLeft.m_strFile.clear();
+	m_treeLeft.m_strFileErr.clear();
+	m_treeRight.m_strFile.clear();
+	m_treeRight.m_strFileErr.clear();
 	if(m_pItemJoint!=NULL)
 	{
 		assert(m_pItemJoint->subpairs!=NULL);

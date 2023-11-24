@@ -53,6 +53,7 @@ public:
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnStartLoadList(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRearrangeTabSize(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnExportListFile(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);

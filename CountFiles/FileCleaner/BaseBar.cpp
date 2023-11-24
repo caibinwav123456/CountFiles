@@ -79,8 +79,10 @@ BEGIN_MESSAGE_MAP(CBaseBar, CDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO_BASE_PATH2, &CBaseBar::OnCbnSelchangeComboBasePath2)
 	ON_COMMAND(ID_CMD_MENU_OPEN, &CBaseBar::OnCmdMenuOpenDir)
 	ON_COMMAND(ID_CMD_MENU_IMP_FILE, &CBaseBar::OnCmdMenuImpFile)
+	ON_COMMAND(ID_CMD_MENU_EXPRECFILE, &CBaseBar::OnCmdMenuExpRecFile)
 	ON_COMMAND(ID_CMD_MENU_SELECT_REC, &CBaseBar::OnCmdMenuSelectRec)
 	ON_COMMAND(ID_CMD_MENU_IMP_FILE_REF, &CBaseBar::OnCmdMenuImpFileRef)
+	ON_COMMAND(ID_CMD_MENU_EXPRECFILE_REF, &CBaseBar::OnCmdMenuExpRecFileRef)
 END_MESSAGE_MAP()
 
 
@@ -160,7 +162,7 @@ void CBaseBar::RestoreCtrlState()
 	m_btnOpen2.RestoreButtonState();
 }
 
-CString CBaseBar::GetImpFileName(const CString& path)
+CString CBaseBar::GetHandleFileName(const CString& path)
 {
 	TCHAR* strFileName = new TCHAR[65536];
 	TCHAR* strFileTitle = new TCHAR[65536];
@@ -493,7 +495,7 @@ void CBaseBar::OnCmdMenuImpFile()
 	// TODO: Add your command handler code here
 	RestoreCtrlState();
 	UpdateData(TRUE);
-	CString strImpFile=GetImpFileName(m_strComboBasePath);
+	CString strImpFile=GetHandleFileName(m_strComboBasePath);
 	if(strImpFile.IsEmpty())
 		return;
 	m_strComboBasePath=strImpFile;
@@ -515,10 +517,43 @@ void CBaseBar::OnCmdMenuImpFileRef()
 	// TODO: Add your command handler code here
 	RestoreCtrlState();
 	UpdateData(TRUE);
-	CString strImpFile=GetImpFileName(m_strComboBasePathRef);
+	CString strImpFile=GetHandleFileName(m_strComboBasePathRef);
 	if(strImpFile.IsEmpty())
 		return;
 	m_strComboBasePathRef=strImpFile;
 	m_btnGo2.EnableButton(FALSE);
 	StartListLoad(FILE_LIST_ATTRIB_REF,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
+}
+
+
+void ExportRecFile(CBaseBar* basebar,int side)
+{
+	int ret=0;
+	fail_goto(ret,0,sys_mkdir((char*)CProgramData::GetExportDirPath().c_str()),fail);
+	{
+		CString strExpFile=basebar->GetHandleFileName(a2tstr(CProgramData::GetExportFilePath()));
+		string lfile=t2astr(strExpFile);
+		FListExportData data;
+		if(strExpFile.IsEmpty())
+			return;
+		data.lfile=lfile;
+		data.efile=CProgramData::GetErrListFilePath(lfile);
+		data.side=side;
+		SendMessageToIDWnd(IDW_MAIN_VIEW,WM_EXPORT_LIST_FILE,(WPARAM)&data);
+	}
+	return;
+fail:
+	PDXShowMessage(_T("Create export directory failed: %s"),a2t(get_error_desc(ret)));
+}
+void CBaseBar::OnCmdMenuExpRecFile()
+{
+	// TODO: Add your command handler code here
+	ExportRecFile(this,-1);
+}
+
+
+void CBaseBar::OnCmdMenuExpRecFileRef()
+{
+	// TODO: Add your command handler code here
+	ExportRecFile(this,1);
 }

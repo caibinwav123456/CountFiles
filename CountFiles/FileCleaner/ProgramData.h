@@ -85,6 +85,8 @@ public:
 	static int Init();
 	static string GetProgramDataBasePath();
 	static string GetCacheDirPath();
+	static string GetExportDirPath();
+	static string GetExportFilePath();
 	static string GetCFilePathRoot();
 	static string GetCacheFilePath();
 	static string GetCacheErrFilePath();
@@ -108,6 +110,7 @@ private:
 	string m_strBasePath;
 	const string m_strCachePath;
 	const string m_strCacheFileName;
+	const string m_strExpPath;
 	const string m_strCFileExt;
 	const string m_strCFileErrExt;
 	static CProgramData s_Data;

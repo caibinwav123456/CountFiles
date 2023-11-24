@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "math.h"
+#include "datetime.h"
 
 CMap<UINT,UINT,CWnd*,CWnd*>* GetIDWndMap()
 {
@@ -57,6 +58,7 @@ CProgramData::CProgramData()
 	, m_scaleX(0)
 	, m_scaleY(0)
 	, m_strCachePath("LocalCache\\")
+	, m_strExpPath("CaiBinSoft\\FileCleanerExport\\")
 	, m_strCacheFileName("current")
 	, m_strCFileExt(".fl")
 	, m_strCFileErrExt(".err")
@@ -107,6 +109,18 @@ string CProgramData::GetProgramDataBasePath()
 string CProgramData::GetCacheDirPath()
 {
 	return s_Data.GetProgramDataBasePath()+s_Data.m_strCachePath;
+}
+string CProgramData::GetExportDirPath()
+{
+	return s_Data.GetProgramDataBasePath()+s_Data.m_strExpPath;
+}
+string CProgramData::GetExportFilePath()
+{
+	CDateTime date;
+	string strdate;
+	sys_get_date_time(&date);
+	date.Format(strdate,FORMAT_DATE|FORMAT_TIME,"","","");
+	return GetExportDirPath()+strdate+s_Data.m_strCFileExt;
 }
 string CProgramData::GetCFilePathRoot()
 {

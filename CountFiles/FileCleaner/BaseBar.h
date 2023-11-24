@@ -28,6 +28,7 @@ public:
 public:
 	BOOL CreateBar(CWnd* pParentWnd);
 	void SetBackPathMaxCount(UINT nmax);
+	CString GetHandleFileName(const CString& path);
 
 	// Dialog Data
 #ifdef AFX_DESIGN_TIME
@@ -47,7 +48,6 @@ private:
 	void RelayoutCtrlGroup(BarRelayoutObject* layout);
 
 	void UpdateBaseBackBuffer(LPCTSTR left,LPCTSTR right);
-	CString GetImpFileName(const CString& path);
 	void RestoreCtrlState();
 
 	BOOL ValidatePaths(FListLoadData& path,UINT accept_type);
@@ -100,8 +100,10 @@ private:
 	afx_msg void OnCbnSelchangeComboBasePath2();
 	afx_msg void OnCmdMenuOpenDir();
 	afx_msg void OnCmdMenuImpFile();
+	afx_msg void OnCmdMenuExpRecFile();
 	afx_msg void OnCmdMenuSelectRec();
 	afx_msg void OnCmdMenuImpFileRef();
+	afx_msg void OnCmdMenuExpRecFileRef();
 
 	DECLARE_MESSAGE_MAP()
 };
