@@ -69,11 +69,15 @@ BOOL CDlgLoad::OnInitDialog()
 
 	// TODO:  Add extra initialization here
 	string cache_path=CProgramData::GetCacheDirPath();
+	string file=CProgramData::GetCacheFilePath();
+	string err_file=CProgramData::GetCacheErrFilePath();
 	if(0!=sys_mkdir((char*)cache_path.c_str()))
 	{
 		PDXShowMessage(_T("Create cache directory \"%s\" failed"),a2t(cache_path));
 		goto exitdlg;
 	}
+	sys_fdelete((char*)file.c_str());
+	sys_fdelete((char*)err_file.c_str());
 
 	InitializeCriticalSection(&m_cs);
 	if(!StartLoadingThread())
@@ -98,6 +102,12 @@ static int cb_wr_file_info(byte* buf,uint buflen,void* param)
 static int cb_wr_file_err(byte* buf,uint buflen,void* param)
 {
 	FileObject* obj=(FileObject*)param;
+	if(obj->hFileErr==NULL)
+	{
+		obj->hFileErr=sys_fopen((char*)obj->err_file.c_str(),FILE_WRITE|FILE_CREATE_ALWAYS);
+		if(!VALID(obj->hFileErr))
+			return ERR_OPEN_FILE_FAILED;
+	}
 	return sys_fwrite(obj->hFileErr,buf,buflen,NULL);
 }
 static int cb_cnt_file_prog(byte* buf,uint buflen,void* param)
@@ -148,7 +158,7 @@ BOOL CDlgLoad::StartLoadingThread()
 	obj->file=CProgramData::GetCacheFilePath();
 	obj->err_file=CProgramData::GetCacheErrFilePath();
 	obj->dlg=this;
-	obj->user_canceled=FALSE;
+	obj->user_canceled=false;
 
 	m_loadingObject.callback=callback;
 	m_loadingObject.obj=obj;
@@ -159,14 +169,6 @@ BOOL CDlgLoad::StartLoadingThread()
 	if(!VALID(obj->hFile))
 	{
 		PDXShowMessage(_T("\"%s\": can not open file for writing"),a2t(obj->file));
-		safe_delete_obj(m_loadingObject);
-		return FALSE;
-	}
-	obj->hFileErr=sys_fopen((char*)obj->err_file.c_str(),FILE_WRITE|FILE_CREATE_ALWAYS);
-	if(!VALID(obj->hFileErr))
-	{
-		PDXShowMessage(_T("\"%s\": can not open file for writing"),a2t(obj->err_file));
-		clean_write_obj(obj,true);
 		safe_delete_obj(m_loadingObject);
 		return FALSE;
 	}
@@ -252,5 +254,5 @@ void CDlgLoad::OnOK()
 void CDlgLoad::OnCancel()
 {
 	// TODO: Add your specialized code here and/or call the base class
-	m_loadingObject.obj->user_canceled=TRUE;
+	m_loadingObject.obj->user_canceled=true;
 }

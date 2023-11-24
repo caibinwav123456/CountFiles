@@ -12,7 +12,7 @@ struct FileObject
 	void* hFile;
 	void* hFileErr;
 	CDlgLoad* dlg;
-	BOOL user_canceled;
+	bool user_canceled;
 	int ret;
 };
 

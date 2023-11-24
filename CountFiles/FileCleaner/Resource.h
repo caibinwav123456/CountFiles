@@ -57,13 +57,15 @@
 #define ID_CMD_MENU_IMP_FILE            32772
 #define ID_CMD_MENU_SELECT_REC          32773
 #define ID_CMD_MENU_IMP_FILE_REF        32774
+#define ID_CMD_MENU_EXPRECFILE          32775
+#define ID_CMD_MENU_EXPRECFILE_REF      32776
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        341
-#define _APS_NEXT_COMMAND_VALUE         32775
+#define _APS_NEXT_COMMAND_VALUE         32777
 #define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

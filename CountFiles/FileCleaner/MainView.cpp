@@ -50,6 +50,7 @@ CMainView::~CMainView()
 BEGIN_MESSAGE_MAP(CMainView, CScrollView)
 	ON_MESSAGE(WM_FILE_LIST_START_LOAD,OnStartLoadList)
 	ON_MESSAGE(WM_REARRANGE_TAB_SIZE,OnRearrangeTabSize)
+	ON_MESSAGE(WM_EXPORT_LIST_FILE,OnExportListFile)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
@@ -234,6 +235,27 @@ LRESULT CMainView::OnRearrangeTabSize(WPARAM wParam, LPARAM lParam)
 	m_TreeList.SetTabInfo(tab);
 	Invalidate();
 	return 0;
+}
+LRESULT CMainView::OnExportListFile(WPARAM wParam, LPARAM lParam)
+{
+	int ret=0;
+	FListExportData* pData=(FListExportData*)wParam;
+	string lfile,efile;
+	m_TreeList.GetListFilePath(pData->side,lfile,efile);
+	if(lfile.empty())
+	{
+		PDXShowMessage(_T("No files will be exported!"));
+		return 0;
+	}
+	fail_goto(ret,0,sys_fcopy((char*)lfile.c_str(),(char*)pData->lfile.c_str()),fail);
+	if(!efile.empty())
+		fail_goto(ret,0,sys_fcopy((char*)efile.c_str(),(char*)pData->efile.c_str()),fail);
+	return 0;
+fail:
+	sys_fdelete((char*)pData->lfile.c_str());
+	sys_fdelete((char*)pData->efile.c_str());
+	PDXShowMessage(_T("Export faild: %s"),a2t(get_error_desc(ret)));
+	return ret;
 }
 
 static inline UINT GetKey()
