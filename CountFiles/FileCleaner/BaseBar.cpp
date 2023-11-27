@@ -261,7 +261,7 @@ BOOL CBaseBar::StartListLoad(UINT mask,UINT accept_type)
 		m_strBasePath=m_strComboBasePath;
 	if(mask&FILE_LIST_ATTRIB_REF)
 		m_strBasePathRef=m_strComboBasePathRef;
-	FListLoadData data(m_strBasePath,m_strBasePathRef,ACC_PATH_TYPE_DIR|ACC_PATH_TYPE_FILE);
+	FListLoadData data(m_strBasePath,m_strBasePathRef,mask);
 	UpdateBaseBackBuffer((mask&FILE_LIST_ATTRIB_MAIN)?m_strComboBasePath:_T(""),
 		(mask&FILE_LIST_ATTRIB_REF)?m_strComboBasePathRef:_T(""));
 	if(!ValidatePaths(data,accept_type))
@@ -531,6 +531,8 @@ void ExportRecFile(CBaseBar* basebar,int side)
 	int ret=0;
 	fail_goto(ret,0,sys_mkdir((char*)CProgramData::GetExportDirPath().c_str()),fail);
 	{
+		if(!SendMessageToIDWnd(IDW_MAIN_VIEW,WM_LIST_FILE_VALID,(WPARAM)side))
+			return;
 		CString strExpFile=basebar->GetHandleFileName(a2tstr(CProgramData::GetExportFilePath()));
 		string lfile=t2astr(strExpFile);
 		FListExportData data;
