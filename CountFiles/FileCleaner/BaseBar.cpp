@@ -166,10 +166,18 @@ CString CBaseBar::GetHandleFileName(const CString& path)
 {
 	TCHAR* strFileName = new TCHAR[65536];
 	TCHAR* strFileTitle = new TCHAR[65536];
-	_tcscpy_s(strFileName,65535,path);
-	int pos=path.ReverseFind(_T('\\'));
-	pos=(pos<0?0:pos+1);
-	_tcscpy_s(strFileTitle,65535,((LPCTSTR)path)+pos);
+	if(path.IsEmpty())
+	{
+		_tcscpy_s(strFileName,65535,a2t(CProgramData::GetExportDirPath()));
+		*strFileTitle=0;
+	}
+	else
+	{
+		_tcscpy_s(strFileName,65535,path);
+		int pos=path.ReverseFind(_T('\\'));
+		pos=(pos<0?0:pos+1);
+		_tcscpy_s(strFileTitle,65535,((LPCTSTR)path)+pos);
+	}
 	CFileDialog dlg(TRUE, NULL, NULL, 0, _T("File List Files|*.fl||"), this);
 	dlg.m_ofn.lpstrFile = strFileName;
 	dlg.m_ofn.lpstrFileTitle = strFileTitle;
