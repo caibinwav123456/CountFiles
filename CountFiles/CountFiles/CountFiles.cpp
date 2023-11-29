@@ -100,7 +100,8 @@ int _tmain(int argc,TCHAR** argv)
 	{
 		printf("Count Files V1.0\n"
 			"Copyright CaiBin 2023\n"
-			"All Rights Reserved\n\n"
+			"All Rights Reserved\n"
+			"Type \'CountFiles -h\' for help\n\n"
 		);
 		return 0;
 	}
