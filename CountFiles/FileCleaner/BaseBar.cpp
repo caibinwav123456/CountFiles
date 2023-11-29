@@ -162,11 +162,12 @@ void CBaseBar::RestoreCtrlState()
 	m_btnOpen2.RestoreButtonState();
 }
 
-CString CBaseBar::GetHandleFileName(const CString& path)
+CString CBaseBar::GetHandleFileName(const CString& path,BOOL bSave)
 {
 	TCHAR* strFileName = new TCHAR[65536];
 	TCHAR* strFileTitle = new TCHAR[65536];
-	if(path.IsEmpty())
+	dword type;
+	if(bSave||path.IsEmpty()||sys_fstat((char*)t2a(path),&type)!=0||type!=FILE_TYPE_NORMAL)
 	{
 		_tcscpy_s(strFileName,65535,a2t(CProgramData::GetExportDirPath()));
 		*strFileTitle=0;
@@ -178,7 +179,7 @@ CString CBaseBar::GetHandleFileName(const CString& path)
 		pos=(pos<0?0:pos+1);
 		_tcscpy_s(strFileTitle,65535,((LPCTSTR)path)+pos);
 	}
-	CFileDialog dlg(TRUE, NULL, NULL, 0, _T("File List Files|*.fl||"), this);
+	CFileDialog dlg(!bSave, NULL, NULL, 0, _T("File List Files|*.fl||"), this);
 	dlg.m_ofn.lpstrFile = strFileName;
 	dlg.m_ofn.lpstrFileTitle = strFileTitle;
 	dlg.m_ofn.nMaxFile = 65536;
@@ -541,7 +542,7 @@ void ExportRecFile(CBaseBar* basebar,int side)
 	{
 		if(!SendMessageToIDWnd(IDW_MAIN_VIEW,WM_LIST_FILE_VALID,(WPARAM)side))
 			return;
-		CString strExpFile=basebar->GetHandleFileName(a2tstr(CProgramData::GetExportFilePath()));
+		CString strExpFile=basebar->GetHandleFileName(a2tstr(CProgramData::GetExportFilePath()),TRUE);
 		string lfile=t2astr(strExpFile);
 		FListExportData data;
 		if(strExpFile.IsEmpty())

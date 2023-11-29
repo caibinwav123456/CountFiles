@@ -28,7 +28,7 @@ public:
 public:
 	BOOL CreateBar(CWnd* pParentWnd);
 	void SetBackPathMaxCount(UINT nmax);
-	CString GetHandleFileName(const CString& path);
+	CString GetHandleFileName(const CString& path,BOOL bSave=FALSE);
 
 	// Dialog Data
 #ifdef AFX_DESIGN_TIME
