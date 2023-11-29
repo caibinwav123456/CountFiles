@@ -275,8 +275,8 @@ BOOL CBaseBar::StartListLoad(UINT mask,UINT accept_type)
 		(mask&FILE_LIST_ATTRIB_REF)?m_strComboBasePathRef:_T(""));
 	if(!ValidatePaths(data,accept_type))
 		return FALSE;
-	if(data.mask==0)
-		return TRUE;
+	//if(data.mask==0)
+	//	return TRUE;
 	return PDXGetWndFromID(IDW_MAIN_VIEW)->SendMessage(WM_FILE_LIST_START_LOAD,(WPARAM)&data);
 }
 
