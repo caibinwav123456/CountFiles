@@ -58,7 +58,8 @@ CProgramData::CProgramData()
 	, m_scaleX(0)
 	, m_scaleY(0)
 	, m_strCachePath("LocalCache\\")
-	, m_strExpPath("CaiBinSoft\\FileCleanerExport\\")
+	, m_strHomePath("CaiBinSoft\\")
+	, m_strExpPath("FileCleanerExport\\")
 	, m_strCacheFileName("current")
 	, m_strCFileExt(".fl")
 	, m_strCFileErrExt(".err")
@@ -110,9 +111,13 @@ string CProgramData::GetCacheDirPath()
 {
 	return s_Data.GetProgramDataBasePath()+s_Data.m_strCachePath;
 }
+string CProgramData::GetProgramHomePath()
+{
+	return s_Data.GetProgramDataBasePath()+s_Data.m_strHomePath;
+}
 string CProgramData::GetExportDirPath()
 {
-	return s_Data.GetProgramDataBasePath()+s_Data.m_strExpPath;
+	return s_Data.GetProgramHomePath()+s_Data.m_strExpPath;
 }
 string CProgramData::GetExportFilePath()
 {
