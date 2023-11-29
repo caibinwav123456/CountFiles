@@ -109,15 +109,15 @@ string CProgramData::GetProgramDataBasePath()
 }
 string CProgramData::GetCacheDirPath()
 {
-	return s_Data.GetProgramDataBasePath()+s_Data.m_strCachePath;
+	return GetProgramDataBasePath()+s_Data.m_strCachePath;
 }
 string CProgramData::GetProgramHomePath()
 {
-	return s_Data.GetProgramDataBasePath()+s_Data.m_strHomePath;
+	return GetProgramDataBasePath()+s_Data.m_strHomePath;
 }
 string CProgramData::GetExportDirPath()
 {
-	return s_Data.GetProgramHomePath()+s_Data.m_strExpPath;
+	return GetProgramHomePath()+s_Data.m_strExpPath;
 }
 string CProgramData::GetExportFilePath()
 {
@@ -129,15 +129,15 @@ string CProgramData::GetExportFilePath()
 }
 string CProgramData::GetCFilePathRoot()
 {
-	return s_Data.GetCacheDirPath()+s_Data.m_strCacheFileName;
+	return GetCacheDirPath()+s_Data.m_strCacheFileName;
 }
 string CProgramData::GetCacheFilePath()
 {
-	return s_Data.GetCFilePathRoot()+s_Data.m_strCFileExt;
+	return GetCFilePathRoot()+s_Data.m_strCFileExt;
 }
 string CProgramData::GetCacheErrFilePath()
 {
-	return s_Data.GetCacheFilePath()+s_Data.m_strCFileErrExt;
+	return GetCacheFilePath()+s_Data.m_strCFileErrExt;
 }
 string CProgramData::GetErrListFilePath(const string& path)
 {
