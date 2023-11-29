@@ -231,13 +231,14 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 		}
 		mask|=FILE_LIST_ATTRIB_REF;
 	}
-	if(mask==0)
-		return true;
-	fail_op(ret,0,m_TreeList.Load(mask,strList.c_str(),strErrList.c_str(),strListRef.c_str(),strErrListRef.c_str()),
+	if(mask!=0)
 	{
-		PDXShowMessage(_T("Load file list failed: %s"),a2t(get_error_desc(ret)));
-		goto fail;
-	})
+		fail_op(ret,0,m_TreeList.Load(mask,strList.c_str(),strErrList.c_str(),strListRef.c_str(),strErrListRef.c_str()),
+		{
+			PDXShowMessage(_T("Load file list failed: %s"),a2t(get_error_desc(ret)));
+			goto fail;
+		})
+	}
 	Invalidate();
 	return TRUE;
 fail:
