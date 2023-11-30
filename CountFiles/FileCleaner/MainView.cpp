@@ -150,6 +150,8 @@ int CMainView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	//test();
 	if(m_TreeList.Init()!=0)
 		return -1;
+	m_idxList=0;
+	m_vstrRecentPath.push_back("");
 
 	return 0;
 }
@@ -184,10 +186,24 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 		{
 			if(lpData->mask&FILE_LIST_ATTRIB_MAIN)
 			{
-				CDlgLoad dlg(NULL,lpData->left);
-				if(dlg.DoModal()!=IDOK)
-					goto fail;
+				string& strRecentPath=m_vstrRecentPath[m_idxList];
+				bool recnt=(strRecentPath.empty()||strRecentPath!=path);
+				if(!recnt)
+				{
+					CString strout;
+					strout.Format(_T("The directory \'%s\' has been counted recently, recount it?")
+						,(LPCTSTR)lpData->left);
+					if(MessageBox(strout,NULL,MB_YESNO)==IDYES)
+						recnt=true;
+				}
+				if(recnt)
+				{
+					CDlgLoad dlg(NULL,lpData->left);
+					if(dlg.DoModal()!=IDOK)
+						goto fail;
+				}
 				strList=CProgramData::GetCacheFilePath();
+				strRecentPath=path;
 			}
 			else
 			{

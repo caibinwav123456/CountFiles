@@ -29,6 +29,8 @@ public:
 // Attributes
 public:
 	CScrollTreeList m_TreeList;
+	vector<string> m_vstrRecentPath;
+	UINT m_idxList;
 
 // Operations
 public:
