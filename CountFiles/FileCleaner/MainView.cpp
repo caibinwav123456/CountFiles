@@ -191,8 +191,8 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 				if(!recnt)
 				{
 					CString strout;
-					strout.Format(_T("The directory \'%s\' has been counted recently, recount it?")
-						,(LPCTSTR)lpData->left);
+					strout.Format(_T("The directory \'%s\' has been counted recently, recount it?"),
+						(LPCTSTR)lpData->left);
 					if(MessageBox(strout,NULL,MB_YESNO)==IDYES)
 						recnt=true;
 				}

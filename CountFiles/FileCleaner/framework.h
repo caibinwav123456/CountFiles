@@ -28,11 +28,9 @@
 #include <afxcontrolbars.h>     // MFC support for ribbons and control bars
 
 
-
-
-
-
-
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
 
 
 #ifdef _UNICODE
