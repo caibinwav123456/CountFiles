@@ -150,8 +150,6 @@ int CMainView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	//test();
 	if(m_TreeList.Init()!=0)
 		return -1;
-	m_idxList=0;
-	m_vstrRecentPath.push_back("");
 
 	return 0;
 }
@@ -186,17 +184,17 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 		{
 			if(lpData->mask&FILE_LIST_ATTRIB_MAIN)
 			{
-				string& strRecentPath=m_vstrRecentPath[m_idxList];
-				bool recnt=(strRecentPath.empty()||strRecentPath!=path);
-				if(!recnt)
+				string& strRecentPath=m_TreeList.GetRecentDirPath();
+				bool cntdir=(strRecentPath.empty()||strRecentPath!=path);
+				if(!cntdir)
 				{
 					CString strout;
 					strout.Format(_T("The directory \'%s\' has been counted recently, recount it?"),
 						(LPCTSTR)lpData->left);
 					if(MessageBox(strout,NULL,MB_YESNO)==IDYES)
-						recnt=true;
+						cntdir=true;
 				}
-				if(recnt)
+				if(cntdir)
 				{
 					CDlgLoad dlg(NULL,lpData->left);
 					if(dlg.DoModal()!=IDOK)
