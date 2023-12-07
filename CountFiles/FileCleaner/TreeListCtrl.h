@@ -247,6 +247,7 @@ struct TLUnit
 	TLItemDir* m_pItemJoint;
 	ItemSelector m_ItemSel;
 	uint m_nTotalLine;
+	string m_strRecentPath;
 	TLUnit(TreeListCtrl* pOwner,TreeListTabGrid* tabLeft,TreeListTabGrid* tabRight)
 		:m_ItemSel(pOwner),m_treeLeft(this,tabLeft),m_treeRight(this,tabRight)
 		,m_pItemJoint(NULL),m_nTotalLine(0){}
@@ -302,6 +303,7 @@ public:
 	void GetCanvasRect(RECT* rc);
 	void SetTabInfo(const TabInfo* tab);
 	void GetListFilePath(int side,string& lfile,string& efile,int idx=-1);
+	string& GetRecentDirPath(int idx=-1);
 
 //Draw callbacks
 	void Draw(CDC* pClientDC,bool buffered);

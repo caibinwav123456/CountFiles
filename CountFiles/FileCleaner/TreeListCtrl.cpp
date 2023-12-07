@@ -61,6 +61,10 @@ void TreeListCtrl::GetListFilePath(int side,string& lfile,string& efile,int idx)
 {
 	m_vecLists[idx<0?m_iVec:idx]->GetListFilePath(side,lfile,efile);
 }
+string& TreeListCtrl::GetRecentDirPath(int idx)
+{
+	return m_vecLists[idx<0?m_iVec:idx]->m_strRecentPath;
+}
 int TreeListCtrl::Init()
 {
 	if(!m_bmpFolder.LoadBitmap(IDB_FOLDER))
