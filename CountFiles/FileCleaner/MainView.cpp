@@ -388,7 +388,7 @@ void CMainView::OnRButtonUp(UINT nFlags, CPoint point)
 void CMainView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// TODO: Add your message handler code here and/or call default
-	CScrollView::OnVScroll(nSBCode, nPos, pScrollBar);
+	CView::OnVScroll(nSBCode, nPos, pScrollBar);
 
 	SCROLLINFO info;
 	GetScrollInfo(SB_VERT, &info, SIF_ALL);
