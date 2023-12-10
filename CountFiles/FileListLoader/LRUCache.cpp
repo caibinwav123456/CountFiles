@@ -4,6 +4,13 @@
 #include <string.h>
 #define clear_mem(m) memset(&m,0,sizeof(m))
 #define NULLSLOT ((uint)-1)
+#define clear_list(head,tail) \
+	head.next=&tail; \
+	tail.prev=&head
+#define init_list(head,tail) \
+	clear_mem(head); \
+	clear_mem(tail); \
+	clear_list(head,tail)
 #ifdef CONFIG_X64
 #define hiptr(ptr) ((uint)(((unsigned long long)(ptr))>>32))
 #define loptr(ptr) ((uint)(((unsigned long long)(ptr))&0xffffffff))
@@ -61,14 +68,9 @@ LRUCache::LRUCache(uint _capacity,void (*_free_item)(void*))
 		printf("capacity overflow, reset to 3000\n");
 		capacity=3000;
 	}
-	clear_mem(head);
-	clear_mem(tail);
-	clear_mem(free_head);
-	clear_mem(free_tail);
-	head.next=&tail;
-	tail.prev=&head;
-	free_head.next=&free_tail;
-	free_tail.prev=&free_head;
+	init_list(head_lru,tail_lru);
+	init_list(head_sid,tail_sid);
+	init_list(head_free,tail_free);
 	lookup_table=new HandleSlot[capacity];
 	memset(lookup_table,0,capacity*sizeof(HandleSlot));
 	for(int i=0;i<(int)capacity;i++)
@@ -84,10 +86,9 @@ LRUCache::~LRUCache()
 }
 void LRUCache::clear()
 {
-	head.next=&tail;
-	tail.prev=&head;
-	free_head.next=&free_tail;
-	free_tail.prev=&free_head;
+	clear_list(head_lru,tail_lru);
+	clear_list(head_sid,tail_sid);
+	clear_list(head_free,tail_free);
 	if(size==0)
 		return;
 	size=0;
@@ -110,10 +111,12 @@ void* LRUCache::get(void** phandle)
 		return NULL;
 	uint sid=loptr(handle);
 	sanitize(slot);
+	if(tail_sid.prev!=&head_sid)
+		sanitize(container_of(tail_sid.prev,itemsid,HandleSlot)-lookup_table);
 	HandleSlot& hslot=lookup_table[slot];
 	if(hslot.sid==sid&&hslot.item!=NULL)
 	{
-		move_to_front(&hslot);
+		move_to_front_lru(&hslot);
 		return hslot.item;
 	}
 	else if(hslot.oldsid==sid)
@@ -122,7 +125,7 @@ void* LRUCache::get(void** phandle)
 			return NULL;
 		HandleSlot& newslot=lookup_table[hslot.newslot];
 		handle=mkptr(hslot.newslot,newslot.sid);
-		move_to_front(&newslot);
+		move_to_front_lru(&newslot);
 		return newslot.item;
 	}
 	else
@@ -135,21 +138,24 @@ void LRUCache::put(void* item,void** phandle)
 	void*& handle=*phandle;
 	HandleSlot* pslot;
 	bool full;
-	if(free_head.next!=&free_tail)
+	if(head_free.next!=&tail_free)
 	{
-		pslot=free_head.next;
-		remove(pslot);
-		add_to_front(pslot);
+		pslot=container_of(head_free.next,itemlru,HandleSlot);
+		remove_from_list(&pslot->itemlru);
+		pslot->oldsid=0;
+		pslot->newslot=NULLSLOT;
+		add_to_front_lru(pslot);
+		add_to_front_sid(pslot);
 		size++;
 		full=false;
 	}
 	else
 	{
-		pslot=tail.prev;
+		pslot=container_of(tail_lru.prev,itemlru,HandleSlot);
 		free_item(pslot->item);
 		pslot->oldsid=pslot->sid;
 		pslot->newslot=NULLSLOT;
-		move_to_front(pslot);
+		move_to_front_lru(pslot);
 		full=true;
 	}
 	HandleSlot& slot=*pslot;
@@ -178,33 +184,33 @@ end_update_new_slot:
 	next_sid=next_id(next_sid);
 	handle=mkptr(idx,slot.sid);
 }
-void LRUCache::move_to_front(HandleSlot* slot)
+void LRUCache::move_to_front(listitem* slot,listitem* head)
 {
 	slot->prev->next=slot->next;
 	slot->next->prev=slot->prev;
-	HandleSlot* next=head.next;
+	listitem* next=head->next;
 	next->prev=slot;
-	head.next=slot;
-	slot->prev=&head;
+	head->next=slot;
+	slot->prev=head;
 	slot->next=next;
 }
-void LRUCache::add_to_front(HandleSlot* slot)
+void LRUCache::add_to_front(listitem* slot,listitem* head)
 {
-	HandleSlot* next=head.next;
-	head.next=slot;
+	listitem* next=head->next;
+	head->next=slot;
 	next->prev=slot;
-	slot->prev=&head;
+	slot->prev=head;
 	slot->next=next;
 }
-void LRUCache::add_to_free(HandleSlot* slot)
+void LRUCache::add_to_free_list(listitem* slot)
 {
-	HandleSlot* prev=free_tail.prev;
-	free_tail.prev=slot;
+	listitem* prev=tail_free.prev;
+	tail_free.prev=slot;
 	prev->next=slot;
 	slot->prev=prev;
-	slot->next=&free_tail;
+	slot->next=&tail_free;
 }
-void LRUCache::remove(HandleSlot* slot)
+void LRUCache::remove_from_list(listitem* slot)
 {
 	slot->prev->next=slot->next;
 	slot->next->prev=slot->prev;
@@ -213,29 +219,29 @@ void LRUCache::remove(HandleSlot* slot)
 inline void LRUCache::sanitize_one_slot(uint nslot)
 {
 	HandleSlot& hslot=lookup_table[nslot];
+	if(hslot.sid==0)
+		return;
 	uint s=expire_id(hslot.sid,next_sid);
 	if(s==hslot.sid)
 		return;
 	hslot.sid=0;
-	remove(&hslot);
+	remove_all(&hslot);
 	add_to_free(&hslot);
 	size--;
 	if(hslot.item!=NULL)
-	{
 		free_item(hslot.item);
-		hslot.item=NULL;
-	}
 }
 void LRUCache::sanitize(uint nslot)
 {
 	sanitize_one_slot(nslot);
 	HandleSlot& hslot=lookup_table[nslot];
+	if(hslot.oldsid==0||hslot.newslot==NULLSLOT||hslot.newslot==nslot)
+		return;
 	uint s=expire_id(hslot.oldsid,next_sid);
-	if(s!=hslot.oldsid)
-	{
-		hslot.oldsid=0;
-		if(hslot.newslot!=NULLSLOT&&hslot.newslot!=nslot)
-			sanitize_one_slot(hslot.newslot);
-		hslot.newslot=NULLSLOT;
-	}
+	if(s==hslot.oldsid)
+		return;
+	uint newslot=hslot.newslot;
+	hslot.oldsid=0;
+	hslot.newslot=NULLSLOT;
+	sanitize_one_slot(newslot);
 }
