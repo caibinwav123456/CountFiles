@@ -390,37 +390,37 @@ void CMainView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	// TODO: Add your message handler code here and/or call default
 	CScrollView::OnVScroll(nSBCode, nPos, pScrollBar);
 
-    SCROLLINFO info;
-    GetScrollInfo(SB_VERT, &info, SIF_ALL);
+	SCROLLINFO info;
+	GetScrollInfo(SB_VERT, &info, SIF_ALL);
 
-    int pos = info.nPos;
-    int save = pos;
-    switch (nSBCode)
-    {
-    case SB_LEFT: pos = info.nMin; break;
-    case SB_RIGHT: pos = info.nMax; break;
-    case SB_LINELEFT: pos--; break;
-    case SB_LINERIGHT: pos++;  break;
-    case SB_PAGELEFT: pos -= info.nPage; break;
-    case SB_PAGERIGHT: pos += info.nPage; break;
-    case SB_THUMBPOSITION: pos = info.nTrackPos; break;
-    case SB_THUMBTRACK: pos = info.nTrackPos; break;
-    }
+	int pos = info.nPos;
+	int save = pos;
+	switch (nSBCode)
+	{
+	case SB_LEFT: pos = info.nMin; break;
+	case SB_RIGHT: pos = info.nMax; break;
+	case SB_LINELEFT: pos--; break;
+	case SB_LINERIGHT: pos++;  break;
+	case SB_PAGELEFT: pos -= info.nPage; break;
+	case SB_PAGERIGHT: pos += info.nPage; break;
+	case SB_THUMBPOSITION: pos = info.nTrackPos; break;
+	case SB_THUMBTRACK: pos = info.nTrackPos; break;
+	}
 
-    //make sure the new position is within range
-    if (pos < info.nMin) pos = info.nMin;
-    int max = info.nMax - info.nPage + 1;
-    if (pos > max) pos = max;
+	//make sure the new position is within range
+	if (pos < info.nMin) pos = info.nMin;
+	int max = info.nMax - info.nPage + 1;
+	if (pos > max) pos = max;
 
 	OnScrollBy(CSize(0, pos - save), 1);
 
-    //EDIT: moved this line after OnScrollBy and added condition
-    if (info.nPos != pos)
-    {
-        info.nPos = pos;
-        SetScrollInfo(SB_VERT, &info, FALSE);
-    }
- 	CPoint point=GetMousePos(this);
+	//EDIT: moved this line after OnScrollBy and added condition
+	if (info.nPos != pos)
+	{
+		info.nPos = pos;
+		SetScrollInfo(SB_VERT, &info, FALSE);
+	}
+	CPoint point=GetMousePos(this);
 	m_TreeList.OnMMove(point,GetKey());
 }
 
