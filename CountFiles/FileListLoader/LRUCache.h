@@ -11,7 +11,7 @@
 struct listitem
 {
 	listitem* prev;
-	listitem* next;		
+	listitem* next;
 };
 struct HandleSlot
 {
