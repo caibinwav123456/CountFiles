@@ -12,8 +12,6 @@ DLL int compare_pathname(const string& a,const string& b)
 		return ret;
 	if(a.size()!=b.size())
 		return a.size()<b.size()?-1:1;
-	if(a!=b)
-		return a<b?-1:1;
 	return 0;
 }
 DLL string format_segmented_u64(const UInteger64& u64)
