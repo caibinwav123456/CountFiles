@@ -46,7 +46,7 @@ static inline uint expire_id(uint id,uint refid)
 {
 	short sid=(short)(ushort)id;
 	short srefid=(short)(ushort)refid;
-	if(srefid-sid>=0)
+	if((short)(srefid-sid)>=0)
 		return id;
 	short rid=srefid-(short)0x7fff;
 	return (uint)(ushort)rid;
