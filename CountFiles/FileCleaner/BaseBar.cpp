@@ -167,17 +167,17 @@ CString CBaseBar::GetHandleFileName(const CString& path,BOOL bSave)
 	TCHAR* strFileName = new TCHAR[65536];
 	TCHAR* strFileTitle = new TCHAR[65536];
 	dword type;
-	if(bSave||path.IsEmpty()||sys_fstat((char*)t2a(path),&type)!=0||type!=FILE_TYPE_NORMAL)
-	{
-		_tcscpy_s(strFileName,65535,a2t(CProgramData::GetExportDirPath()));
-		*strFileTitle=0;
-	}
-	else
+	if((!path.IsEmpty()) && (bSave || (sys_fstat((char*)t2a(path),&type)==0 && type==FILE_TYPE_NORMAL)))
 	{
 		_tcscpy_s(strFileName,65535,path);
 		int pos=path.ReverseFind(_T('\\'));
 		pos=(pos<0?0:pos+1);
 		_tcscpy_s(strFileTitle,65535,((LPCTSTR)path)+pos);
+	}
+	else
+	{
+		_tcscpy_s(strFileName,65535,a2t(CProgramData::GetExportDirPath()));
+		*strFileTitle=0;
 	}
 	CFileDialog dlg(!bSave, NULL, NULL, 0, _T("File List Files|*.fl||"), this);
 	dlg.m_ofn.lpstrFile = strFileName;
