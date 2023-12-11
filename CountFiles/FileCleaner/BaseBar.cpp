@@ -538,23 +538,33 @@ void CBaseBar::OnCmdMenuImpFileRef()
 void ExportRecFile(CBaseBar* basebar,int side)
 {
 	int ret=0;
-	fail_goto(ret,0,sys_mkdir((char*)CProgramData::GetExportDirPath().c_str()),fail);
+	fail_op(ret,0,sys_mkdir((char*)CProgramData::GetExportDirPath().c_str()),
 	{
-		if(!SendMessageToIDWnd(IDW_MAIN_VIEW,WM_LIST_FILE_VALID,(WPARAM)side))
+		PDXShowMessage(_T("Create export directory failed: %s"),a2t(get_error_desc(ret)));
+		return;
+	})
+	if(!SendMessageToIDWnd(IDW_MAIN_VIEW,WM_LIST_FILE_VALID,(WPARAM)side))
+		return;
+	CString strExpFile=basebar->GetHandleFileName(a2tstr(CProgramData::GetExportFilePath()),TRUE);
+	if(strExpFile.IsEmpty())
+		return;
+	string lfile=t2astr(strExpFile);
+	dword type;
+	if(sys_fstat((char*)lfile.c_str(),&type)==0)
+	{
+		if(type==FILE_TYPE_DIR)
+		{
+			PDXShowMessage(_T("Path already exists"));
 			return;
-		CString strExpFile=basebar->GetHandleFileName(a2tstr(CProgramData::GetExportFilePath()),TRUE);
-		string lfile=t2astr(strExpFile);
-		FListExportData data;
-		if(strExpFile.IsEmpty())
+		}
+		else if(basebar->MessageBox(_T("File already exists, rewrite it?"),NULL,MB_YESNO)!=IDYES)
 			return;
-		data.lfile=lfile;
-		data.efile=CProgramData::GetErrListFilePath(lfile);
-		data.side=side;
-		SendMessageToIDWnd(IDW_MAIN_VIEW,WM_EXPORT_LIST_FILE,(WPARAM)&data);
 	}
-	return;
-fail:
-	PDXShowMessage(_T("Create export directory failed: %s"),a2t(get_error_desc(ret)));
+	FListExportData data;
+	data.lfile=lfile;
+	data.efile=CProgramData::GetErrListFilePath(lfile);
+	data.side=side;
+	SendMessageToIDWnd(IDW_MAIN_VIEW,WM_EXPORT_LIST_FILE,(WPARAM)&data);
 }
 void CBaseBar::OnCmdMenuExpRecFile()
 {
