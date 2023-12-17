@@ -1,7 +1,16 @@
 #include "pch.h"
 #include "math.h"
 #include "datetime.h"
-
+#include "algor_templ.h"
+#include "utility.h"
+#include "stdlib.h"
+#include "time.h"
+#define safe_release(ptr) \
+	if(ptr!=NULL) \
+	{ \
+		delete ptr; \
+		ptr=NULL; \
+	}
 CMap<UINT,UINT,CWnd*,CWnd*>* GetIDWndMap()
 {
 	static CMap<UINT,UINT,CWnd*,CWnd*> map;
@@ -43,6 +52,166 @@ void PDXShowMessage(LPCTSTR format,...)
 	va_end(args);
 	AfxMessageBox(strMsg);
 }
+class CBaseTree;
+class CBaseList;
+struct PathNode
+{
+	int ref;
+	PathNode():ref(1){}
+	virtual void Release()=0;
+	virtual string GetPath()=0;
+	virtual PathNode* Dup()=0;
+	virtual PathNode* GetSub(const string& name)=0;
+};
+struct PathNodeList:public PathNode
+{
+	PathNodeList* prev;
+	PathNodeList* next;
+	string extern_path;
+	PathNodeList():prev(this),next(this){}
+	virtual void Release();
+	virtual string GetPath();
+	virtual PathNode* Dup();
+	virtual PathNode* GetSub(const string& name);
+	void Remove();
+};
+struct PathNodeTree:public PathNode
+{
+	KeyTree<string,PathNodeTree>::TreeNode* node;
+	CBaseTree* hosttree;
+	PathNodeTree():node(NULL),hosttree(NULL){}
+	virtual void Release();
+	virtual string GetPath();
+	virtual PathNode* Dup();
+	virtual PathNode* GetSub(const string& name);
+};
+class CBaseList
+{
+	PathNodeList first;
+	PathNodeList last;
+public:
+	CBaseList()
+	{
+		first.prev=NULL;
+		first.next=&last;
+		last.prev=&first;
+		last.next=NULL;
+	}
+	~CBaseList()
+	{
+		Clear();
+	}
+	void Clear();
+	void AddNode(PathNodeList* node);
+};
+class CBaseTree:public KeyTree<string,PathNodeTree>
+{
+	friend struct PathNodeTree;
+	friend struct PathNodeList;
+	string base_path;
+public:
+	CBaseTree(const string& base,const string& name):KeyTree<string,PathNodeTree>(name),base_path(base)
+	{
+		KeyTree<string,PathNodeTree>::TreeNode* node=GetRootNode();
+		node->t.node=node;
+		node->t.hosttree=this;
+	}
+};
+void PathNodeList::Release()
+{
+	if((ref--)==0)
+	{
+		Remove();
+		delete this;
+	}
+}
+string PathNodeList::GetPath()
+{
+	return extern_path;
+}
+PathNode* PathNodeList::Dup()
+{
+	ref++;
+	return this;
+}
+PathNode* PathNodeList::GetSub(const string& name)
+{
+	PathNodeList* node=new PathNodeList;
+	node->extern_path=extern_path+"\\"+name;
+	CProgramData::GetPathList()->AddNode(node);
+	return node;
+}
+void PathNodeList::Remove()
+{
+	prev->next=next;
+	next->prev=prev;
+	prev=next=this;
+}
+void PathNodeTree::Release()
+{
+	for(KeyTree<string,PathNodeTree>::TreeNode* pnode=node;pnode!=NULL;pnode=pnode->GetParent())
+	{
+		if((pnode->t.ref--)==0)
+		{
+			sys_fdelete((char*)GetPath().c_str());
+			node->Detach();
+			node->Clear();
+			delete node;
+		}
+	}
+}
+string PathNodeTree::GetPath()
+{
+	vector<string> vname;
+	for(KeyTree<string,PathNodeTree>::TreeNode* pnode=node;pnode!=NULL;pnode=pnode->GetParent())
+		vname.push_back(pnode->key);
+	string path=node->t.hosttree->base_path;
+	for(vector<string>::iterator it=vname.end()-1;it>=vname.begin();it--)
+		path+=(string("\\")+ *it);
+	return path;
+}
+PathNode* PathNodeTree::Dup()
+{
+	for(KeyTree<string,PathNodeTree>::TreeNode* pnode=node;pnode!=NULL;pnode=pnode->GetParent())
+		pnode->t.ref++;
+	return this;
+}
+PathNode* PathNodeTree::GetSub(const string& name)
+{
+	KeyTree<string,PathNodeTree>::TreeNode* pnode;
+	PathNodeTree* pathnode;
+	if((pnode=node->GetChild(name))!=NULL)
+	{
+		pathnode=&pnode->t;
+		pathnode->Dup();
+	}
+	else
+	{
+		pnode=new KeyTree<string,PathNodeTree>::TreeNode(name);
+		pathnode=&pnode->t;
+		pathnode->node=pnode;
+		pathnode->hosttree=hosttree;
+		pnode->AddTo(node);
+		Dup();
+	}
+	return pathnode;
+}
+void CBaseList::AddNode(PathNodeList* node)
+{
+	PathNodeList* next=first.next;
+	first.next=next->prev=node;
+	node->prev=&first;
+	node->next=next;
+}
+void CBaseList::Clear()
+{
+	while(first.next!=&last)
+	{
+		PathNodeList* pnode=first.next;
+		pnode->Remove();
+		delete pnode;
+	}
+}
 #define clamp_value(val,minimum,maximum) \
 	if(val<minimum) \
 		val=minimum; \
@@ -51,13 +220,17 @@ void PDXShowMessage(LPCTSTR format,...)
 
 CProgramData CProgramData::s_Data;
 CProgramData::CProgramData()
-	: m_dpiX(0)
+	: m_pBaseTree(NULL)
+	, m_pBaseList(NULL)
+	, m_dpiX(0)
 	, m_dpiY(0)
 	, m_deflogicX(96)
 	, m_deflogicY(96)
 	, m_scaleX(0)
 	, m_scaleY(0)
 	, m_strCachePath("LocalCache\\")
+	, m_strTempPath("Temp\\")
+	, m_strBackupPath("Backup\\")
 	, m_strHomePath("CaiBinSoft\\")
 	, m_strExpPath("FileCleanerExport\\")
 	, m_strCacheFileName("current")
@@ -65,9 +238,17 @@ CProgramData::CProgramData()
 	, m_strCFileErrExt(".err")
 {
 }
+CProgramData::~CProgramData()
+{
+	ExitData();
+}
 int CProgramData::Init()
 {
 	return s_Data.InitData();
+}
+void CProgramData::Exit()
+{
+	s_Data.ExitData();
 }
 int CProgramData::InitData()
 {
@@ -85,7 +266,41 @@ int CProgramData::InitData()
 
 	m_strBasePath="D:\\";
 
+	m_pBaseTree=new CBaseTree(GetCacheDirPath(),m_strTempPath);
+	m_pBaseList=new CBaseList;
+
+	int ret=0;
+	fail_op(ret,0,sys_mkdir((char*)GetTempDirPath().c_str()),
+	{
+		PDXShowMessage(_T("Failed to create temporary path: %s"),a2t(get_error_desc(ret)));
+		return ret;
+	});
+	fail_op(ret,0,sys_mkdir((char*)GetBackupDirPath().c_str()),
+	{
+		PDXShowMessage(_T("Failed to create backup path: %s"),a2t(get_error_desc(ret)));
+		return ret;
+	});
+
+	srand(time(NULL));
+
 	return 0;
+}
+void CProgramData::ExitData()
+{
+	safe_release(m_pBaseTree);
+	safe_release(m_pBaseList);
+	sys_recurse_fdelete((char*)GetTempDirPath().c_str(),NULL);
+}
+CBaseList* CProgramData::GetPathList()
+{
+	return s_Data.m_pBaseList;
+}
+PathNode* CProgramData::GetPathNode(const string& path)
+{
+	PathNodeList* node=new PathNodeList;
+	node->extern_path=path;
+	s_Data.m_pBaseList->AddNode(node);
+	return node;
 }
 int CProgramData::GetRealPixelsX(int logicx)
 {
@@ -110,6 +325,14 @@ string CProgramData::GetProgramDataBasePath()
 string CProgramData::GetCacheDirPath()
 {
 	return GetProgramDataBasePath()+s_Data.m_strCachePath;
+}
+string CProgramData::GetTempDirPath()
+{
+	return GetCacheDirPath()+s_Data.m_strTempPath;
+}
+string CProgramData::GetBackupDirPath()
+{
+	return GetCacheDirPath()+s_Data.m_strBackupPath;
 }
 string CProgramData::GetProgramHomePath()
 {
