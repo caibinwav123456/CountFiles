@@ -107,6 +107,7 @@ int CFileCleanerApp::ExitInstance()
 {
 	//TODO: handle additional resources you may have added
 	DrawObjectShutdown();
+	CProgramData::Exit();
 	return CWinApp::ExitInstance();
 }
 

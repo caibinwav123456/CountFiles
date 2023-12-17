@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\algor_templ.h" />
     <ClInclude Include="..\include\ASTError.h" />
     <ClInclude Include="..\include\common.h" />
     <ClInclude Include="..\include\datetime.h" />
