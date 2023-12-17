@@ -79,12 +79,18 @@ inline LRESULT SendMessageToIDWnd(UINT id,UINT message,WPARAM wParam=0,LPARAM lP
 		return pWnd->SendMessage(message,wParam,lParam);
 	return -1;
 }
+class CBaseTree;
+class CBaseList;
+struct PathNode;
 class CProgramData
 {
 public:
 	static int Init();
+	static void Exit();
 	static string GetProgramDataBasePath();
 	static string GetCacheDirPath();
+	static string GetTempDirPath();
+	static string GetBackupDirPath();
 	static string GetProgramHomePath();
 	static string GetExportDirPath();
 	static string GetExportFilePath();
@@ -99,9 +105,14 @@ public:
 	static CPoint GetRealPoint(POINT pt);
 	static CRect GetRealRect(RECT rect);
 
+	static CBaseList* GetPathList();
+	static PathNode* GetPathNode(const string& path);
+
 private:
-	CProgramData::CProgramData();
+	CProgramData();
+	~CProgramData();
 	int InitData();
+	void ExitData();
 	const int m_deflogicX;
 	const int m_deflogicY;
 	int m_dpiX;
@@ -110,11 +121,15 @@ private:
 	float m_scaleY;
 	string m_strBasePath;
 	const string m_strCachePath;
+	const string m_strTempPath;
+	const string m_strBackupPath;
 	const string m_strCacheFileName;
 	const string m_strHomePath;
 	const string m_strExpPath;
 	const string m_strCFileExt;
 	const string m_strCFileErrExt;
+	CBaseTree* m_pBaseTree;
+	CBaseList* m_pBaseList;
 	static CProgramData s_Data;
 };
 
