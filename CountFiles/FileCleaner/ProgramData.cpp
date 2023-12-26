@@ -100,13 +100,19 @@ public:
 	void Clear();
 	void AddNode(PathNodeList* node);
 };
+inline string process_path(const string& input)
+{
+	if(input.empty())
+		return "";
+	return input.back()=='\\'?input.substr(0,input.size()-1):input;
+}
 class CBaseTree:public KeyTree<string,PathNodeTree>
 {
 	friend struct PathNodeTree;
 	friend struct PathNodeList;
 	string base_path;
 public:
-	CBaseTree(const string& base,const string& name):KeyTree<string,PathNodeTree>(name),base_path(base)
+	CBaseTree(const string& base,const string& name):KeyTree<string,PathNodeTree>(process_path(name)),base_path(process_path(base))
 	{
 		KeyTree<string,PathNodeTree>::TreeNode* node=GetRootNode();
 		node->t.node=node;
@@ -115,7 +121,7 @@ public:
 };
 void PathNodeList::Release()
 {
-	if((ref--)==0)
+	if((--ref)==0)
 	{
 		Remove();
 		delete this;
@@ -163,14 +169,15 @@ void PathNodeList::Remove()
 }
 void PathNodeTree::Release()
 {
-	for(KeyTree<string,PathNodeTree>::TreeNode* pnode=node;pnode!=NULL;pnode=pnode->GetParent())
+	for(KeyTree<string,PathNodeTree>::TreeNode* pnode=node;pnode!=NULL;)
 	{
-		if((pnode->t.ref--)==0)
+		KeyTree<string,PathNodeTree>::TreeNode* tmp=pnode;
+		pnode=pnode->GetParent();
+		if((--tmp->t.ref)==0)
 		{
-			sys_fdelete((char*)GetPath().c_str());
-			node->Detach();
-			node->Clear();
-			delete node;
+			sys_fdelete((char*)tmp->t.GetPath().c_str());
+			tmp->Detach();
+			delete tmp;
 		}
 	}
 }
@@ -182,8 +189,16 @@ string PathNodeTree::GetPath()
 	for(KeyTree<string,PathNodeTree>::TreeNode* pnode=node;pnode!=NULL;pnode=pnode->GetParent())
 		vname.push_back(pnode->key);
 	string path=node->t.hosttree->base_path;
-	for(vector<string>::iterator it=vname.end()-1;it>=vname.begin();it--)
+	if(vname.empty())
+		return path;
+	for(vector<string>::iterator it=vname.end()-1;;)
+	{
 		path+=(string("\\")+*it);
+		if(it>vname.begin())
+			it--;
+		else
+			break;
+	}
 	return path;
 }
 PathNode* PathNodeTree::Dup()
@@ -333,7 +348,7 @@ CBaseTree* CProgramData::GetPathTree()
 PathNode* CProgramData::GetBasePathNode()
 {
 	KeyTree<string,PathNodeTree>::TreeNode* pnode=s_Data.m_pBaseTree->GetRootNode();
-	return new PathNodeTree(pnode,s_Data.m_pBaseTree);
+	return &pnode->t;
 }
 PathNode* CProgramData::GetPathNode(const string& path)
 {
