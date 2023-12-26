@@ -81,22 +81,35 @@ inline LRESULT SendMessageToIDWnd(UINT id,UINT message,WPARAM wParam=0,LPARAM lP
 }
 class CBaseTree;
 class CBaseList;
-struct PathNode;
+struct PathNode
+{
+	int ref;
+	PathNode():ref(1){}
+	virtual void Release()=0;
+	virtual string GetPath()=0;
+	virtual PathNode* Dup()=0;
+	virtual PathNode* GetSub(const string& name)=0;
+	virtual PathNode* GetSibling(const string& name)=0;
+	virtual bool PeekSub(const string& name)=0;
+};
 class CProgramData
 {
 public:
 	static int Init();
 	static void Exit();
 	static string GetProgramDataBasePath();
+
 	static string GetCacheDirPath();
 	static string GetTempDirPath();
 	static string GetBackupDirPath();
+
 	static string GetProgramHomePath();
 	static string GetExportDirPath();
 	static string GetExportFilePath();
-	static string GetCFilePathRoot();
-	static string GetCacheFilePath();
-	static string GetCacheErrFilePath();
+
+	static string GetCFileRoot();
+	static string GetCacheFileExt();
+	static string GetCacheErrFileExt();
 	static string GetErrListFilePath(const string& path);
 
 	static int GetRealPixelsX(int logicx);
@@ -106,7 +119,10 @@ public:
 	static CRect GetRealRect(RECT rect);
 
 	static CBaseList* GetPathList();
+	static CBaseTree* GetPathTree();
+	static PathNode* GetBasePathNode();
 	static PathNode* GetPathNode(const string& path);
+	static PathNode* GetErrListFileNode(PathNode* node);
 
 private:
 	CProgramData();
