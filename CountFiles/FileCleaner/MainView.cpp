@@ -269,7 +269,7 @@ LRESULT CMainView::OnRearrangeTabSize(WPARAM wParam, LPARAM lParam)
 }
 LRESULT CMainView::OnExportIsValid(WPARAM wParam, LPARAM lParam)
 {
-	ListFileNode* node=m_TreeList.GetListFilePath((INT_PTR)wParam);	
+	ListFileNode* node=m_TreeList.GetListFilePath((INT_PTR)wParam);
 	if(node->empty())
 		PDXShowMessage(_T("No files will be exported!"));
 	return (LRESULT)(!node->empty());
