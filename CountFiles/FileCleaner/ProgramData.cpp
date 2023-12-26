@@ -1,10 +1,10 @@
 #include "pch.h"
-#include "math.h"
+#include <math.h>
 #include "datetime.h"
 #include "algor_templ.h"
 #include "utility.h"
-#include "stdlib.h"
-#include "time.h"
+#include <stdlib.h>
+#include <time.h>
 #define safe_release(ptr) \
 	if(ptr!=NULL) \
 	{ \
@@ -54,15 +54,6 @@ void PDXShowMessage(LPCTSTR format,...)
 }
 class CBaseTree;
 class CBaseList;
-struct PathNode
-{
-	int ref;
-	PathNode():ref(1){}
-	virtual void Release()=0;
-	virtual string GetPath()=0;
-	virtual PathNode* Dup()=0;
-	virtual PathNode* GetSub(const string& name)=0;
-};
 struct PathNodeList:public PathNode
 {
 	PathNodeList* prev;
@@ -73,17 +64,22 @@ struct PathNodeList:public PathNode
 	virtual string GetPath();
 	virtual PathNode* Dup();
 	virtual PathNode* GetSub(const string& name);
+	virtual PathNode* GetSibling(const string& name);
+	virtual bool PeekSub(const string& name);
 	void Remove();
 };
 struct PathNodeTree:public PathNode
 {
 	KeyTree<string,PathNodeTree>::TreeNode* node;
 	CBaseTree* hosttree;
-	PathNodeTree():node(NULL),hosttree(NULL){}
+	PathNodeTree(KeyTree<string,PathNodeTree>::TreeNode* _node=NULL,
+		CBaseTree* _hosttree=NULL):node(_node),hosttree(_hosttree){}
 	virtual void Release();
 	virtual string GetPath();
 	virtual PathNode* Dup();
 	virtual PathNode* GetSub(const string& name);
+	virtual PathNode* GetSibling(const string& name);
+	virtual bool PeekSub(const string& name);
 };
 class CBaseList
 {
@@ -127,10 +123,12 @@ void PathNodeList::Release()
 }
 string PathNodeList::GetPath()
 {
-	return extern_path;
+	return this==NULL?"":extern_path;
 }
 PathNode* PathNodeList::Dup()
 {
+	if(this==NULL)
+		return NULL;
 	ref++;
 	return this;
 }
@@ -140,6 +138,22 @@ PathNode* PathNodeList::GetSub(const string& name)
 	node->extern_path=extern_path+"\\"+name;
 	CProgramData::GetPathList()->AddNode(node);
 	return node;
+}
+PathNode* PathNodeList::GetSibling(const string& name)
+{
+	int pos=extern_path.rfind('\\');
+	string base=pos==string::npos?extern_path:extern_path.substr(0,pos+1);
+	PathNodeList* node=new PathNodeList;
+	node->extern_path=base+name;
+	CProgramData::GetPathList()->AddNode(node);
+	return node;
+}
+bool PathNodeList::PeekSub(const string& name)
+{
+	if(this==NULL)
+		return false;
+	string path=extern_path+"\\"+name;
+	return sys_fstat((char*)path.c_str(),NULL)==0;
 }
 void PathNodeList::Remove()
 {
@@ -162,16 +176,20 @@ void PathNodeTree::Release()
 }
 string PathNodeTree::GetPath()
 {
+	if(this==NULL)
+		return "";
 	vector<string> vname;
 	for(KeyTree<string,PathNodeTree>::TreeNode* pnode=node;pnode!=NULL;pnode=pnode->GetParent())
 		vname.push_back(pnode->key);
 	string path=node->t.hosttree->base_path;
 	for(vector<string>::iterator it=vname.end()-1;it>=vname.begin();it--)
-		path+=(string("\\")+ *it);
+		path+=(string("\\")+*it);
 	return path;
 }
 PathNode* PathNodeTree::Dup()
 {
+	if(this==NULL)
+		return NULL;
 	for(KeyTree<string,PathNodeTree>::TreeNode* pnode=node;pnode!=NULL;pnode=pnode->GetParent())
 		pnode->t.ref++;
 	return this;
@@ -195,6 +213,19 @@ PathNode* PathNodeTree::GetSub(const string& name)
 		Dup();
 	}
 	return pathnode;
+}
+PathNode* PathNodeTree::GetSibling(const string& name)
+{
+	if(this==NULL)
+		return NULL;
+	KeyTree<string,PathNodeTree>::TreeNode* pnode=node->GetParent();
+	return pnode->t.GetSub(name);
+}
+bool PathNodeTree::PeekSub(const string& name)
+{
+	if(this==NULL)
+		return false;
+	return node->GetChild(name)!=NULL;
 }
 void CBaseList::AddNode(PathNodeList* node)
 {
@@ -295,12 +326,28 @@ CBaseList* CProgramData::GetPathList()
 {
 	return s_Data.m_pBaseList;
 }
+CBaseTree* CProgramData::GetPathTree()
+{
+	return s_Data.m_pBaseTree;
+}
+PathNode* CProgramData::GetBasePathNode()
+{
+	KeyTree<string,PathNodeTree>::TreeNode* pnode=s_Data.m_pBaseTree->GetRootNode();
+	return new PathNodeTree(pnode,s_Data.m_pBaseTree);
+}
 PathNode* CProgramData::GetPathNode(const string& path)
 {
 	PathNodeList* node=new PathNodeList;
 	node->extern_path=path;
 	s_Data.m_pBaseList->AddNode(node);
 	return node;
+}
+PathNode* CProgramData::GetErrListFileNode(PathNode* node)
+{
+	string filepath=node->GetPath();
+	int pos=filepath.rfind('\\');
+	string filename=pos==string::npos?filepath:filepath.substr(pos+1);
+	return node->GetSibling(GetErrListFilePath(filename));
 }
 int CProgramData::GetRealPixelsX(int logicx)
 {
@@ -350,17 +397,17 @@ string CProgramData::GetExportFilePath()
 	date.Format(strdate,FORMAT_DATE|FORMAT_TIME,"","","");
 	return GetExportDirPath()+strdate+s_Data.m_strCFileExt;
 }
-string CProgramData::GetCFilePathRoot()
+string CProgramData::GetCFileRoot()
 {
-	return GetCacheDirPath()+s_Data.m_strCacheFileName;
+	return s_Data.m_strCacheFileName;
 }
-string CProgramData::GetCacheFilePath()
+string CProgramData::GetCacheFileExt()
 {
-	return GetCFilePathRoot()+s_Data.m_strCFileExt;
+	return s_Data.m_strCFileExt;
 }
-string CProgramData::GetCacheErrFilePath()
+string CProgramData::GetCacheErrFileExt()
 {
-	return GetCacheFilePath()+s_Data.m_strCFileErrExt;
+	return s_Data.m_strCFileErrExt;
 }
 string CProgramData::GetErrListFilePath(const string& path)
 {

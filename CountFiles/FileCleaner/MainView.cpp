@@ -168,9 +168,9 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 	int ret=0;
 	FListLoadData* lpData=(FListLoadData*)wParam;
 	string strList,strListRef;
-	string strErrList,strErrListRef;
 	dword type=0;
 	UINT mask=0;
+	bool bdir=false;
 	m_TreeList.UnLoad();
 	if(!lpData->left.IsEmpty())
 	{
@@ -182,6 +182,7 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 		}
 		if(type==FILE_TYPE_DIR)
 		{
+			bdir=true;
 			if(lpData->mask&FILE_LIST_ATTRIB_MAIN)
 			{
 				string& strRecentPath=m_TreeList.GetRecentDirPath();
@@ -196,31 +197,25 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 				}
 				if(cntdir)
 				{
-					CDlgLoad dlg(NULL,lpData->left);
+					ListFileNode* node;
+					m_TreeList.AllocCacheFile(&node);
+					CDlgLoad dlg(NULL,t2astr(lpData->left),node->pListNode->GetPath(),node->pErrNode->GetPath());
 					if(dlg.DoModal()!=IDOK)
+					{
+						m_TreeList.DestroyCacheFile();
+						strRecentPath.clear();
 						goto fail;
+					}
+					strRecentPath=path;
 				}
-				strList=CProgramData::GetCacheFilePath();
-				strRecentPath=path;
+				else
+					m_TreeList.ResumeCacheFile();
 			}
 			else
-			{
-				path=CProgramData::GetCacheFilePath();
-				if(sys_fstat((char*)path.c_str(),&type)!=0||type!=FILE_TYPE_NORMAL)
-					goto fail;
-				strList=path;
-			}
-			string patherr=CProgramData::GetErrListFilePath(strList);
-			if(sys_fstat((char*)patherr.c_str(),&type)==0&&type==FILE_TYPE_NORMAL)
-				strErrList=patherr;
+				m_TreeList.ResumeCacheFile();
 		}
 		else
-		{
 			strList=path;
-			string patherr=CProgramData::GetErrListFilePath(path);
-			if(sys_fstat((char*)patherr.c_str(),&type)==0&&type==FILE_TYPE_NORMAL)
-				strErrList=patherr;
-		}
 		mask|=FILE_LIST_ATTRIB_MAIN;
 	}
 	if(!lpData->right.IsEmpty())
@@ -237,21 +232,27 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 			goto fail;
 		}
 		else
-		{
 			strListRef=path;
-			string patherr=CProgramData::GetErrListFilePath(path);
-			if(sys_fstat((char*)patherr.c_str(),&type)==0&&type==FILE_TYPE_NORMAL)
-				strErrListRef=patherr;
-		}
 		mask|=FILE_LIST_ATTRIB_REF;
 	}
 	if(mask!=0)
 	{
-		fail_op(ret,0,m_TreeList.Load(mask,strList.c_str(),strErrList.c_str(),strListRef.c_str(),strErrListRef.c_str()),
+		if(bdir)
 		{
-			PDXShowMessage(_T("Load file list failed: %s"),a2t(get_error_desc(ret)));
-			goto fail;
-		})
+			fail_op(ret,0,m_TreeList.LoadData(mask,strListRef.c_str()),
+			{
+				PDXShowMessage(_T("Load file list failed: %s"),a2t(get_error_desc(ret)));
+				goto fail;
+			})
+		}
+		else
+		{
+			fail_op(ret,0,m_TreeList.LoadData(mask,strList.c_str(),strListRef.c_str()),
+			{
+				PDXShowMessage(_T("Load file list failed: %s"),a2t(get_error_desc(ret)));
+				goto fail;
+			})
+		}
 	}
 	Invalidate();
 	return TRUE;
@@ -268,23 +269,23 @@ LRESULT CMainView::OnRearrangeTabSize(WPARAM wParam, LPARAM lParam)
 }
 LRESULT CMainView::OnExportIsValid(WPARAM wParam, LPARAM lParam)
 {
-	string lfile,efile;
-	m_TreeList.GetListFilePath((INT_PTR)wParam,lfile,efile);
-	if(lfile.empty())
+	ListFileNode* node=m_TreeList.GetListFilePath((INT_PTR)wParam);	
+	if(node->empty())
 		PDXShowMessage(_T("No files will be exported!"));
-	return (LRESULT)(!lfile.empty());
+	return (LRESULT)(!node->empty());
 }
 LRESULT CMainView::OnExportListFile(WPARAM wParam, LPARAM lParam)
 {
 	int ret=0;
 	FListExportData* pData=(FListExportData*)wParam;
-	string lfile,efile;
-	m_TreeList.GetListFilePath(pData->side,lfile,efile);
-	if(lfile.empty())
+	ListFileNode* node=m_TreeList.GetListFilePath(pData->side);
+	if(node->empty())
 	{
 		PDXShowMessage(_T("No files will be exported!"));
 		return 0;
 	}
+	string lfile=node->pListNode->GetPath(),
+		efile=node->pErrNode->GetPath();
 	fail_goto(ret,0,sys_fcopy((char*)lfile.c_str(),(char*)pData->lfile.c_str()),fail);
 	if(!efile.empty())
 		fail_goto(ret,0,sys_fcopy((char*)efile.c_str(),(char*)pData->efile.c_str()),fail);

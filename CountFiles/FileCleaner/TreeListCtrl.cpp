@@ -41,6 +41,7 @@ TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_iCurLine(-1)
 	m_vecLists.push_back(new TLUnit(this,&m_tabLeft,&m_tabRight));
 	m_iVec=0;
 	m_pCurTlU=m_vecLists[m_iVec];
+	m_pCurTlU->PrepareBase();
 }
 TreeListCtrl::~TreeListCtrl()
 {
@@ -57,9 +58,9 @@ void TreeListCtrl::SetTabInfo(const TabInfo* tab)
 	m_tabLeft=*tab->left;
 	m_tabRight=*tab->right;
 }
-void TreeListCtrl::GetListFilePath(int side,string& lfile,string& efile,int idx)
+ListFileNode* TreeListCtrl::GetListFilePath(int side,int idx)
 {
-	m_vecLists[idx<0?m_iVec:idx]->GetListFilePath(side,lfile,efile);
+	return m_vecLists[idx<0?m_iVec:idx]->GetListFilePath(side);
 }
 string& TreeListCtrl::GetRecentDirPath(int idx)
 {
@@ -90,6 +91,7 @@ failed:
 void TreeListCtrl::Exit()
 {
 	UnLoad(true);
+	DestroyBase(true);
 	m_bmpFolder.DeleteObject();
 	m_bmpFolderMask.DeleteObject();
 	m_bmpFolderExp.DeleteObject();
@@ -130,15 +132,14 @@ TLCore* TLUnit::GetPrimaryBase(int* side)
 		return NULL;
 	}
 }
-void TLUnit::GetListFilePath(int side,string& lfile,string& efile)
+ListFileNode* TLUnit::GetListFilePath(int side)
 {
 	TLCore* core;
 	if(side<=0)
 		core=&m_treeLeft;
 	else
 		core=&m_treeRight;
-	lfile=core->m_strFile;
-	efile=core->m_strFileErr;
+	return &core->m_lfNode;
 }
 int TLUnit::LoadCore(TLCore& core,const char* lfile,const char* efile)
 {
@@ -196,16 +197,6 @@ int TLUnit::Load(UINT mask,const char* lfile,const char* efile,
 			m_treeRight.m_pBaseItem->parentidx=0;
 	}
 	fail_goto(ret,0,InitialExpand(),fail);
-	if(loadleft)
-	{
-		m_treeLeft.m_strFile=lfile;
-		m_treeLeft.m_strFileErr=efile;
-	}
-	if(loadright)
-	{
-		m_treeRight.m_strFile=lfileref;
-		m_treeRight.m_strFileErr=efileref;
-	}
 	return 0;
 fail:
 	UnLoad();
@@ -215,10 +206,8 @@ void TLUnit::UnLoad()
 {
 	UnLoadCore(m_treeLeft);
 	UnLoadCore(m_treeRight);
-	m_treeLeft.m_strFile.clear();
-	m_treeLeft.m_strFileErr.clear();
-	m_treeRight.m_strFile.clear();
-	m_treeRight.m_strFileErr.clear();
+	m_treeLeft.m_lfNode.Release();
+	m_treeRight.m_lfNode.Release();
 	if(m_pItemJoint!=NULL)
 	{
 		assert(m_pItemJoint->subpairs!=NULL);
@@ -252,6 +241,18 @@ void TreeListCtrl::UnLoad(bool bAll)
 		}
 	}
 	UpdateListStat();
+}
+void TreeListCtrl::DestroyBase(bool bAll)
+{
+	if(!bAll)
+	{
+		m_TlU.DestroyBase();
+		return;
+	}
+	for(int i=0;i<(int)m_vecLists.size();i++)
+	{
+		m_vecLists[i]->DestroyBase();
+	}
 }
 void TreeListCtrl::Invalidate()
 {

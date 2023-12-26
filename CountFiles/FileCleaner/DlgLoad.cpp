@@ -27,10 +27,13 @@
 
 IMPLEMENT_DYNAMIC(CDlgLoad, CDialog)
 
-CDlgLoad::CDlgLoad(CWnd* pParent,const CString& path)
+CDlgLoad::CDlgLoad(CWnd* pParent,const string& path,
+	const string& lfile,const string& efile)
 	: CDialog(IDD_DIALOG_LOAD, pParent)
 	, m_strPathLoading(_T(""))
 	, m_strBasePath(path)
+	, m_strListFile(lfile)
+	, m_strErrFile(efile)
 {
 	m_loadingObject.callback=NULL;
 	m_loadingObject.obj=NULL;
@@ -42,14 +45,23 @@ CDlgLoad::~CDlgLoad()
 
 void CDlgLoad::SplitPathDisplay()
 {
-	for(int i=70;i<m_strPathLoading.GetLength();i+=70)
-		m_strPathLoading.Insert(i,_T("\n"));
+	CRect rcWnd;
+	m_StaticPath.GetWindowRect(&rcWnd);
+	int width=rcWnd.Width();
+	CWindowDC dc(&m_StaticPath);
+	for(int i=70,j=0;i<m_strPathLoading.GetLength();j=i,i+=70)
+	{
+		while(dc.GetTextExtent(m_strPathLoading.Mid(j,i-j)).cx>width-20)
+			i--;
+		m_strPathLoading.Insert(i++,_T("\n"));
+	}
 }
 
 void CDlgLoad::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_STATIC_PATH, m_strPathLoading);
+	DDX_Control(pDX, IDC_STATIC_PATH, m_StaticPath);
 }
 
 
@@ -69,8 +81,8 @@ BOOL CDlgLoad::OnInitDialog()
 
 	// TODO:  Add extra initialization here
 	string cache_path=CProgramData::GetCacheDirPath();
-	string file=CProgramData::GetCacheFilePath();
-	string err_file=CProgramData::GetCacheErrFilePath();
+	string file=m_strListFile;
+	string err_file=m_strErrFile;
 	if(0!=sys_mkdir((char*)cache_path.c_str()))
 	{
 		PDXShowMessage(_T("Create cache directory \"%s\" failed"),a2t(cache_path));
@@ -154,9 +166,9 @@ BOOL CDlgLoad::StartLoadingThread()
 	callback->cb_rec=cb_cnt_file_prog;
 
 	obj->ret=0;
-	obj->cnt_path=t2astr(m_strBasePath);
-	obj->file=CProgramData::GetCacheFilePath();
-	obj->err_file=CProgramData::GetCacheErrFilePath();
+	obj->cnt_path=m_strBasePath;
+	obj->file=m_strListFile;
+	obj->err_file=m_strErrFile;
 	obj->dlg=this;
 	obj->user_canceled=false;
 

@@ -223,6 +223,16 @@ private:
 	friend int join_list(TLItemDir* llist,TLItemDir* rlist);
 	uint* ptr_disp_len();
 };
+struct ListFileNode
+{
+	PathNode* pListNode;
+	PathNode* pErrNode;
+	ListFileNode():pListNode(NULL),pErrNode(NULL){}
+	void Release();
+	void Curl();
+	bool empty() const;
+	bool valid() const;
+};
 struct TLCore
 {
 	FileListLoader m_ListLoader;
@@ -231,8 +241,7 @@ struct TLCore
 	TLItemDir* m_pBaseItem;
 	TLItemDir* m_pBaseParent;
 	TLUnit* m_pTlUnit;
-	string m_strFile;
-	string m_strFileErr;
+	ListFileNode m_lfNode;
 	TLCore(TLUnit* tl,TreeListTabGrid* tab)
 		:m_pTlUnit(tl)
 		,m_pTab(tab)
@@ -247,10 +256,12 @@ struct TLUnit
 	TLItemDir* m_pItemJoint;
 	ItemSelector m_ItemSel;
 	uint m_nTotalLine;
+	ListFileNode m_CacheNode;
+	PathNode* m_pBaseDirNode;
 	string m_strRecentPath;
 	TLUnit(TreeListCtrl* pOwner,TreeListTabGrid* tabLeft,TreeListTabGrid* tabRight)
 		:m_ItemSel(pOwner),m_treeLeft(this,tabLeft),m_treeRight(this,tabRight)
-		,m_pItemJoint(NULL),m_nTotalLine(0){}
+		,m_pItemJoint(NULL),m_nTotalLine(0),m_pBaseDirNode(NULL){}
 	int Load(UINT mask,const char* lfile,const char* efile,
 		const char* lfileref,const char* efileref);
 	void UnLoad();
@@ -259,7 +270,14 @@ struct TLUnit
 	int InitialExpand();
 	bool IsCompareMode(){return m_pItemJoint!=NULL;}
 	TLCore* GetPrimaryBase(int* side=NULL);
-	void GetListFilePath(int side,string& lfile,string& efile);
+	ListFileNode* GetListFilePath(int side);
+	void CacheNode();
+	void RestoreNode();
+	void DestroyCacheNode();
+	void Fork();
+	void Curl();
+	int PrepareBase();
+	void DestroyBase();
 };
 class ListCtrlIterator
 {
@@ -298,11 +316,18 @@ public:
 	int Load(UINT mask,const char* lfile,const char* efile,
 		const char* lfileref,const char* efileref);
 	void UnLoad(bool bAll=false);
+	void DestroyBase(bool bAll=false);
+
+	int LoadData(UINT mask,const char* lfile,const char* rfile);
+	int LoadData(UINT mask,const char* rfile);//Load with cached directory list
+	void AllocCacheFile(ListFileNode** pFileNode);
+	void ResumeCacheFile();
+	void DestroyCacheFile();
 
 	int GetUnitCount(){return m_iVec;}
 	void GetCanvasRect(RECT* rc);
 	void SetTabInfo(const TabInfo* tab);
-	void GetListFilePath(int side,string& lfile,string& efile,int idx=-1);
+	ListFileNode* GetListFilePath(int side,int idx=-1);
 	string& GetRecentDirPath(int idx=-1);
 
 //Draw callbacks
