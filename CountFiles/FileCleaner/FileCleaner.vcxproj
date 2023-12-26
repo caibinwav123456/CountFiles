@@ -237,6 +237,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ProgramData.cpp" />
+    <ClCompile Include="TreeListBase.cpp" />
     <ClCompile Include="TreeListCtrl.cpp" />
   </ItemGroup>
   <ItemGroup>

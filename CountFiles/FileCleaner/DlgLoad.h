@@ -21,7 +21,8 @@ class CDlgLoad : public CDialog
 	DECLARE_DYNAMIC(CDlgLoad)
 
 public:
-	CDlgLoad(CWnd* pParent,const CString& path);   // standard constructor
+	CDlgLoad(CWnd* pParent,const string& path,
+		const string& lfile,const string& efile);   // standard constructor
 	virtual ~CDlgLoad();
 
 public:
@@ -38,7 +39,9 @@ public:
 	}m_loadingObject;
 
 private:
-	CString m_strBasePath;
+	string m_strBasePath;
+	string m_strListFile;
+	string m_strErrFile;
 	CString m_strProgressBuf;
 
 	void* m_hThreadLoadFile;
@@ -53,6 +56,7 @@ protected:
 
 public:
 	CString m_strPathLoading;
+	CStatic m_StaticPath;
 	virtual BOOL OnInitDialog();
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
