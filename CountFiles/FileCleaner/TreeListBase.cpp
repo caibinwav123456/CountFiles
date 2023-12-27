@@ -127,7 +127,3 @@ void TreeListCtrl::ResumeCacheFile()
 {
 	m_TlU.RestoreNode();
 }
-void TreeListCtrl::DestroyCacheFile()
-{
-	m_TlU.m_treeLeft.m_lfNode.Release();
-}
