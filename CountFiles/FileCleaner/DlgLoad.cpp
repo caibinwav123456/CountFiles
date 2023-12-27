@@ -80,16 +80,8 @@ BOOL CDlgLoad::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	// TODO:  Add extra initialization here
-	string cache_path=CProgramData::GetCacheDirPath();
-	string file=m_strListFile;
-	string err_file=m_strErrFile;
-	if(0!=sys_mkdir((char*)cache_path.c_str()))
-	{
-		PDXShowMessage(_T("Create cache directory \"%s\" failed"),a2t(cache_path));
-		goto exitdlg;
-	}
-	sys_fdelete((char*)file.c_str());
-	sys_fdelete((char*)err_file.c_str());
+	sys_fdelete((char*)m_strListFile.c_str());
+	sys_fdelete((char*)m_strErrFile.c_str());
 
 	InitializeCriticalSection(&m_cs);
 	if(!StartLoadingThread())
