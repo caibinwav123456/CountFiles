@@ -62,8 +62,8 @@ struct PathNodeList:public PathNode
 	string extern_path;
 	PathNodeList():prev(this),next(this){}
 	virtual void Release();
-	virtual string GetPath();
-	virtual PathNode* Dup();
+	virtual string GetPathInternal();
+	virtual PathNode* DupInternal();
 	virtual PathNode* GetSub(const string& name);
 	virtual PathNode* GetSibling(const string& name);
 	virtual bool PeekSub(const string& name);
@@ -76,8 +76,8 @@ struct PathNodeTree:public PathNode
 	PathNodeTree(KeyTree<string,PathNodeTree>::TreeNode* _node=NULL,
 		CBaseTree* _hosttree=NULL):node(_node),hosttree(_hosttree){}
 	virtual void Release();
-	virtual string GetPath();
-	virtual PathNode* Dup();
+	virtual string GetPathInternal();
+	virtual PathNode* DupInternal();
 	virtual PathNode* GetSub(const string& name);
 	virtual PathNode* GetSibling(const string& name);
 	virtual bool PeekSub(const string& name);
@@ -128,14 +128,12 @@ void PathNodeList::Release()
 		delete this;
 	}
 }
-string PathNodeList::GetPath()
+string PathNodeList::GetPathInternal()
 {
-	return this==NULL?"":extern_path;
+	return extern_path;
 }
-PathNode* PathNodeList::Dup()
+PathNode* PathNodeList::DupInternal()
 {
-	if(this==NULL)
-		return NULL;
 	ref++;
 	return this;
 }
@@ -157,8 +155,6 @@ PathNode* PathNodeList::GetSibling(const string& name)
 }
 bool PathNodeList::PeekSub(const string& name)
 {
-	if(this==NULL)
-		return false;
 	string path=extern_path+"\\"+name;
 	return sys_fstat((char*)path.c_str(),NULL)==0;
 }
@@ -182,10 +178,8 @@ void PathNodeTree::Release()
 		}
 	}
 }
-string PathNodeTree::GetPath()
+string PathNodeTree::GetPathInternal()
 {
-	if(this==NULL)
-		return "";
 	vector<string*> vname;
 	for(KeyTree<string,PathNodeTree>::TreeNode* pnode=node;pnode!=NULL;pnode=pnode->GetParent())
 		vname.push_back(&pnode->key);
@@ -195,10 +189,8 @@ string PathNodeTree::GetPath()
 		path+=(string("\\")+**it);
 	return path;
 }
-PathNode* PathNodeTree::Dup()
+PathNode* PathNodeTree::DupInternal()
 {
-	if(this==NULL)
-		return NULL;
 	for(KeyTree<string,PathNodeTree>::TreeNode* pnode=node;pnode!=NULL;pnode=pnode->GetParent())
 		pnode->t.ref++;
 	return this;
@@ -225,15 +217,11 @@ PathNode* PathNodeTree::GetSub(const string& name)
 }
 PathNode* PathNodeTree::GetSibling(const string& name)
 {
-	if(this==NULL)
-		return NULL;
 	KeyTree<string,PathNodeTree>::TreeNode* pnode=node->GetParent();
 	return pnode->t.GetSub(name);
 }
 bool PathNodeTree::PeekSub(const string& name)
 {
-	if(this==NULL)
-		return false;
 	return node->GetChild(name)!=NULL;
 }
 void CBaseList::AddNode(PathNodeList* node)
