@@ -318,8 +318,8 @@ public:
 	void UnLoad(bool bAll=false,bool release_cache=false);
 	void DestroyBase(bool bAll=false);
 
-	int LoadData(UINT mask,const char* lfile,const char* rfile);
-	int LoadData(UINT mask,const char* rfile);//Load with cached directory list
+	int LoadBase(UINT mask,const char* lfile,const char* rfile);
+	int LoadBase(UINT mask,const char* rfile);//Load with cached directory list
 	void AllocCacheFile(ListFileNode** pFileNode);
 	void ResumeCacheFile();
 	void DestroyCacheFile();
