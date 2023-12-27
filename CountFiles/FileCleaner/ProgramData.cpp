@@ -3,6 +3,7 @@
 #include "datetime.h"
 #include "algor_templ.h"
 #include "utility.h"
+#include <algorithm>
 #include <stdlib.h>
 #include <time.h>
 #define safe_release(ptr) \
@@ -185,20 +186,13 @@ string PathNodeTree::GetPath()
 {
 	if(this==NULL)
 		return "";
-	vector<string> vname;
+	vector<string*> vname;
 	for(KeyTree<string,PathNodeTree>::TreeNode* pnode=node;pnode!=NULL;pnode=pnode->GetParent())
-		vname.push_back(pnode->key);
+		vname.push_back(&pnode->key);
+	reverse(vname.begin(),vname.end());
 	string path=node->t.hosttree->base_path;
-	if(vname.empty())
-		return path;
-	for(vector<string>::iterator it=vname.end()-1;;)
-	{
-		path+=(string("\\")+*it);
-		if(it>vname.begin())
-			it--;
-		else
-			break;
-	}
+	for(vector<string*>::iterator it=vname.begin();it<vname.end();it++)
+		path+=(string("\\")+**it);
 	return path;
 }
 PathNode* PathNodeTree::Dup()
