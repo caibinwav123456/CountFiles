@@ -239,7 +239,7 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 	{
 		if(bdir)
 		{
-			fail_op(ret,0,m_TreeList.LoadData(mask,strListRef.c_str()),
+			fail_op(ret,0,m_TreeList.LoadBase(mask,strListRef.c_str()),
 			{
 				PDXShowMessage(_T("Load file list failed: %s"),a2t(get_error_desc(ret)));
 				goto fail;
@@ -247,7 +247,7 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 		}
 		else
 		{
-			fail_op(ret,0,m_TreeList.LoadData(mask,strList.c_str(),strListRef.c_str()),
+			fail_op(ret,0,m_TreeList.LoadBase(mask,strList.c_str(),strListRef.c_str()),
 			{
 				PDXShowMessage(_T("Load file list failed: %s"),a2t(get_error_desc(ret)));
 				goto fail;
