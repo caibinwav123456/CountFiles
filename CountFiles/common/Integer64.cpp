@@ -214,15 +214,15 @@ DLL string FormatI64<int>(const _Integer64<int>& i)
 	}
 }
 template<class T>
-DLL string FormatI64Hex(const _Integer64<T>& i)
+DLL string FormatI64Hex(const _Integer64<T>& i,bool bFillZero)
 {
 	string low,high;
 	char buf[9];
-	sprintf(buf,i.high!=0?"%08x":"%x",i.low);
+	sprintf(buf,i.high!=0||bFillZero?"%08x":"%x",i.low);
 	low=buf;
-	if(i.high!=0)
+	if(i.high!=0||bFillZero)
 	{
-		sprintf(buf,"%x",i.high);
+		sprintf(buf,bFillZero?"%08x":"%x",i.high);
 		high=buf;
 	}
 	return high+low;

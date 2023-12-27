@@ -90,7 +90,7 @@ failed:
 }
 void TreeListCtrl::Exit()
 {
-	UnLoad(true);
+	UnLoad(true,true);
 	DestroyBase(true);
 	m_bmpFolder.DeleteObject();
 	m_bmpFolderMask.DeleteObject();
@@ -171,7 +171,6 @@ void TLUnit::UnLoadCore(TLCore& core)
 int TLUnit::Load(UINT mask,const char* lfile,const char* efile,
 	const char* lfileref,const char* efileref)
 {
-	UnLoad();
 	if((lfile==NULL||*lfile==0)&&(lfileref==NULL||*lfileref==0))
 		return 0;
 	int ret=0;
@@ -202,12 +201,14 @@ fail:
 	UnLoad();
 	return ret;
 }
-void TLUnit::UnLoad()
+void TLUnit::UnLoad(bool release_cache)
 {
 	UnLoadCore(m_treeLeft);
 	UnLoadCore(m_treeRight);
 	m_treeLeft.m_lfNode.Release();
 	m_treeRight.m_lfNode.Release();
+	if(release_cache)
+		DestroyCacheNode();
 	if(m_pItemJoint!=NULL)
 	{
 		assert(m_pItemJoint->subpairs!=NULL);
@@ -224,20 +225,20 @@ int TreeListCtrl::Load(UINT mask,const char* lfile,const char* efile,
 	UpdateListStat();
 	return ret;
 }
-void TreeListCtrl::UnLoad(bool bAll)
+void TreeListCtrl::UnLoad(bool bAll,bool release_cache)
 {
 	m_iCurLine=-1;
 	if(!bAll)
 	{
 		m_TlU.m_ItemSel.SetSel(NULL,-1);
-		m_TlU.UnLoad();
+		m_TlU.UnLoad(release_cache);
 	}
 	else
 	{
 		for(int i=0;i<(int)m_vecLists.size();i++)
 		{
 			m_vecLists[i]->m_ItemSel.SetSel(NULL,-1);
-			m_vecLists[i]->UnLoad();
+			m_vecLists[i]->UnLoad(true);
 		}
 	}
 	UpdateListStat();

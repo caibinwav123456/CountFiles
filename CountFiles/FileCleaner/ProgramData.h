@@ -86,8 +86,16 @@ struct PathNode
 	int ref;
 	PathNode():ref(1){}
 	virtual void Release()=0;
-	virtual string GetPath()=0;
-	virtual PathNode* Dup()=0;
+	string GetPath()
+	{
+		return this==NULL?"":GetPathInternal();
+	}
+	PathNode* Dup()
+	{
+		return this==NULL?NULL:DupInternal();
+	}
+	virtual string GetPathInternal()=0;
+	virtual PathNode* DupInternal()=0;
 	virtual PathNode* GetSub(const string& name)=0;
 	virtual PathNode* GetSibling(const string& name)=0;
 	virtual bool PeekSub(const string& name)=0;

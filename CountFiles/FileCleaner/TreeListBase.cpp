@@ -88,7 +88,9 @@ void TLUnit::Fork()
 }
 inline void PrepFile(ListFileNode* node,const char* file)
 {
-	assert(node->empty());
+	assert(node->pListNode==NULL&&node->pErrNode==NULL);
+	if(file==NULL||*file==0)
+		return;
 	node->pListNode=CProgramData::GetPathNode(file);
 	node->pErrNode=CProgramData::GetErrListFileNode(node->pListNode);
 	node->Curl();
@@ -97,16 +99,18 @@ int TreeListCtrl::LoadData(UINT mask,const char* lfile,const char* rfile)
 {
 	PrepFile(&m_TlU.m_treeLeft.m_lfNode,lfile);
 	PrepFile(&m_TlU.m_treeRight.m_lfNode,rfile);
-	return Load(mask,lfile,m_TlU.m_treeLeft.m_lfNode.pErrNode->GetPath().c_str(),
-		rfile,m_TlU.m_treeRight.m_lfNode.pErrNode->GetPath().c_str());
+	string lerr=m_TlU.m_treeLeft.m_lfNode.pErrNode->GetPath();
+	string rerr=m_TlU.m_treeRight.m_lfNode.pErrNode->GetPath();
+	return Load(mask,lfile,lerr.c_str(),rfile,rerr.c_str());
 }
 int TreeListCtrl::LoadData(UINT mask,const char* rfile)
 {
 	PrepFile(&m_TlU.m_treeRight.m_lfNode,rfile);
 	m_TlU.m_treeLeft.m_lfNode.Curl();
-	int ret=Load(mask,m_TlU.m_treeLeft.m_lfNode.pListNode->GetPath().c_str(),
-		m_TlU.m_treeLeft.m_lfNode.pErrNode->GetPath().c_str(),
-		rfile,m_TlU.m_treeRight.m_lfNode.pErrNode->GetPath().c_str());
+	string lfile=m_TlU.m_treeLeft.m_lfNode.pListNode->GetPath();
+	string lerr=m_TlU.m_treeLeft.m_lfNode.pErrNode->GetPath();
+	string rerr=m_TlU.m_treeRight.m_lfNode.pErrNode->GetPath();
+	int ret=Load(mask,lfile.c_str(),lerr.c_str(),rfile,rerr.c_str());
 	if(ret==0)
 		m_TlU.CacheNode();
 	return ret;
