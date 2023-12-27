@@ -322,7 +322,6 @@ public:
 	int LoadBase(UINT mask,const char* rfile);//Load with cached directory list
 	void AllocCacheFile(ListFileNode** pFileNode);
 	void ResumeCacheFile();
-	void DestroyCacheFile();
 
 	int GetUnitCount(){return m_iVec;}
 	void GetCanvasRect(RECT* rc);
