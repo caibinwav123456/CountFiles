@@ -264,7 +264,7 @@ struct TLUnit
 		,m_pItemJoint(NULL),m_nTotalLine(0),m_pBaseDirNode(NULL){}
 	int Load(UINT mask,const char* lfile,const char* efile,
 		const char* lfileref,const char* efileref);
-	void UnLoad();
+	void UnLoad(bool release_cache=false);
 	int LoadCore(TLCore& core,const char* lfile,const char* efile);
 	void UnLoadCore(TLCore& core);
 	int InitialExpand();
@@ -315,7 +315,7 @@ public:
 
 	int Load(UINT mask,const char* lfile,const char* efile,
 		const char* lfileref,const char* efileref);
-	void UnLoad(bool bAll=false);
+	void UnLoad(bool bAll=false,bool release_cache=false);
 	void DestroyBase(bool bAll=false);
 
 	int LoadData(UINT mask,const char* lfile,const char* rfile);

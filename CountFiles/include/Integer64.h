@@ -41,7 +41,7 @@ DLL bool operator>=(const _Integer64<T>& a,const _Integer64<T>& b);
 template<class T>
 DLL string FormatI64(const _Integer64<T>& i);
 template<class T>
-DLL string FormatI64Hex(const _Integer64<T>& i);
+DLL string FormatI64Hex(const _Integer64<T>& i,bool bFillZero=true);
 template<class T>
 DLL bool I64FromDec(const string& dec,_Integer64<T>& i);
 template<class T>
