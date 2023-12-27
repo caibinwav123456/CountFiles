@@ -95,7 +95,7 @@ inline void PrepFile(ListFileNode* node,const char* file)
 	node->pErrNode=CProgramData::GetErrListFileNode(node->pListNode);
 	node->Curl();
 }
-int TreeListCtrl::LoadData(UINT mask,const char* lfile,const char* rfile)
+int TreeListCtrl::LoadBase(UINT mask,const char* lfile,const char* rfile)
 {
 	PrepFile(&m_TlU.m_treeLeft.m_lfNode,lfile);
 	PrepFile(&m_TlU.m_treeRight.m_lfNode,rfile);
@@ -103,7 +103,7 @@ int TreeListCtrl::LoadData(UINT mask,const char* lfile,const char* rfile)
 	string rerr=m_TlU.m_treeRight.m_lfNode.pErrNode->GetPath();
 	return Load(mask,lfile,lerr.c_str(),rfile,rerr.c_str());
 }
-int TreeListCtrl::LoadData(UINT mask,const char* rfile)
+int TreeListCtrl::LoadBase(UINT mask,const char* rfile)
 {
 	PrepFile(&m_TlU.m_treeRight.m_lfNode,rfile);
 	m_TlU.m_treeLeft.m_lfNode.Curl();
@@ -113,6 +113,8 @@ int TreeListCtrl::LoadData(UINT mask,const char* rfile)
 	int ret=Load(mask,lfile.c_str(),lerr.c_str(),rfile,rerr.c_str());
 	if(ret==0)
 		m_TlU.CacheNode();
+	else
+		m_TlU.m_strRecentPath.clear();
 	return ret;
 }
 void TreeListCtrl::AllocCacheFile(ListFileNode** pFileNode)
@@ -127,5 +129,5 @@ void TreeListCtrl::ResumeCacheFile()
 }
 void TreeListCtrl::DestroyCacheFile()
 {
-	m_TlU.DestroyCacheNode();
+	m_TlU.m_treeLeft.m_lfNode.Release();
 }
