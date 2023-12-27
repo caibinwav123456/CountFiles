@@ -202,7 +202,7 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 					CDlgLoad dlg(NULL,t2astr(lpData->left),node->pListNode->GetPath(),node->pErrNode->GetPath());
 					if(dlg.DoModal()!=IDOK)
 					{
-						m_TreeList.DestroyCacheFile();
+						node->Release();
 						strRecentPath.clear();
 						goto fail;
 					}
