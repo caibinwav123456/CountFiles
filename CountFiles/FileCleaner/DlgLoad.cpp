@@ -34,9 +34,11 @@ CDlgLoad::CDlgLoad(CWnd* pParent,const string& path,
 	, m_strBasePath(path)
 	, m_strListFile(lfile)
 	, m_strErrFile(efile)
+	, m_hThreadLoadFile(NULL)
 {
 	m_loadingObject.callback=NULL;
 	m_loadingObject.obj=NULL;
+	memset(&m_cs,0,sizeof(m_cs));
 }
 
 CDlgLoad::~CDlgLoad()
