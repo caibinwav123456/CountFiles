@@ -196,10 +196,10 @@ void CDlgLoad::UpdateProgress(const string& strPathProc)
 
 LRESULT CDlgLoad::OnLoadingComplete(WPARAM wParam, LPARAM lParam)
 {
-	WaitForSingleObject(m_hThreadLoadFile,INFINITE);
-	KillTimer(IDEVENT_TIMER_PROG);
-	CloseHandle(m_hThreadLoadFile);
+	sys_wait_thread(m_hThreadLoadFile);
+	sys_close_thread(m_hThreadLoadFile);
 	m_hThreadLoadFile=NULL;
+	KillTimer(IDEVENT_TIMER_PROG);
 
 	if(m_loadingObject.obj->user_canceled)
 	{
