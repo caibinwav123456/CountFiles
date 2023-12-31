@@ -4,7 +4,8 @@
 #include "pch.h"
 #include "FileCleaner.h"
 #include "DlgLoad.h"
-#include "afxdialogex.h"
+#include <afxdialogex.h>
+#include <assert.h>
 #define safe_fclose(hfile) \
 	if(VALID(hfile)) \
 	{ \
@@ -51,11 +52,26 @@ void CDlgLoad::SplitPathDisplay()
 	m_StaticPath.GetWindowRect(&rcWnd);
 	int width=rcWnd.Width();
 	CWindowDC dc(&m_StaticPath);
-	for(int i=70,j=0;i<m_strPathLoading.GetLength();j=i,i+=70)
+	for(uint i=0,len=m_strPathLoading.GetLength();i<len;i++,len++)
 	{
-		while(dc.GetTextExtent(m_strPathLoading.Mid(j,i-j)).cx>width-20)
-			i--;
-		m_strPathLoading.Insert(i++,_T("\n"));
+		uint acc=0;
+		for(uint j=64;j>0;j>>=1)
+		{
+			uint na=acc|j;
+			uint next=i+na;
+			if(next>len)
+				next=len;
+			if(dc.GetTextExtent(m_strPathLoading.Mid(i,next-i)).cx<=width)
+			{
+				if(next==len)
+					return;
+				acc=na;
+			}
+		}
+		assert(acc>0);
+		i+=acc;
+		if(i<len)
+			m_strPathLoading.Insert(i,_T("\n"));
 	}
 }
 
