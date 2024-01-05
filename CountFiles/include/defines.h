@@ -1,6 +1,8 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
 
+#define APP_BIN_NAME "FileCleaner.exe"
+
 #define DEF_LINE_HEIGHT        20
 #define DEF_LINE_INDENT        20
 #define DEF_TEXT_HEIGHT        16

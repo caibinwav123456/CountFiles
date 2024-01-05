@@ -1,5 +1,6 @@
 #include "pch.h"
 #include <math.h>
+#include "defines.h"
 #include "datetime.h"
 #include "algor_templ.h"
 #include "utility.h"
@@ -317,7 +318,8 @@ void CProgramData::ExitData()
 {
 	safe_release(m_pBaseTree);
 	safe_release(m_pBaseList);
-	sys_recurse_fdelete((char*)GetTempDirPath().c_str(),NULL);
+	if(!sys_has_dup_process(APP_BIN_NAME))
+		sys_recurse_fdelete((char*)GetTempDirPath().c_str(),NULL);
 }
 CBaseList* CProgramData::GetPathList()
 {

@@ -40,7 +40,8 @@ int TLUnit::PrepareBase()
 	UInteger64 uuid;
 	random_integer64(uuid);
 	string idstr=FormatI64Hex(uuid);
-	while(CProgramData::GetBasePathNode()->PeekSub(idstr))
+	while(CProgramData::GetBasePathNode()->PeekSub(idstr)
+		||sys_fstat((char*)(CProgramData::GetBasePathNode()->GetPath()+"\\"+idstr).c_str(),NULL)==0)
 	{
 		uuid+=UInteger64(1);
 		idstr=FormatI64Hex(uuid);
