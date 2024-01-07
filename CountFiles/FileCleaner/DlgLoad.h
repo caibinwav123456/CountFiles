@@ -58,10 +58,10 @@ public:
 	CString m_strPathLoading;
 	CStatic m_StaticPath;
 	virtual BOOL OnInitDialog();
-	DECLARE_MESSAGE_MAP()
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	afx_msg void OnDestroy();
-	afx_msg LRESULT OnLoadingComplete(WPARAM wParam,LPARAM lParam);
 	virtual void OnOK();
 	virtual void OnCancel();
+	DECLARE_MESSAGE_MAP()
+	afx_msg LRESULT OnLoadingComplete(WPARAM wParam,LPARAM lParam);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnDestroy();
 };
