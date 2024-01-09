@@ -41,7 +41,6 @@ TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_iCurLine(-1)
 	m_vecLists.push_back(new TLUnit(this,&m_tabLeft,&m_tabRight));
 	m_iVec=0;
 	m_pCurTlU=m_vecLists[m_iVec];
-	m_pCurTlU->PrepareBase();
 }
 TreeListCtrl::~TreeListCtrl()
 {
@@ -68,6 +67,7 @@ string& TreeListCtrl::GetRecentDirPath(int idx)
 }
 int TreeListCtrl::Init()
 {
+	int ret=-1;
 	if(!m_bmpFolder.LoadBitmap(IDB_FOLDER))
 		goto failed;
 	if(!m_bmpFolderMask.LoadBitmap(IDB_FOLDER_MASK))
@@ -82,11 +82,12 @@ int TreeListCtrl::Init()
 		goto failed;
 	if(!m_bmpDiffMask.LoadBitmap(IDB_DIFF_MASK))
 		goto failed;
+	fail_goto(ret,0,m_TlU.PrepareBase(),failed);
 	SetScrollSizes(CSize(-1,m_TlU.m_nTotalLine*LINE_HEIGHT));
 	return 0;
 failed:
 	Exit();
-	return -1;
+	return ret;
 }
 void TreeListCtrl::Exit()
 {
