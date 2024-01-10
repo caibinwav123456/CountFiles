@@ -12,5 +12,6 @@
 #define IDW_MAIN_VIEW 1
 #define IDW_HEAD_BAR  2
 #define IDW_BASE_BAR  3
+#define IDW_PROP_WND  4
 
 #endif

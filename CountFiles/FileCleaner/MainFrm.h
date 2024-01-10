@@ -5,6 +5,7 @@
 #pragma once
 #include "ContainerWnd.h"
 #include "BaseBar.h"
+#include "PropWnd.h"
 
 class CMainFrame : public CFrameWnd
 {
@@ -38,6 +39,7 @@ protected:  // control bar embedded members
 	CBaseBar          m_wndBaseBar;
 	CStatusBar        m_wndStatusBar;
 	CContainerWnd*    m_pWndView;
+	CPropWnd*         m_pWndProp;
 
 // Generated message map functions
 protected:

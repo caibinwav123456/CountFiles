@@ -27,6 +27,14 @@
 
 #define DEF_FILE_RECT          CRect(3,6,9,14)
 
+#define DEF_PROP_WND_HEIGHT    32
+#define DEF_PROP_START_X       4
+#define DEF_PAGE_TAB_RECT      CRect(0,2,275,31)
+#define DEF_PAGE_TAB_WIDTH     250
+#define DEF_MIN_PROP_LEFT_MARGIN 100
+#define DEF_MIN_PROP_RIGHT_MARGIN 70
+#define DEF_PROP_BUTTON_RECT   CRect(232,7,245,20)
+
 #ifndef USE_HIPPI_SCREEN
 
 #define LINE_HEIGHT        DEF_LINE_HEIGHT
@@ -53,6 +61,14 @@
 
 #define FILE_RECT          DEF_FILE_RECT
 
+#define PROP_WND_HEIGHT    DEF_PROP_WND_HEIGHT
+#define PROP_START_X       DEF_PROP_START_X
+#define PAGE_TAB_RECT      DEF_PAGE_TAB_RECT
+#define PAGE_TAB_WIDTH     DEF_PAGE_TAB_WIDTH
+#define MIN_PROP_LEFT_MARGIN DEF_MIN_PROP_LEFT_MARGIN
+#define MIN_PROP_RIGHT_MARGIN DEF_MIN_PROP_RIGHT_MARGIN
+#define PROP_BUTTON_RECT   DEF_PROP_BUTTON_RECT
+
 #else
 
 #define LINE_HEIGHT        (CProgramData::GetRealPixelsY(DEF_LINE_HEIGHT))
@@ -78,6 +94,14 @@
 #define TABMARGIN_SIZE         (CProgramData::GetRealPixelsX(DEF_TABMARGIN_SIZE))
 
 #define FILE_RECT          (CProgramData::GetRealRect(DEF_FILE_RECT))
+
+#define PROP_WND_HEIGHT    (CProgramData::GetRealPixelsY(DEF_PROP_WND_HEIGHT))
+#define PROP_START_X       (CProgramData::GetRealPixelsX(DEF_PROP_START_X))
+#define PAGE_TAB_RECT      (CProgramData::GetRealRect(DEF_PAGE_TAB_RECT))
+#define PAGE_TAB_WIDTH     (CProgramData::GetRealPixelsX(DEF_PAGE_TAB_WIDTH))
+#define MIN_PROP_LEFT_MARGIN (CProgramData::GetRealPixelsX(DEF_MIN_PROP_LEFT_MARGIN))
+#define MIN_PROP_RIGHT_MARGIN (CProgramData::GetRealPixelsX(DEF_MIN_PROP_RIGHT_MARGIN))
+#define PROP_BUTTON_RECT   (CProgramData::GetRealRect(DEF_PROP_BUTTON_RECT))
 
 #endif
 

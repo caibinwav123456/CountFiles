@@ -35,6 +35,7 @@ public:
 	void FillRect(RECT* rc,COLORREF clr=RGB(0,0,0));
 
 	void DrawBitmap(CBitmap* pBmp,POINT* pt,DWORD dwOps=SRCCOPY,RECT* srcrc=NULL);
+	void DrawBitmapScaled(CBitmap* pBmp,RECT* dstrc,RECT* srcrc=NULL,DWORD dwOps=SRCCOPY);
 
 	void DrawText(POINT* pos,LPCTSTR text,int height=24,COLORREF clr=RGB(0,0,0),UINT backmode=TRANSPARENT,LPCTSTR ftname=NULL);
 	void DrawText(LPCRECT rect,UINT align,LPCTSTR text,int height=24,COLORREF clr=RGB(0,0,0),UINT backmode=TRANSPARENT,LPCTSTR ftname=NULL);

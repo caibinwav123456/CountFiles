@@ -212,6 +212,7 @@
     <ClInclude Include="MyBmpButton.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ProgramData.h" />
+    <ClInclude Include="PropWnd.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TreeListCtrl.h" />
@@ -237,6 +238,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ProgramData.cpp" />
+    <ClCompile Include="PropWnd.cpp" />
     <ClCompile Include="TreeListBase.cpp" />
     <ClCompile Include="TreeListCtrl.cpp" />
   </ItemGroup>
@@ -277,6 +279,15 @@
     <Image Include="res\open_disable.bmp" />
     <Image Include="res\open_hover.bmp" />
     <Image Include="res\open_normal.bmp" />
+    <Image Include="res\page_btn_c.bmp" />
+    <Image Include="res\page_btn_h.bmp" />
+    <Image Include="res\page_btn_inactive.bmp" />
+    <Image Include="res\page_btn_n.bmp" />
+    <Image Include="res\page_norm.bmp" />
+    <Image Include="res\page_norm_mask.bmp" />
+    <Image Include="res\page_sel.bmp" />
+    <Image Include="res\page_sel_mask.bmp" />
+    <Image Include="res\prop_back.bmp" />
     <Image Include="res\Toolbar.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
