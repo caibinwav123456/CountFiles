@@ -69,6 +69,9 @@
     <ClInclude Include="HeadBar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PropWnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileCleaner.cpp">
@@ -120,6 +123,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TreeListBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PropWnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -225,6 +231,33 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\diff_mask.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\page_sel_mask.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\page_sel.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\page_norm_mask.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\page_norm.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\page_btn_c.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\page_btn_h.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\page_btn_inactive.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\page_btn_n.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\prop_back.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

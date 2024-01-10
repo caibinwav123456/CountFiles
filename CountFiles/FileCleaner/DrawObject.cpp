@@ -359,6 +359,32 @@ void CDrawer::DrawBitmap(CBitmap* pBmp,POINT* pt,DWORD dwOps,RECT* srcrc)
 	dcBmp.SelectObject(oldbmp);
 	dcBmp.DeleteDC();
 }
+void CDrawer::DrawBitmapScaled(CBitmap* pBmp,RECT* dstrc,RECT* srcrc,DWORD dwOps)
+{
+	BITMAP bm;
+	pBmp->GetBitmap(&bm);
+	CRect srcrect(0,0,0,0);
+	if(srcrc==NULL)
+	{
+		srcrect.right=bm.bmWidth;
+		srcrect.bottom=bm.bmHeight;
+	}
+	else
+	{
+		srcrect=*srcrc;
+		if(srcrect.right>bm.bmWidth)
+			srcrect.right=bm.bmWidth;
+		if(srcrect.bottom>bm.bmHeight)
+			srcrect.bottom=bm.bmHeight;
+	}
+	CDC dcBmp;
+	dcBmp.CreateCompatibleDC(m_pCanvas->m_pClientDC);
+	CBitmap* oldbmp=dcBmp.SelectObject(pBmp);
+	SelectDC()->StretchBlt(dstrc->left,dstrc->top,((CRect*)dstrc)->Width(),((CRect*)dstrc)->Height(),
+		&dcBmp,srcrect.left,srcrect.top,srcrect.Width(),srcrect.Height(),dwOps);
+	dcBmp.SelectObject(oldbmp);
+	dcBmp.DeleteDC();
+}
 void CDrawer::DrawText(POINT* pos,LPCTSTR text,int height,COLORREF clr,UINT backmode,LPCTSTR ftname)
 {
 	DrawFont font(SelectDC(),height,ftname);
