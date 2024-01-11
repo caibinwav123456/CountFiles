@@ -52,6 +52,7 @@ private:
 
 	BOOL ValidatePaths(FListLoadData& path,UINT accept_type);
 	BOOL StartListLoad(UINT mask,UINT accept_type);
+	BOOL IsValidFilePath();
 
 	//class data
 private:

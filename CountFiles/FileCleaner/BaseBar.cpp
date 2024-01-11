@@ -263,9 +263,32 @@ BOOL CBaseBar::ValidatePaths(FListLoadData& path,UINT accept_type)
 	}
 	return TRUE;
 }
-
+BOOL CBaseBar::IsValidFilePath()
+{
+	bool invalid=false;
+	if(!CProgramData::IsValidImpExpFilePath(t2astr(m_strComboBasePath)))
+	{
+		PDXShowMessage(_T("Load path invalid (%s)"),(LPCTSTR)m_strComboBasePath);
+		m_strComboBasePath.Empty();
+		invalid=true;
+	}
+	if(!CProgramData::IsValidImpExpFilePath(t2astr(m_strComboBasePathRef)))
+	{
+		PDXShowMessage(_T("Load path invalid (%s)"),(LPCTSTR)m_strComboBasePathRef);
+		m_strComboBasePathRef.Empty();
+		invalid=true;
+	}
+	if(invalid)
+	{
+		UpdateData(FALSE);
+		return FALSE;
+	}
+	return TRUE;
+}
 BOOL CBaseBar::StartListLoad(UINT mask,UINT accept_type)
 {
+	if(!IsValidFilePath())
+		return FALSE;
 	if(mask&FILE_LIST_ATTRIB_MAIN)
 		m_strBasePath=m_strComboBasePath;
 	if(mask&FILE_LIST_ATTRIB_REF)
@@ -548,6 +571,11 @@ void ExportRecFile(CBaseBar* basebar,int side)
 	CString strExpFile=basebar->GetHandleFileName(a2tstr(CProgramData::GetExportFilePath()),TRUE);
 	if(strExpFile.IsEmpty())
 		return;
+	if(!CProgramData::IsValidImpExpFilePath(t2astr(strExpFile)))
+	{
+		PDXShowMessage(_T("Can not export into cache directory (%s)"),(LPCTSTR)strExpFile);
+		return;
+	}
 	string lfile=t2astr(strExpFile);
 	dword type;
 	if(sys_fstat((char*)lfile.c_str(),&type)==0)
