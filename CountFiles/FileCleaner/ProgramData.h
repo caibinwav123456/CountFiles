@@ -119,6 +119,7 @@ public:
 	static string GetCacheFileExt();
 	static string GetCacheErrFileExt();
 	static string GetErrListFilePath(const string& path);
+	static bool IsValidImpExpFilePath(const string& path);
 
 	static int GetRealPixelsX(int logicx);
 	static int GetRealPixelsY(int logicy);
