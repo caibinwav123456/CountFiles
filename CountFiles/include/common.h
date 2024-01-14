@@ -23,6 +23,10 @@ typedef unsigned long dword;
 #define fail_op(ret,retok,expression,op) \
 	if((ret=expression)!=retok) \
 		op
+#define fail_op_no_retval(retok,expression,op) \
+	if((expression)!=retok) \
+		op
+#define fail_return(retok,expression) fail_op_no_retval(retok,expression,return)
 #define fail_goto(ret,retok,expression,tag) \
 	fail_op(ret,retok,expression,goto tag)
 #define return_ret_val(ret,retok,expression,retval) \

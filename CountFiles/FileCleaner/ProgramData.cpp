@@ -314,19 +314,13 @@ int CProgramData::InitData()
 
 	return 0;
 }
-inline string get_app_exe_name()
-{
-	char buf[256];
-	GetModuleFileNameA(NULL,buf,256);
-	string exe_path=buf;
-	int pos=exe_path.rfind('\\');
-	return pos==string::npos?exe_path:exe_path.substr(pos+1);
-}
 void CProgramData::ExitData()
 {
 	safe_release(m_pBaseTree);
 	safe_release(m_pBaseList);
-	if(!sys_has_dup_process((char*)get_app_exe_name().c_str()))
+	char exe_name[256];
+	fail_return(0,sys_get_current_process_name(exe_name,256));
+	if(!sys_has_dup_process(exe_name))
 		sys_recurse_fdelete((char*)GetTempDirPath().c_str(),NULL);
 }
 CBaseList* CProgramData::GetPathList()
