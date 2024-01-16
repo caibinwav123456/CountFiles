@@ -148,9 +148,9 @@ PathNode* PathNodeList::GetSub(const string& name)
 PathNode* PathNodeList::GetSibling(const string& name)
 {
 	int pos=extern_path.rfind('\\');
-	string base=pos==string::npos?extern_path:extern_path.substr(0,pos+1);
+	string base=pos==string::npos?extern_path:extern_path.substr(0,pos);
 	PathNodeList* node=new PathNodeList;
-	node->extern_path=base+name;
+	node->extern_path=base+"\\"+name;
 	CProgramData::GetPathList()->AddNode(node);
 	return node;
 }
