@@ -419,6 +419,8 @@ bool CProgramData::IsValidImpExpFilePath(const string& path)
 	string cache_path=process_path(GetCacheDirPath());
 	if(path.size()<cache_path.size())
 		return true;
+	if(path.size()>cache_path.size()&&path[cache_path.size()]!='\\')
+		return true;
 	return compare_pathname(path.substr(0,cache_path.size()),cache_path)!=0;
 }
 
