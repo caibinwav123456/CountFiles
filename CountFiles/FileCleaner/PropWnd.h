@@ -8,6 +8,7 @@ class CPropWnd:public CWnd
 public:
 	CPropWnd();
 	~CPropWnd();
+
 private:
 	CBitmap m_bmpBk;
 
