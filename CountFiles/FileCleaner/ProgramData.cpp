@@ -102,7 +102,7 @@ public:
 	void Clear();
 	void AddNode(PathNodeList* node);
 };
-inline string process_path(const string& input)
+static inline string process_path(const string& input)
 {
 	if(input.empty())
 		return "";
