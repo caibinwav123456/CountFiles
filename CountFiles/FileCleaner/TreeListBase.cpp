@@ -87,7 +87,7 @@ void TLUnit::Fork()
 	m_treeLeft.m_lfNode.pErrNode=m_pBaseDirNode->GetSub(
 		CProgramData::GetErrListFilePath(buf));
 }
-inline void PrepFile(ListFileNode* node,const char* file)
+static inline void PrepFile(ListFileNode* node,const char* file)
 {
 	assert(node->pListNode==NULL&&node->pErrNode==NULL);
 	if(file==NULL||*file==0)
