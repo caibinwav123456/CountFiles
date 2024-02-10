@@ -34,7 +34,7 @@
 #define DEF_MIN_PROP_RIGHT_MARGIN 70
 #define DEF_PROP_BUTTON_RECT   CRect(232,7,245,20)
 
-#define PAGE_TAB_MARGIN        35
+#define PAGE_TAB_MARGIN        29
 
 #ifndef USE_HIPPI_SCREEN
 
