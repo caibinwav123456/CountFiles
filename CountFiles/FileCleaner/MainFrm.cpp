@@ -136,6 +136,9 @@ BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO*
 	if (m_pWndView->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
 		return TRUE;
 
+	if (m_pWndProp->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
+		return TRUE;
+
 	// otherwise, do default handling
 	return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
 }
