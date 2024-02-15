@@ -21,15 +21,24 @@ PropTabData* PropTabStat::GetSelTab()
 {
 	return first.next==&last?NULL:first.next;
 }
-void PropTabStat::NewTab()
+void PropTabStat::NewTab(const CString& left,const CString& right)
 {
 	PropTabData* data=new PropTabData;
 	PropTabData* cursel=GetSelTab();
+	data->left=left,data->right=right;
+	int index;
+	for(index=0;;index++)
+	{
+		if(indices.find(index)==indices.end())
+			break;
+	}
 	data->ctrl_idx=(int)vecData.size();
+	data->tab_idx=index;
 	data->issel=true;
 	if(cursel!=NULL)
 		cursel->issel=false;
 	vecData.push_back(data);
+	indices.insert(index);
 	data->LinkAfter(&first);
 }
 int PropTabStat::DeleteTab(int idx,int& next)
@@ -55,6 +64,7 @@ int PropTabStat::DeleteTab(int idx,int& next)
 	else
 		next=-1;
 	del->Remove();
+	indices.erase(del->tab_idx);
 	vecData.erase(vecData.begin()+idx);
 	delete del;
 	return mapidx;
@@ -145,7 +155,7 @@ void CPropWnd::DrawTab(CDrawer& drawer,PropTabData* tab,int xpos)
 			break;
 		}
 	}
-	DrawTab(drawer,xpos,tab->left,tab->right,tab->issel,state);
+	DrawTab(drawer,xpos,tab->tab_idx,tab->left,tab->right,tab->issel,state);
 }
 static inline CRect GetBitmapSize(CBitmap* bmp)
 {
@@ -153,7 +163,7 @@ static inline CRect GetBitmapSize(CBitmap* bmp)
 	bmp->GetBitmap(&bm);
 	return CRect(0,0,bm.bmWidth,bm.bmHeight);
 }
-void CPropWnd::DrawTab(CDrawer& drawer,int xpos,const CString& left,const CString& right,bool sel,E_PROP_BTN_STATE state)
+void CPropWnd::DrawTab(CDrawer& drawer,int xpos,int tabidx,const CString& left,const CString& right,bool sel,E_PROP_BTN_STATE state)
 {
 	CBitmap *bmpTab,*bmpMask,*btn;
 	if(sel)
@@ -204,7 +214,15 @@ void CPropWnd::DrawTab(CDrawer& drawer,int xpos,const CString& left,const CStrin
 	drawer.DrawBitmapScaled(btn,rcBtn,NULL,SRCPAINT);
 
 	if(left==_T("")&&right==_T(""))
+	{
+		CString strNewTab,strTabNew(_T("New Tab"));
+		if(tabidx==0)
+			strNewTab=strTabNew;
+		else
+			strNewTab.Format(_T("%s(%d)"),(LPCTSTR)strTabNew,tabidx);
+		drawer.DrawText(rcString,DT_ALIGN_LEFT,strNewTab,TEXT_HEIGHT,RGB(0,0,0),TRANSPARENT,VIEW_FONT);
 		return;
+	}
 	CString strDisp;
 	if(left==_T("")||left==right)
 		strDisp=right;
@@ -294,7 +312,6 @@ int CPropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 	delete[] bitmaps;
 	m_PropStat.NewTab();
-	m_PropStat.SetCurTabString(_T("New Tab"));
 	return 0;
 }
 
@@ -489,6 +506,5 @@ void CPropWnd::OnFileNewTab()
 {
 	// TODO: Add your command handler code here
 	m_PropStat.NewTab();
-	m_PropStat.SetCurTabString(_T("New Tab"));
 	Invalidate();
 }
