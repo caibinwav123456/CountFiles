@@ -2,6 +2,7 @@
 #define _PROP_WND_H_
 #include "DrawObject.h"
 #include <vector>
+#include <set>
 struct BitmapLoadInfo
 {
 	CBitmap* bmp;
@@ -10,12 +11,13 @@ struct BitmapLoadInfo
 struct PropTabData
 {
 	int ctrl_idx;
+	int tab_idx;
 	bool issel;
 	CString left;
 	CString right;
 	PropTabData* prev;
 	PropTabData* next;
-	PropTabData():ctrl_idx(-1),issel(false),prev(this),next(this){}
+	PropTabData():ctrl_idx(-1),tab_idx(-1),issel(false),prev(this),next(this){}
 	void LinkAfter(PropTabData* data);
 	void Remove();
 };
@@ -24,6 +26,7 @@ struct PropTabStat
 	vector<PropTabData*> vecData;
 	PropTabData first;
 	PropTabData last;
+	set<int> indices;
 	PropTabStat()
 	{
 		first.prev=NULL;
@@ -37,7 +40,7 @@ struct PropTabStat
 			delete vecData[i];
 	}
 	PropTabData* GetSelTab();
-	void NewTab();
+	void NewTab(const CString& left=_T(""),const CString& right=_T(""));
 	int DeleteTab(int idx,int& next);
 	bool ReorderTab(int origin, int insert_before);
 	int SelectTab(int idx,bool& unchanged);
@@ -84,7 +87,7 @@ private:
 private:
 	void GetBitmapList(BitmapLoadInfo** blist,int* num);
 	void DeleteBitmaps();
-	void DrawTab(CDrawer& drawer,int xpos,const CString& left,const CString& right,bool sel,E_PROP_BTN_STATE state);
+	void DrawTab(CDrawer& drawer,int xpos,int tabidx,const CString& left,const CString& right,bool sel,E_PROP_BTN_STATE state);
 	void DrawTab(CDrawer& drawer,PropTabData* tab,int xpos);
 
 	int DetectGrabState(LPPOINT pt,bool mousedown,E_PROP_GRAB_TYPE& type);
