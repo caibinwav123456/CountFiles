@@ -204,7 +204,8 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 					{
 						node->Release();
 						strRecentPath.clear();
-						goto fail;
+						bdir=false;
+						goto right;
 					}
 					strRecentPath=path;
 				}
@@ -218,6 +219,7 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 			strList=path;
 		mask|=FILE_LIST_ATTRIB_MAIN;
 	}
+right:
 	if(!lpData->right.IsEmpty())
 	{
 		string path=t2astr(lpData->right);
