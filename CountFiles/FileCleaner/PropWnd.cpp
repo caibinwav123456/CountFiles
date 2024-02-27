@@ -430,6 +430,7 @@ void CPropWnd::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	ReleaseCapture();
+	SetCursor(LoadCursor(NULL,IDC_ARROW));
 	if(m_eGType==eGrabCloseBtn)
 	{
 		int next;
@@ -440,15 +441,24 @@ void CPropWnd::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 	E_PROP_GRAB_TYPE type;
 	int idx=DetectGrabState(&point,false,type);
-	if(idx>=0&&type==eGrabHoverBtn)
+	switch(type)
 	{
-		m_eGType=type;
-		m_nGrabIndex=idx;
-	}
-	else
-	{
+	case eGrabTab:
+		if(idx!=m_nGrabIndex)
+		{
+			m_PropStat.ReorderTab(m_nGrabIndex,idx);
+		}
 		m_eGType=eGrabNone;
 		m_nGrabIndex=-1;
+		break;
+	case eGrabHoverBtn:
+		m_eGType=type;
+		m_nGrabIndex=idx;
+		break;
+	default:
+		m_eGType=eGrabNone;
+		m_nGrabIndex=-1;
+		break;
 	}
 	Invalidate();
 	CWnd::OnLButtonUp(nFlags, point);
@@ -484,6 +494,10 @@ void CPropWnd::OnMouseMove(UINT nFlags, CPoint point)
 		bUpdate=true;
 		break;
 	case eGrabTab:
+		if(type==eGrabTab)
+			SetCursor(LoadCursor(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDC_CUR_MOVE)));
+		else
+			SetCursor(LoadCursor(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDC_CUR_BAN)));
 		break;
 	default:
 		if(type==eGrabHoverBtn)
@@ -505,6 +519,7 @@ void CPropWnd::OnMouseLeave()
 	// TODO: Add your message handler code here and/or call default
 	m_eGType=eGrabNone;
 	m_nGrabIndex=-1;
+	SetCursor(LoadCursor(NULL,IDC_ARROW));
 	Invalidate();
 	CWnd::OnMouseLeave();
 }
