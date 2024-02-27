@@ -246,6 +246,8 @@
     <ResourceCompile Include="FileCleaner.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\ban.cur" />
+    <None Include="res\move.cur" />
     <None Include="res\FileCleaner.rc2" />
   </ItemGroup>
   <ItemGroup>
@@ -288,6 +290,14 @@
     <Image Include="res\page_sel.bmp" />
     <Image Include="res\page_sel_mask.bmp" />
     <Image Include="res\prop_back.bmp" />
+    <Image Include="res\tableft_click.bmp" />
+    <Image Include="res\tableft_disable.bmp" />
+    <Image Include="res\tableft_hover.bmp" />
+    <Image Include="res\tableft_normal.bmp" />
+    <Image Include="res\tabright_click.bmp" />
+    <Image Include="res\tabright_disable.bmp" />
+    <Image Include="res\tabright_hover.bmp" />
+    <Image Include="res\tabright_normal.bmp" />
     <Image Include="res\Toolbar.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

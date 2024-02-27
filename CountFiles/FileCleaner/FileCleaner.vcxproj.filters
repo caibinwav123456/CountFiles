@@ -138,6 +138,12 @@
     <None Include="res\FileCleaner.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\ban.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\move.cur">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\FileCleaner.ico">
@@ -258,6 +264,30 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\prop_back.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\tableft_click.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\tableft_disable.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\tableft_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\tableft_normal.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\tabright_click.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\tabright_disable.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\tabright_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\tabright_normal.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

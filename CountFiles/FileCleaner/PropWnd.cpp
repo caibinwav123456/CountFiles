@@ -124,6 +124,14 @@ void CPropWnd::GetBitmapList(BitmapLoadInfo** blist,int* num)
 		{&m_bmpTabBtnH,IDB_BMP_PROP_BTN_H},
 		{&m_bmpTabBtnC,IDB_BMP_PROP_BTN_C},
 		{&m_bmpTabBtnI,IDB_BMP_PROP_BTN_I},
+		{&m_bmpTabLeftN,IDB_BMP_TABL_N},
+		{&m_bmpTabLeftH,IDB_BMP_TABL_H},
+		{&m_bmpTabLeftC,IDB_BMP_TABL_C},
+		{&m_bmpTabLeftD,IDB_BMP_TABL_D},
+		{&m_bmpTabRightN,IDB_BMP_TABR_N},
+		{&m_bmpTabRightH,IDB_BMP_TABR_H},
+		{&m_bmpTabRightC,IDB_BMP_TABR_C},
+		{&m_bmpTabRightD,IDB_BMP_TABR_D},
 	};
 	*num=sizeof(bitmaps)/sizeof(BitmapLoadInfo);
 	*blist=new BitmapLoadInfo[*num];
