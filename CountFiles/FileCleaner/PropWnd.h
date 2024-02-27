@@ -1,13 +1,9 @@
 #ifndef _PROP_WND_H_
 #define _PROP_WND_H_
 #include "DrawObject.h"
+#include "CommonStruct.h"
 #include <vector>
 #include <set>
-struct BitmapLoadInfo
-{
-	CBitmap* bmp;
-	int nIDResource;
-};
 struct PropTabData
 {
 	int ctrl_idx;

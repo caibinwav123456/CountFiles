@@ -5,6 +5,11 @@
 using namespace std;
 #define FILE_LIST_ATTRIB_MAIN 1
 #define FILE_LIST_ATTRIB_REF  2
+struct BitmapLoadInfo
+{
+	CBitmap* bmp;
+	int nIDResource;
+};
 struct FListLoadData
 {
 	CString left;
