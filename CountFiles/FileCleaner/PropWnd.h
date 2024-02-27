@@ -79,6 +79,15 @@ private:
 	CBitmap m_bmpTabBtnC;
 	CBitmap m_bmpTabBtnI;
 
+	CBitmap m_bmpTabLeftN;
+	CBitmap m_bmpTabLeftH;
+	CBitmap m_bmpTabLeftC;
+	CBitmap m_bmpTabLeftD;
+	CBitmap m_bmpTabRightN;
+	CBitmap m_bmpTabRightH;
+	CBitmap m_bmpTabRightC;
+	CBitmap m_bmpTabRightD;
+
 	PropTabStat m_PropStat;
 	int m_iBaseX;
 	int m_nGrabIndex;

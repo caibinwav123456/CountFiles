@@ -50,6 +50,16 @@
 #define IDB_BMP_PROP_BTN_I              347
 #define IDB_BMP_PROP_BTN_N              348
 #define IDB_BMP_PROP_BACK               349
+#define IDB_BMP_TABL_C                  350
+#define IDB_BMP_TABL_D                  351
+#define IDB_BMP_TABL_H                  352
+#define IDB_BMP_TABL_N                  353
+#define IDB_BMP_TABR_C                  354
+#define IDB_BMP_TABR_D                  355
+#define IDB_BMP_TABR_H                  356
+#define IDB_BMP_TABR_N                  357
+#define IDC_CUR_BAN                     358
+#define IDC_CUR_MOVE                    359
 #define IDC_COMBO_BASE_PATH             1000
 #define IDC_BUTTON_GO                   1001
 #define IDC_BUTTON_OPEN                 1002
@@ -74,7 +84,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        350
+#define _APS_NEXT_RESOURCE_VALUE        360
 #define _APS_NEXT_COMMAND_VALUE         32778
 #define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           310
