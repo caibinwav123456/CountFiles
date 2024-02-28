@@ -413,7 +413,7 @@ void CPropWnd::OnLButtonDown(UINT nFlags, CPoint point)
 	// TODO: Add your message handler code here and/or call default
 	SetCapture();
 	m_nGrabIndex=DetectGrabState(&point,true,m_eGType);
-	if(m_nGrabIndex>=0&&m_eGType==eGrabTab)
+	if(m_eGType==eGrabTab&&m_nGrabIndex>=0)
 	{
 		bool unchanged=false;
 		int ctrlid=m_PropStat.SelectTab(m_nGrabIndex,unchanged);

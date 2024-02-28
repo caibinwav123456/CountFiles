@@ -79,6 +79,7 @@
 #define ID_CMD_MENU_EXPRECFILE          32775
 #define ID_CMD_MENU_EXPRECFILE_REF      32776
 #define ID_FILE_NEW_TAB                 32777
+#define ID_FILE_TAB_NEW                 32777
 
 // Next default values for new objects
 // 
