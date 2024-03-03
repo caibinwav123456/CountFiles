@@ -55,6 +55,8 @@ enum E_PROP_GRAB_TYPE
 	eGrabTab,
 	eGrabCloseBtn,
 	eGrabHoverBtn,
+	eGrabMove,
+	eGrabHoverMove,
 };
 class CPropWnd:public CWnd
 {
@@ -86,7 +88,9 @@ private:
 
 	PropTabStat m_PropStat;
 	int m_iBaseX;
+	int m_iShiftTab;
 	int m_nGrabIndex;
+	BOOL m_bShowMove;
 	E_PROP_GRAB_TYPE m_eGType;
 
 private:
