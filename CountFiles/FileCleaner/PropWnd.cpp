@@ -104,7 +104,7 @@ void PropTabStat::SetCurTabString(const CString& left,const CString& right)
 	if(cursel!=NULL)
 		cursel->left=left,cursel->right=right;
 }
-CPropWnd::CPropWnd():m_iBaseX(PROP_START_X),m_nGrabIndex(-1),m_eGType(eGrabNone)
+CPropWnd::CPropWnd():m_iBaseX(PROP_START_X),m_iShiftTab(0),m_nGrabIndex(-1),m_bShowMove(FALSE),m_eGType(eGrabNone)
 {
 
 }
