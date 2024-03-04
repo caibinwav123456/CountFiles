@@ -165,30 +165,49 @@ void CPropWnd::DrawTab(CDrawer& drawer,PropTabData* tab,int xpos)
 	}
 	DrawTab(drawer,xpos,tab->tab_idx,tab->left,tab->right,tab->issel,state);
 }
+void CPropWnd::GetMoveBtnRect(RECT* rcl,RECT* rcr)
+{
+	if(!m_bShowMove)
+	{
+		*rcl=CRect(0,0,0,0);
+		*rcr=CRect(0,0,0,0);
+		return;
+	}
+	CRect rect;
+	GetClientRect(&rect);
+	*rcl=PROP_TABSL_RECT,*rcr=PROP_TABSR_RECT;
+	((CRect*)rcl)->OffsetRect(rect.right,rect.top);
+	((CRect*)rcr)->OffsetRect(rect.right,rect.top);
+}
+void CPropWnd::GetMoveBtnEnableState(bool& ldisable,bool& rdisable)
+{
+	CRect rect;
+	GetClientRect(&rect);
+	ldisable=(m_iShiftTab==0);
+	rdisable=(((int)m_PropStat.vecData.size()-m_iShiftTab)*PAGE_TAB_WIDTH<=rect.Width());
+}
 void CPropWnd::DrawMoveBtn(CDrawer& drawer)
 {
 	if(!m_bShowMove)
 		return;
-	CRect rect,rcLeft=PROP_TABSL_RECT,rcRight=PROP_TABSR_RECT;
-	GetClientRect(&rect);
-	bool bLeftEnd=m_iShiftTab==0,
-		bRightEnd=((int)m_PropStat.vecData.size()-m_iShiftTab)*PAGE_TAB_WIDTH<=rect.Width();
-	rcLeft.OffsetRect(rect.right,rect.top);
-	rcRight.OffsetRect(rect.right,rect.top);
+	CRect rcLeft,rcRight;
+	bool bLeftEnd,bRightEnd;
+	GetMoveBtnRect(rcLeft,rcRight);
+	GetMoveBtnEnableState(bLeftEnd,bRightEnd);
 	CBitmap* bmpLeft=bLeftEnd?&m_bmpTabLeftD:&m_bmpTabLeftN;
 	CBitmap* bmpRight=bRightEnd?&m_bmpTabRightD:&m_bmpTabRightN;
 	switch(m_eGType)
 	{
 	case eGrabHoverMove:
-		if(m_nGrabIndex==0)
+		if(m_nGrabIndex==0&&!bLeftEnd)
 			bmpLeft=&m_bmpTabLeftH;
-		else if(m_nGrabIndex==1)
+		else if(m_nGrabIndex==1&&!bRightEnd)
 			bmpRight=&m_bmpTabRightH;
 		break;
 	case eGrabMove:
-		if(m_nGrabIndex==0)
+		if(m_nGrabIndex==0&&!bLeftEnd)
 			bmpLeft=&m_bmpTabLeftC;
-		else if(m_nGrabIndex==1)
+		else if(m_nGrabIndex==1&&!bRightEnd)
 			bmpRight=&m_bmpTabRightC;
 		break;
 	}
@@ -299,8 +318,35 @@ void CPropWnd::DrawTab(CDrawer& drawer,int xpos,int tabidx,const CString& left,c
 	drawer.DrawText(rcMid,DT_ALIGN_LEFT,sep,TEXT_HEIGHT,RGB(0,0,0),TRANSPARENT,VIEW_FONT);
 	drawer.DrawText(rcRight,DT_ALIGN_LEFT,right,TEXT_HEIGHT,RGB(0,0,0),TRANSPARENT,VIEW_FONT);
 }
+int CPropWnd::DetectMoveBtnState(LPPOINT pt,bool mousedown,E_PROP_GRAB_TYPE& type)
+{
+	if(!m_bShowMove)
+	{
+		type=eGrabNone;
+		return -1;
+	}
+	CRect rcBtn[2];
+	GetMoveBtnRect(rcBtn[0],rcBtn[1]);
+	for(int i=0;i<2;i++)
+	{
+		if(rcBtn[i].PtInRect(*pt))
+		{
+			type=(mousedown?eGrabMove:eGrabHoverMove);
+			return i;
+		}
+	}
+	type=eGrabNone;
+	return -1;
+}
 int CPropWnd::DetectGrabState(LPPOINT pt,bool mousedown,E_PROP_GRAB_TYPE& type)
 {
+	E_PROP_GRAB_TYPE typeBtnMove;
+	int idxBtnMove=DetectMoveBtnState(pt,mousedown,typeBtnMove);
+	if(typeBtnMove!=eGrabNone)
+	{
+		type=typeBtnMove;
+		return idxBtnMove;
+	}
 	CPoint& point=*(CPoint*)pt;
 	int x=point.x-m_iBaseX;
 	if(x<0)
@@ -486,14 +532,35 @@ void CPropWnd::OnLButtonUp(UINT nFlags, CPoint point)
 	// TODO: Add your message handler code here and/or call default
 	ReleaseCapture();
 	SetCursor(LoadCursor(NULL,IDC_ARROW));
-	if(m_eGType==eGrabCloseBtn)
+	switch(m_eGType)
 	{
-		int next;
-		int ctrlid=m_PropStat.DeleteTab(m_nGrabIndex,next);
-		AdjustMoveBtn();
-		if(ctrlid>=0&&next>=0)
+	case eGrabCloseBtn:
 		{
+			int next;
+			int ctrlid=m_PropStat.DeleteTab(m_nGrabIndex,next);
+			AdjustMoveBtn();
+			if(ctrlid>=0&&next>=0)
+			{
+			}
 		}
+		break;
+	case eGrabMove:
+		{
+			bool bLEnd,bREnd;
+			GetMoveBtnEnableState(bLEnd,bREnd);
+			if(m_nGrabIndex==0&&!bLEnd)
+			{
+				m_iShiftTab--;
+				ASSERT(m_iShiftTab>=0);
+				m_iBaseX=PROP_START_X-m_iShiftTab*PAGE_TAB_WIDTH;
+			}
+			else if(m_nGrabIndex==1&&!bREnd)
+			{
+				m_iShiftTab++;
+				m_iBaseX=PROP_START_X-m_iShiftTab*PAGE_TAB_WIDTH;
+			}
+		}
+		break;
 	}
 	E_PROP_GRAB_TYPE type;
 	int idx=DetectGrabState(&point,false,type);
@@ -501,13 +568,12 @@ void CPropWnd::OnLButtonUp(UINT nFlags, CPoint point)
 	{
 	case eGrabTab:
 		if(idx!=m_nGrabIndex)
-		{
 			m_PropStat.ReorderTab(m_nGrabIndex,idx);
-		}
 		m_eGType=eGrabNone;
 		m_nGrabIndex=-1;
 		break;
 	case eGrabHoverBtn:
+	case eGrabHoverMove:
 		m_eGType=type;
 		m_nGrabIndex=idx;
 		break;
@@ -555,8 +621,25 @@ void CPropWnd::OnMouseMove(UINT nFlags, CPoint point)
 		else
 			SetCursor(LoadCursor(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDC_CUR_BAN)));
 		break;
+	case eGrabMove:
+	case eGrabHoverMove:
+		if(type!=m_eGType||idx!=m_nGrabIndex)
+		{
+			if(type!=eGrabTab&&type!=eGrabCloseBtn)
+			{
+				m_eGType=type;
+				m_nGrabIndex=idx;
+			}
+			else
+			{
+				m_eGType=eGrabNone;
+				m_nGrabIndex=-1;
+			}
+			bUpdate=true;
+		}
+		break;
 	default:
-		if(type==eGrabHoverBtn)
+		if(type==eGrabHoverBtn||type==eGrabHoverMove)
 		{
 			m_nGrabIndex=idx;
 			m_eGType=type;
