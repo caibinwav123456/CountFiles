@@ -165,6 +165,41 @@ void CPropWnd::DrawTab(CDrawer& drawer,PropTabData* tab,int xpos)
 	}
 	DrawTab(drawer,xpos,tab->tab_idx,tab->left,tab->right,tab->issel,state);
 }
+void CPropWnd::DrawMoveBtn(CDrawer& drawer)
+{
+	if(!m_bShowMove)
+		return;
+	CRect rect,rcLeft=PROP_TABSL_RECT,rcRight=PROP_TABSR_RECT;
+	GetClientRect(&rect);
+	bool bLeftEnd=m_iShiftTab==0,
+		bRightEnd=((int)m_PropStat.vecData.size()-m_iShiftTab)*PAGE_TAB_WIDTH<=rect.Width();
+	rcLeft.OffsetRect(rect.right,rect.top);
+	rcRight.OffsetRect(rect.right,rect.top);
+	CBitmap* bmpLeft=bLeftEnd?&m_bmpTabLeftD:&m_bmpTabLeftN;
+	CBitmap* bmpRight=bRightEnd?&m_bmpTabRightD:&m_bmpTabRightN;
+	switch(m_eGType)
+	{
+	case eGrabHoverMove:
+		if(m_nGrabIndex==0)
+			bmpLeft=&m_bmpTabLeftH;
+		else if(m_nGrabIndex==1)
+			bmpRight=&m_bmpTabRightH;
+		break;
+	case eGrabMove:
+		if(m_nGrabIndex==0)
+			bmpLeft=&m_bmpTabLeftC;
+		else if(m_nGrabIndex==1)
+			bmpRight=&m_bmpTabRightC;
+		break;
+	}
+	CRect rcLMask=rcLeft,rcRMask=rcRight;
+	rcLMask.InflateRect(0,0,1,1);
+	rcRMask.InflateRect(0,0,1,1);
+	drawer.FillRect(rcLMask,RGB(0,0,0));
+	drawer.FillRect(rcRMask,RGB(0,0,0));
+	drawer.DrawBitmapScaled(bmpLeft,rcLeft,NULL,SRCPAINT);
+	drawer.DrawBitmapScaled(bmpRight,rcRight,NULL,SRCPAINT);
+}
 static inline CRect GetBitmapSize(CBitmap* bmp)
 {
 	BITMAP bm;
@@ -218,7 +253,9 @@ void CPropWnd::DrawTab(CDrawer& drawer,int xpos,int tabidx,const CString& left,c
 	drawer.DrawBitmapScaled(bmpTab,rcTab,rcSrc,SRCPAINT);
 	drawer.DrawBitmapScaled(bmpTab,rcTabMargin,rcSrcMargin,SRCPAINT);
 
-	drawer.FillRect(rcBtn,RGB(0,0,0));
+	CRect rcBtnMask=rcBtn;
+	rcBtnMask.InflateRect(0,0,1,1);
+	drawer.FillRect(rcBtnMask,RGB(0,0,0));
 	drawer.DrawBitmapScaled(btn,rcBtn,NULL,SRCPAINT);
 
 	if(left==_T("")&&right==_T(""))
@@ -283,6 +320,22 @@ int CPropWnd::DetectGrabState(LPPOINT pt,bool mousedown,E_PROP_GRAB_TYPE& type)
 	else
 		type=eGrabTab;
 	return idx;
+}
+void CPropWnd::AdjustMoveBtn(int width)
+{
+	if(width<=0)
+	{
+		CRect rect;
+		GetClientRect(&rect);
+		width=rect.Width();
+	}
+	for(;m_iShiftTab>0;m_iShiftTab--)
+	{
+		if(width<((int)m_PropStat.vecData.size()+1-m_iShiftTab)*PAGE_TAB_WIDTH)
+			break;
+	}
+	m_bShowMove=(((int)m_PropStat.vecData.size())*PAGE_TAB_WIDTH>width);
+	m_iBaseX=PROP_START_X-m_iShiftTab*PAGE_TAB_WIDTH;
 }
 
 BEGIN_MESSAGE_MAP(CPropWnd, CWnd)
@@ -379,6 +432,7 @@ void CPropWnd::OnPaint()
 	}
 	if(idxSel>=0)
 		DrawTab(drawer,m_PropStat.vecData[idxSel],m_iBaseX+idxSel*PAGE_TAB_WIDTH);
+	DrawMoveBtn(drawer);
 }
 
 
@@ -387,6 +441,7 @@ void CPropWnd::OnSize(UINT nType, int cx, int cy)
 	CWnd::OnSize(nType, cx, cy);
 
 	// TODO: Add your message handler code here
+	AdjustMoveBtn(cx);
 	Invalidate();
 }
 
@@ -435,6 +490,7 @@ void CPropWnd::OnLButtonUp(UINT nFlags, CPoint point)
 	{
 		int next;
 		int ctrlid=m_PropStat.DeleteTab(m_nGrabIndex,next);
+		AdjustMoveBtn();
 		if(ctrlid>=0&&next>=0)
 		{
 		}
@@ -529,5 +585,6 @@ void CPropWnd::OnFileNewTab()
 {
 	// TODO: Add your command handler code here
 	m_PropStat.NewTab();
+	AdjustMoveBtn();
 	Invalidate();
 }
