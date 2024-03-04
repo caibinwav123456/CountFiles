@@ -494,7 +494,7 @@ void CPropWnd::OnMouseMove(UINT nFlags, CPoint point)
 		bUpdate=true;
 		break;
 	case eGrabTab:
-		if(type==eGrabTab)
+		if(type==eGrabTab&&idx>=0&&m_nGrabIndex>=0&&idx!=m_nGrabIndex)
 			SetCursor(LoadCursor(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDC_CUR_MOVE)));
 		else
 			SetCursor(LoadCursor(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDC_CUR_BAN)));
