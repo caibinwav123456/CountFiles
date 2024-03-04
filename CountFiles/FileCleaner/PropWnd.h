@@ -98,8 +98,10 @@ private:
 	void DeleteBitmaps();
 	void DrawTab(CDrawer& drawer,int xpos,int tabidx,const CString& left,const CString& right,bool sel,E_PROP_BTN_STATE state);
 	void DrawTab(CDrawer& drawer,PropTabData* tab,int xpos);
+	void DrawMoveBtn(CDrawer& drawer);
 
 	int DetectGrabState(LPPOINT pt,bool mousedown,E_PROP_GRAB_TYPE& type);
+	void AdjustMoveBtn(int width=0);
 
 private:
 	DECLARE_MESSAGE_MAP()
