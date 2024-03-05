@@ -151,7 +151,8 @@ void CPropWnd::DeleteBitmaps()
 void CPropWnd::DrawTab(CDrawer& drawer,PropTabData* tab,int xpos)
 {
 	E_PROP_BTN_STATE state=tab->issel?ePropBtnNormal:ePropBtnDisable;
-	if(m_nGrabIndex>=0&&m_PropStat.vecData[m_nGrabIndex]==tab)
+	if((m_eGType==eGrabHoverBtn||m_eGType==eGrabCloseBtn)
+		&&m_nGrabIndex>=0&&m_PropStat.vecData[m_nGrabIndex]==tab)
 	{
 		switch(m_eGType)
 		{
@@ -360,7 +361,7 @@ int CPropWnd::DetectGrabState(LPPOINT pt,bool mousedown,E_PROP_GRAB_TYPE& type)
 		type=eGrabNone;
 		return -1;
 	}
-	CPoint relative_coord=point-CSize(idx*PAGE_TAB_WIDTH,0);
+	CPoint relative_coord(x-idx*PAGE_TAB_WIDTH,point.y);
 	if(PROP_BUTTON_RECT.PtInRect(relative_coord))
 		type=(mousedown?eGrabCloseBtn:eGrabHoverBtn);
 	else
@@ -641,8 +642,8 @@ void CPropWnd::OnMouseMove(UINT nFlags, CPoint point)
 	default:
 		if(type==eGrabHoverBtn||type==eGrabHoverMove)
 		{
-			m_nGrabIndex=idx;
 			m_eGType=type;
+			m_nGrabIndex=idx;
 			bUpdate=true;
 		}
 		break;
