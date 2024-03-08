@@ -103,6 +103,7 @@ private:
 	int DetectGrabState(LPPOINT pt,bool mousedown,E_PROP_GRAB_TYPE& type);
 	int DetectMoveBtnState(LPPOINT pt,bool mousedown,E_PROP_GRAB_TYPE& type);
 	void AdjustMoveBtn(int width=0);
+	void AlignNewTab();
 	void GetMoveBtnRect(RECT* rcl,RECT* rcr);
 	void GetMoveBtnEnableState(bool& ldisable,bool& rdisable);
 
