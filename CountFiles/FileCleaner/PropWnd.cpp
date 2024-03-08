@@ -185,7 +185,8 @@ void CPropWnd::GetMoveBtnEnableState(bool& ldisable,bool& rdisable)
 	CRect rect;
 	GetClientRect(&rect);
 	ldisable=(m_iShiftTab==0);
-	rdisable=(((int)m_PropStat.vecData.size()-m_iShiftTab)*PAGE_TAB_WIDTH<=rect.Width());
+	rdisable=((int)m_PropStat.vecData.size()<=1||
+		(((int)m_PropStat.vecData.size()-m_iShiftTab)*PAGE_TAB_WIDTH<=rect.Width()));
 }
 void CPropWnd::DrawMoveBtn(CDrawer& drawer)
 {
@@ -379,6 +380,19 @@ void CPropWnd::AdjustMoveBtn(int width)
 	for(;m_iShiftTab>0;m_iShiftTab--)
 	{
 		if(width<((int)m_PropStat.vecData.size()+1-m_iShiftTab)*PAGE_TAB_WIDTH)
+			break;
+	}
+	m_bShowMove=(((int)m_PropStat.vecData.size())*PAGE_TAB_WIDTH>width);
+	m_iBaseX=PROP_START_X-m_iShiftTab*PAGE_TAB_WIDTH;
+}
+void CPropWnd::AlignNewTab()
+{
+	CRect rect;
+	GetClientRect(&rect);
+	int width=rect.Width();
+	for(;;m_iShiftTab++)
+	{
+		if(width>=((int)m_PropStat.vecData.size()-m_iShiftTab)*PAGE_TAB_WIDTH)
 			break;
 	}
 	m_bShowMove=(((int)m_PropStat.vecData.size())*PAGE_TAB_WIDTH>width);
@@ -669,6 +683,6 @@ void CPropWnd::OnFileNewTab()
 {
 	// TODO: Add your command handler code here
 	m_PropStat.NewTab();
-	AdjustMoveBtn();
+	AlignNewTab();
 	Invalidate();
 }
