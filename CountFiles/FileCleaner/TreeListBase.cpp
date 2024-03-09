@@ -128,3 +128,24 @@ void TreeListCtrl::ResumeCacheFile()
 {
 	m_TlU.RestoreNode();
 }
+void TreeListCtrl::SetRealPath(int side,const string& path)
+{
+	if(side<0)
+		m_TlU.m_treeLeft.m_strRealPath=process_path(path);
+	else
+		m_TlU.m_treeRight.m_strRealPath=process_path(path);
+	SendMessageToIDWnd(IDW_PROP_WND,WM_SET_PROP_WND_TITLE,
+		(WPARAM)&m_TlU.m_treeLeft.m_strRealPath,
+		(LPARAM)&m_TlU.m_treeRight.m_strRealPath);
+	SendMessageToIDWnd(IDW_BASE_BAR,WM_SET_PROP_WND_TITLE,
+		(WPARAM)&m_TlU.m_treeLeft.m_strRealPath,
+		(LPARAM)&m_TlU.m_treeRight.m_strRealPath);
+}
+string TreeListCtrl::GetRealPath(int side)
+{
+	if(side<0)
+		return m_TlU.m_treeLeft.m_strRealPath;
+	else
+		return m_TlU.m_treeRight.m_strRealPath;
+}
+

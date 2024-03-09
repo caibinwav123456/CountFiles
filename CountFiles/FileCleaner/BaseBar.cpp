@@ -64,6 +64,7 @@ BEGIN_MESSAGE_MAP(CBaseBar, CDialog)
 	ON_MESSAGE(WM_ENABLE_BTN_GO, &CBaseBar::OnEnableBtnGo)
 	ON_MESSAGE(WM_SIZEPARENT, &CBaseBar::OnSizeParent)
 	ON_MESSAGE(WM_SET_VIEW_SIZE, &CBaseBar::OnSizeView)
+	ON_MESSAGE(WM_SET_PROP_WND_TITLE, &CBaseBar::OnSetCurPath)
 	ON_WM_EXITMENULOOP()
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BUTTON_GO, &CBaseBar::OnBnClickedButtonGo)
@@ -605,4 +606,12 @@ void CBaseBar::OnCmdMenuExpRecFileRef()
 {
 	// TODO: Add your command handler code here
 	ExportRecFile(this,1);
+}
+
+LRESULT CBaseBar::OnSetCurPath(WPARAM wParam, LPARAM lParam)
+{
+	m_strBasePath=m_strComboBasePath=a2tstr(*(const string*)wParam);
+	m_strBasePathRef=m_strComboBasePathRef=a2tstr(*(const string*)lParam);
+	UpdateData(FALSE);
+	return 0;
 }

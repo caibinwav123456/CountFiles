@@ -19,6 +19,7 @@ IMPLEMENT_DYNAMIC(CMainFrame, CFrameWnd)
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -141,4 +142,31 @@ BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO*
 
 	// otherwise, do default handling
 	return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
+}
+
+void CMainFrame::OnClose()
+{
+	// TODO: Add your message handler code here and/or call default
+	if(m_pWndProp->GetPropCount()<=1)
+	{
+		CFrameWnd::OnClose();
+		return;
+	}
+	LPCTSTR msg=_T(
+		"You have opened more than one tab, do you want to close the whole program or just the current tab?\n"
+		"Yes - close the whole program\n"
+		"No - close the current tab"
+	);
+	int ret=MessageBox(msg,NULL,MB_YESNOCANCEL);
+	switch(ret)
+	{
+	case IDYES:
+		CFrameWnd::OnClose();
+		break;
+	case IDNO:
+		SendMessageToIDWnd(IDW_PROP_WND,WM_CLOSE_CURRENT_SESSION);
+		break;
+	default:
+		break;
+	}
 }
