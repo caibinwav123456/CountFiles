@@ -242,6 +242,7 @@ struct TLCore
 	TLItemDir* m_pBaseParent;
 	TLUnit* m_pTlUnit;
 	ListFileNode m_lfNode;
+	string m_strRealPath;
 	TLCore(TLUnit* tl,TreeListTabGrid* tab)
 		:m_pTlUnit(tl)
 		,m_pTab(tab)
@@ -256,12 +257,13 @@ struct TLUnit
 	TLItemDir* m_pItemJoint;
 	ItemSelector m_ItemSel;
 	uint m_nTotalLine;
+	CPoint m_ptScrollPos;
 	ListFileNode m_CacheNode;
 	PathNode* m_pBaseDirNode;
 	string m_strRecentPath;
 	TLUnit(TreeListCtrl* pOwner,TreeListTabGrid* tabLeft,TreeListTabGrid* tabRight)
 		:m_ItemSel(pOwner),m_treeLeft(this,tabLeft),m_treeRight(this,tabRight)
-		,m_pItemJoint(NULL),m_nTotalLine(0),m_pBaseDirNode(NULL){}
+		,m_pItemJoint(NULL),m_nTotalLine(0),m_ptScrollPos(0,0),m_pBaseDirNode(NULL){}
 	int Load(UINT mask,const char* lfile,const char* efile,
 		const char* lfileref,const char* efileref);
 	void UnLoad(bool release_cache=false);
@@ -328,6 +330,13 @@ public:
 	void SetTabInfo(const TabInfo* tab);
 	ListFileNode* GetListFilePath(int side,int idx=-1);
 	string& GetRecentDirPath(int idx=-1);
+	void SetRealPath(int side,const string& path="");
+	string GetRealPath(int side);
+
+//Session operations
+	int NewSession();
+	int SwitchToSession(int idx);
+	int CloseSession(int idx,int trans_to);
 
 //Draw callbacks
 	void Draw(CDC* pClientDC,bool buffered);
@@ -341,12 +350,14 @@ public:
 	void OnMMove(const CPoint& pt,UINT nFlags);
 
 public:
+//Set scroll position
+	virtual void SetScrollPos(const CPoint& pos)=0;
 //Get scroll position
 	virtual CPoint GetScrollPos() const=0;
 //Set scroll sizes
 	virtual void SetScrollSizes(const CSize& size)=0;
 //Get scroll sizes
-	virtual CSize GetScrollSizes()=0;
+	virtual CSize GetScrollSizes() const=0;
 
 protected:
 	CWnd* m_pWnd;
@@ -365,7 +376,7 @@ private:
 //List data
 protected:
 	vector<TLUnit*> m_vecLists;
-	uint m_iVec;
+	int m_iVec;
 	TLUnit* m_pCurTlU;
 
 	TreeListTabGrid m_tabLeft;
@@ -387,6 +398,6 @@ protected:
 	void DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,int side,int xbase);
 	void DrawLine(CDrawer& drawer,const ListCtrlIterator& iter);
 	void DrawLineGrp(CDrawer& drawer,const ListCtrlIterator& iter,TLCore& tltree);
-	void UpdateListStat();
+	void UpdateListStat(bool bCalcLineNum=true);
 };
 #endif

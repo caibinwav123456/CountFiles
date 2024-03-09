@@ -9,13 +9,16 @@ struct PropTabData
 	int ctrl_idx;
 	int tab_idx;
 	bool issel;
-	CString left;
-	CString right;
+	CString lTitle;
+	CString rTitle;
+	CString lPath;
+	CString rPath;
 	PropTabData* prev;
 	PropTabData* next;
 	PropTabData():ctrl_idx(-1),tab_idx(-1),issel(false),prev(this),next(this){}
 	void LinkAfter(PropTabData* data);
 	void Remove();
+	void UpdateString(const string& left,const string& right);
 };
 struct PropTabStat
 {
@@ -36,11 +39,11 @@ struct PropTabStat
 			delete vecData[i];
 	}
 	PropTabData* GetSelTab();
-	void NewTab(const CString& left=_T(""),const CString& right=_T(""));
+	void NewTab(const string& left="",const string& right="");
 	int DeleteTab(int idx,int& next);
 	bool ReorderTab(int origin, int insert_before);
 	int SelectTab(int idx,bool& unchanged);
-	void SetCurTabString(const CString& left,const CString& right=_T(""));
+	void SetCurTabString(const string& left,const string& right="");
 };
 enum E_PROP_BTN_STATE
 {
@@ -65,6 +68,8 @@ class CPropWnd:public CWnd
 public:
 	CPropWnd();
 	~CPropWnd();
+
+	int GetPropCount();
 
 private:
 	CBitmap m_bmpBk;
@@ -113,6 +118,8 @@ private:
 	virtual void PostNcDestroy();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg LRESULT OnSizeParent(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSetCurTitle(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCloseCurrentSession(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);

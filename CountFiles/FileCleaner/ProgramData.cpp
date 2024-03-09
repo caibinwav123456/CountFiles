@@ -102,12 +102,6 @@ public:
 	void Clear();
 	void AddNode(PathNodeList* node);
 };
-static inline string process_path(const string& input)
-{
-	if(input.empty())
-		return "";
-	return input.back()=='\\'?input.substr(0,input.size()-1):input;
-}
 class CBaseTree:public KeyTree<string,PathNodeTree>
 {
 	friend struct PathNodeTree;

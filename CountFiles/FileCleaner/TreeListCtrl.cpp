@@ -36,11 +36,8 @@ COLORREF GetDispColor(E_FOLDER_STATE state)
 	}clr_array;
 	return clr_array.arr[state];
 }
-TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_iCurLine(-1)
+TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_iCurLine(-1),m_iVec(-1),m_pCurTlU(NULL)
 {
-	m_vecLists.push_back(new TLUnit(this,&m_tabLeft,&m_tabRight));
-	m_iVec=0;
-	m_pCurTlU=m_vecLists[m_iVec];
 }
 TreeListCtrl::~TreeListCtrl()
 {
@@ -82,8 +79,7 @@ int TreeListCtrl::Init()
 		goto failed;
 	if(!m_bmpDiffMask.LoadBitmap(IDB_DIFF_MASK))
 		goto failed;
-	fail_goto(ret,0,m_TlU.PrepareBase(),failed);
-	SetScrollSizes(CSize(-1,m_TlU.m_nTotalLine*LINE_HEIGHT));
+	fail_goto(ret,0,NewSession(),failed);
 	return 0;
 failed:
 	Exit();
@@ -100,6 +96,58 @@ void TreeListCtrl::Exit()
 	m_bmpEqual.DeleteObject();
 	m_bmpDiff.DeleteObject();
 	m_bmpDiffMask.DeleteObject();
+}
+int TreeListCtrl::NewSession()
+{
+	int ret=0;
+	TLUnit* newSession=new TLUnit(this,&m_tabLeft,&m_tabRight);
+	fail_goto(ret,0,newSession->PrepareBase(),failed);
+	m_vecLists.push_back(newSession);
+	SwitchToSession((int)m_vecLists.size()-1);
+	return 0;
+failed:
+	delete newSession;
+	return ret;
+}
+int TreeListCtrl::SwitchToSession(int idx)
+{
+	if(m_iVec>=0&&m_pCurTlU!=NULL)
+	{
+		m_TlU.m_ptScrollPos=GetScrollPos();
+	}
+	if(idx<0||idx>=(int)m_vecLists.size())
+		return -1;
+	m_iVec=idx;
+	m_pCurTlU=m_vecLists[m_iVec];
+	UpdateListStat(false);
+	SetScrollPos(m_TlU.m_ptScrollPos);
+	SendMessageToIDWnd(IDW_BASE_BAR,WM_SET_PROP_WND_TITLE,
+		(WPARAM)&m_TlU.m_treeLeft.m_strRealPath,
+		(LPARAM)&m_TlU.m_treeRight.m_strRealPath);
+	Invalidate();
+	return 0;
+}
+int TreeListCtrl::CloseSession(int idx,int trans_to)
+{
+	if(idx<0||idx>=(int)m_vecLists.size())
+		return -1;
+	if(m_iVec==idx)
+	{
+		if(trans_to<0||trans_to>=(int)m_vecLists.size()-1)
+			return -1;
+		int next=(trans_to>=idx?trans_to+1:trans_to);
+		SwitchToSession(next);
+	}
+	assert(m_iVec!=idx);
+	if(m_iVec>idx)
+		m_iVec--;
+	TLUnit* pUnitDel=m_vecLists[idx];
+	m_vecLists.erase(m_vecLists.begin()+idx);
+	pUnitDel->m_ItemSel.SetSel(NULL,-1);
+	pUnitDel->UnLoad(true);
+	pUnitDel->DestroyBase();
+	delete pUnitDel;
+	return 0;
 }
 int TLUnit::InitialExpand()
 {
@@ -231,6 +279,8 @@ void TreeListCtrl::UnLoad(bool bAll,bool release_cache)
 	m_iCurLine=-1;
 	if(!bAll)
 	{
+		if(m_pCurTlU==NULL)
+			return;
 		m_TlU.m_ItemSel.SetSel(NULL,-1);
 		m_TlU.UnLoad(release_cache);
 	}
@@ -248,6 +298,8 @@ void TreeListCtrl::DestroyBase(bool bAll)
 {
 	if(!bAll)
 	{
+		if(m_pCurTlU==NULL)
+			return;
 		m_TlU.DestroyBase();
 		return;
 	}
@@ -524,11 +576,14 @@ void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 	drawer.DrawLine(&CPoint(grplen+BAR_CENTER_SPACE,top),&CPoint(grplen+BAR_CENTER_SPACE,bottom),
 		BACK_GREY_COLOR,1,PS_SOLID);
 }
-void TreeListCtrl::UpdateListStat()
+void TreeListCtrl::UpdateListStat(bool bCalcLineNum)
 {
-	TLCore* pBase=m_TlU.GetPrimaryBase();
-	m_TlU.m_nTotalLine=(pBase==NULL||pBase->m_pBaseItem==NULL?
-		0:(pBase->m_pBaseItem->GetDispLength()-1));
+	if(bCalcLineNum)
+	{
+		TLCore* pBase=m_TlU.GetPrimaryBase();
+		m_TlU.m_nTotalLine=(pBase==NULL||pBase->m_pBaseItem==NULL?
+			0:(pBase->m_pBaseItem->GetDispLength()-1));
+	}
 	SetScrollSizes(CSize(-1,m_TlU.m_nTotalLine*LINE_HEIGHT));
 }
 void TreeListCtrl::OnLBDown(const CPoint& pt,UINT nFlags)

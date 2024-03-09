@@ -86,6 +86,7 @@ private:
 	afx_msg LRESULT OnSizeParent(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSizeView(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEnableBtnGo(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSetCurPath(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnDestroy();
 	afx_msg void OnExitMenuLoop(BOOL bIsTrackPopupMenu);
 	afx_msg void OnBnClickedButtonGo();

@@ -20,6 +20,10 @@
 CScrollTreeList::CScrollTreeList(CWnd* pWnd):TreeListCtrl(pWnd),m_sizeScl(MIN_SCROLL_WIDTH,1)
 {
 }
+void CScrollTreeList::SetScrollPos(const CPoint& pos)
+{
+	((CScrollView*)m_pWnd)->ScrollToPosition(pos);
+}
 CPoint CScrollTreeList::GetScrollPos() const
 {
 	return ((CScrollView*)m_pWnd)->GetScrollPosition();
@@ -31,7 +35,7 @@ void CScrollTreeList::SetScrollSizes(const CSize& size)
 	((CScrollView*)m_pWnd)->SetScrollSizes(MM_TEXT,m_sizeScl,
 		CSize(LINE_HEIGHT,LINE_HEIGHT*3),CSize(LINE_HEIGHT,LINE_HEIGHT));
 }
-CSize CScrollTreeList::GetScrollSizes()
+CSize CScrollTreeList::GetScrollSizes() const
 {
 	return m_sizeScl;
 }
@@ -52,6 +56,9 @@ BEGIN_MESSAGE_MAP(CMainView, CScrollView)
 	ON_MESSAGE(WM_REARRANGE_TAB_SIZE,OnRearrangeTabSize)
 	ON_MESSAGE(WM_EXPORT_LIST_FILE,OnExportListFile)
 	ON_MESSAGE(WM_LIST_FILE_VALID,OnExportIsValid)
+	ON_MESSAGE(WM_NEW_SESSION,OnNewSession)
+	ON_MESSAGE(WM_CLOSE_SESSION,OnCloseSession)
+	ON_MESSAGE(WM_SWITCH_SESSION,OnSwitchSession)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
@@ -180,6 +187,7 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 			PDXShowMessage(_T("\'%s\': %s"),(LPCTSTR)lpData->left,a2t(get_error_desc(ret)));
 			goto fail;
 		}
+		m_TreeList.SetRealPath(-1,path);
 		if(type==FILE_TYPE_DIR)
 		{
 			bdir=true;
@@ -199,12 +207,13 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 				{
 					ListFileNode* node;
 					m_TreeList.AllocCacheFile(&node);
-					CDlgLoad dlg(NULL,t2astr(lpData->left),node->pListNode->GetPath(),node->pErrNode->GetPath());
+					CDlgLoad dlg(NULL,path,node->pListNode->GetPath(),node->pErrNode->GetPath());
 					if(dlg.DoModal()!=IDOK)
 					{
 						node->Release();
 						strRecentPath.clear();
 						bdir=false;
+						m_TreeList.SetRealPath(-1,"");
 						goto right;
 					}
 					strRecentPath=path;
@@ -235,6 +244,7 @@ right:
 		}
 		else
 			strListRef=path;
+		m_TreeList.SetRealPath(1,path);
 		mask|=FILE_LIST_ATTRIB_REF;
 	}
 	if(mask!=0)
@@ -259,6 +269,8 @@ right:
 	Invalidate();
 	return TRUE;
 fail:
+	m_TreeList.SetRealPath(-1,"");
+	m_TreeList.SetRealPath(1,"");
 	Invalidate();
 	return FALSE;
 }
@@ -298,6 +310,21 @@ fail:
 	sys_fdelete((char*)pData->efile.c_str());
 	PDXShowMessage(_T("Export faild: %s"),a2t(get_error_desc(ret)));
 	return ret;
+}
+LRESULT CMainView::OnNewSession(WPARAM wParam, LPARAM lParam)
+{
+	m_TreeList.NewSession();
+	return 0;
+}
+LRESULT CMainView::OnCloseSession(WPARAM wParam, LPARAM lParam)
+{
+	m_TreeList.CloseSession((int)wParam,(int)lParam);
+	return 0;
+}
+LRESULT CMainView::OnSwitchSession(WPARAM wParam, LPARAM lParam)
+{
+	m_TreeList.SwitchToSession((int)wParam);
+	return 0;
 }
 
 static inline UINT GetKey()

@@ -17,15 +17,26 @@ void PropTabData::Remove()
 	next->prev=prev;
 	prev=next=this;
 }
+inline void update_path_title(const string& path,CString& fullpath,CString& title)
+{
+	int pos=(int)path.rfind("\\");
+	string strtitle=pos==string::npos?path:path.substr(pos+1);
+	fullpath=a2tstr(path),title=a2tstr(strtitle);
+}
+void PropTabData::UpdateString(const string& left,const string& right)
+{
+	update_path_title(left,lPath,lTitle);
+	update_path_title(right,rPath,rTitle);
+}
 PropTabData* PropTabStat::GetSelTab()
 {
 	return first.next==&last?NULL:first.next;
 }
-void PropTabStat::NewTab(const CString& left,const CString& right)
+void PropTabStat::NewTab(const string& left,const string& right)
 {
 	PropTabData* data=new PropTabData;
 	PropTabData* cursel=GetSelTab();
-	data->left=left,data->right=right;
+	data->UpdateString(left,right);
 	int index;
 	for(index=0;;index++)
 	{
@@ -98,11 +109,11 @@ int PropTabStat::SelectTab(int idx,bool& unchanged)
 	unchanged=false;
 	return data->ctrl_idx;
 }
-void PropTabStat::SetCurTabString(const CString& left,const CString& right)
+void PropTabStat::SetCurTabString(const string& left,const string& right)
 {
 	PropTabData* cursel=GetSelTab();
 	if(cursel!=NULL)
-		cursel->left=left,cursel->right=right;
+		cursel->UpdateString(left,right);
 }
 CPropWnd::CPropWnd():m_iBaseX(PROP_START_X),m_iShiftTab(0),m_nGrabIndex(-1),m_bShowMove(FALSE),m_eGType(eGrabNone)
 {
@@ -111,6 +122,10 @@ CPropWnd::CPropWnd():m_iBaseX(PROP_START_X),m_iShiftTab(0),m_nGrabIndex(-1),m_bS
 CPropWnd::~CPropWnd()
 {
 
+}
+int CPropWnd::GetPropCount()
+{
+	return (int)m_PropStat.vecData.size();
 }
 void CPropWnd::GetBitmapList(BitmapLoadInfo** blist,int* num)
 {
@@ -164,7 +179,7 @@ void CPropWnd::DrawTab(CDrawer& drawer,PropTabData* tab,int xpos)
 			break;
 		}
 	}
-	DrawTab(drawer,xpos,tab->tab_idx,tab->left,tab->right,tab->issel,state);
+	DrawTab(drawer,xpos,tab->tab_idx,tab->lTitle,tab->rTitle,tab->issel,state);
 }
 void CPropWnd::GetMoveBtnRect(RECT* rcl,RECT* rcr)
 {
@@ -311,10 +326,14 @@ void CPropWnd::DrawTab(CDrawer& drawer,int xpos,int tabidx,const CString& left,c
 		return;
 	}
 	int width=(rcString.Width()-sz.cx)/2;
+	int rwidth=width;
 	if(width>szLeft.cx)
+	{
 		width=szLeft.cx;
+		rwidth=rcString.Width()-sz.cx-width;
+	}
 	CRect rcLeft(rcString.TopLeft(),CPoint(rcString.left+width,rcString.bottom)),
-		rcRight(CPoint(rcString.right-width,rcString.top),rcString.BottomRight());
+		rcRight(CPoint(rcString.right-rwidth,rcString.top),rcString.BottomRight());
 	CRect rcMid(rcLeft.right,rcLeft.top,rcRight.left,rcRight.bottom);
 	drawer.DrawText(rcLeft,DT_ALIGN_LEFT,left,TEXT_HEIGHT,RGB(0,0,0),TRANSPARENT,VIEW_FONT);
 	drawer.DrawText(rcMid,DT_ALIGN_LEFT,sep,TEXT_HEIGHT,RGB(0,0,0),TRANSPARENT,VIEW_FONT);
@@ -401,6 +420,8 @@ void CPropWnd::AlignNewTab()
 
 BEGIN_MESSAGE_MAP(CPropWnd, CWnd)
 	ON_MESSAGE(WM_SIZEPARENT, &CPropWnd::OnSizeParent)
+	ON_MESSAGE(WM_SET_PROP_WND_TITLE, &CPropWnd::OnSetCurTitle)
+	ON_MESSAGE(WM_CLOSE_CURRENT_SESSION, &CPropWnd::OnCloseCurrentSession)
 	ON_WM_CREATE()
 	ON_WM_PAINT()
 	ON_WM_SIZE()
@@ -535,6 +556,7 @@ void CPropWnd::OnLButtonDown(UINT nFlags, CPoint point)
 		int ctrlid=m_PropStat.SelectTab(m_nGrabIndex,unchanged);
 		if(ctrlid>=0&&!unchanged)
 		{
+			SendMessageToIDWnd(IDW_MAIN_VIEW,WM_SWITCH_SESSION,(WPARAM)ctrlid);
 		}
 	}
 	Invalidate();
@@ -554,8 +576,9 @@ void CPropWnd::OnLButtonUp(UINT nFlags, CPoint point)
 			int next;
 			int ctrlid=m_PropStat.DeleteTab(m_nGrabIndex,next);
 			AdjustMoveBtn();
-			if(ctrlid>=0&&next>=0)
+			if(ctrlid>=0)
 			{
+				SendMessageToIDWnd(IDW_MAIN_VIEW,WM_CLOSE_SESSION,(WPARAM)ctrlid,(LPARAM)next);
 			}
 		}
 		break;
@@ -684,5 +707,39 @@ void CPropWnd::OnFileNewTab()
 	// TODO: Add your command handler code here
 	m_PropStat.NewTab();
 	AlignNewTab();
+	SendMessageToIDWnd(IDW_MAIN_VIEW,WM_NEW_SESSION);
 	Invalidate();
+}
+
+LRESULT CPropWnd::OnSetCurTitle(WPARAM wParam, LPARAM lParam)
+{
+	const string& left=*(string*)wParam;
+	const string& right=*(string*)lParam;
+	m_PropStat.SetCurTabString(left,right);
+	Invalidate();
+	return 0;
+}
+
+LRESULT CPropWnd::OnCloseCurrentSession(WPARAM wParam, LPARAM lParam)
+{
+	int idx;
+	PropTabData* pProp=m_PropStat.GetSelTab();
+	if(pProp==NULL)
+		return 0;
+	for(idx=0;idx<(int)m_PropStat.vecData.size();idx++)
+	{
+		if(m_PropStat.vecData[idx]==pProp)
+			break;
+	}
+	if(idx>=(int)m_PropStat.vecData.size())
+		return 0;
+	int next;
+	int ctrlid=m_PropStat.DeleteTab(idx,next);
+	AdjustMoveBtn();
+	if(ctrlid>=0)
+	{
+		SendMessageToIDWnd(IDW_MAIN_VIEW,WM_CLOSE_SESSION,(WPARAM)ctrlid,(LPARAM)next);
+	}
+	Invalidate();
+	return 0;
 }

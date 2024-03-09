@@ -79,6 +79,12 @@ inline LRESULT SendMessageToIDWnd(UINT id,UINT message,WPARAM wParam=0,LPARAM lP
 		return pWnd->SendMessage(message,wParam,lParam);
 	return -1;
 }
+inline string process_path(const string& path)
+{
+	if(path.empty())
+		return "";
+	return path.back()=='\\'?path.substr(0,path.size()-1):path;
+}
 class CBaseTree;
 class CBaseList;
 struct PathNode
