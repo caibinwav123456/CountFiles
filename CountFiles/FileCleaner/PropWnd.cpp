@@ -115,7 +115,7 @@ void PropTabStat::SetCurTabString(const string& left,const string& right)
 	if(cursel!=NULL)
 		cursel->UpdateString(left,right);
 }
-CPropWnd::CPropWnd():m_iBaseX(PROP_START_X),m_iShiftTab(0),m_nGrabIndex(-1),m_bShowMove(FALSE),m_eGType(eGrabNone),m_nCancelMMove(0)
+CPropWnd::CPropWnd():m_iBaseX(PROP_START_X),m_iShiftTab(0),m_nGrabIndex(-1),m_bShowMove(FALSE),m_eGType(eGrabNone),m_bShow(FALSE),m_nCancelMMove(0)
 {
 
 }
@@ -126,6 +126,16 @@ CPropWnd::~CPropWnd()
 int CPropWnd::GetPropCount()
 {
 	return (int)m_PropStat.vecData.size();
+}
+void CPropWnd::ShowPropWnd(BOOL bShow)
+{
+	if(m_bShow!=bShow)
+	{
+		m_bShow=bShow;
+		ShowWindow(bShow);
+		((CFrameWnd*)AfxGetMainWnd())->RecalcLayout();
+		Invalidate();
+	}
 }
 void CPropWnd::GetBitmapList(BitmapLoadInfo** blist,int* num)
 {
@@ -467,6 +477,7 @@ BOOL CPropWnd::PreCreateWindow(CREATESTRUCT& cs)
 
 	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 	cs.style &= ~WS_BORDER;
+	cs.style &= ~WS_VISIBLE;
 	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS,
 		::LoadCursor(nullptr, IDC_ARROW), reinterpret_cast<HBRUSH>(COLOR_WINDOW+1), nullptr);
 
@@ -483,6 +494,8 @@ void CPropWnd::PostNcDestroy()
 
 LRESULT CPropWnd::OnSizeParent(WPARAM wParam, LPARAM lParam)
 {
+	if(!m_bShow)
+		return 0;
 	AFX_SIZEPARENTPARAMS* lpLayout = (AFX_SIZEPARENTPARAMS*)lParam;
 	CRect rect(0,0,0,PROP_WND_HEIGHT),rcParent;
 	GetParent()->GetClientRect(&rcParent);
@@ -577,6 +590,8 @@ void CPropWnd::OnLButtonUp(UINT nFlags, CPoint point)
 			int next;
 			int ctrlid=m_PropStat.DeleteTab(m_nGrabIndex,next);
 			AdjustMoveBtn();
+			if((int)m_PropStat.vecData.size()<=1)
+				ShowPropWnd(FALSE);
 			if(ctrlid>=0)
 			{
 				SendMessageToIDWnd(IDW_MAIN_VIEW,WM_CLOSE_SESSION,(WPARAM)ctrlid,(LPARAM)next);
@@ -713,6 +728,7 @@ void CPropWnd::OnFileNewTab()
 {
 	// TODO: Add your command handler code here
 	m_PropStat.NewTab();
+	ShowPropWnd(TRUE);
 	AlignNewTab();
 	SendMessageToIDWnd(IDW_MAIN_VIEW,WM_NEW_SESSION);
 	Invalidate();
@@ -742,6 +758,8 @@ LRESULT CPropWnd::OnCloseCurrentSession(WPARAM wParam, LPARAM lParam)
 		return 0;
 	int next;
 	int ctrlid=m_PropStat.DeleteTab(idx,next);
+	if((int)m_PropStat.vecData.size()<=1)
+		ShowPropWnd(FALSE);
 	AdjustMoveBtn();
 	if(ctrlid>=0)
 	{
