@@ -70,6 +70,7 @@ public:
 	~CPropWnd();
 
 	int GetPropCount();
+	void ShowPropWnd(BOOL bShow);
 
 private:
 	CBitmap m_bmpBk;
@@ -98,6 +99,7 @@ private:
 	BOOL m_bShowMove;
 	E_PROP_GRAB_TYPE m_eGType;
 
+	BOOL m_bShow;
 	int m_nCancelMMove;
 
 private:
