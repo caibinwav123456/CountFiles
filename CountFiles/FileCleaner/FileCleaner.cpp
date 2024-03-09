@@ -98,7 +98,7 @@ BOOL CFileCleanerApp::InitInstance()
 		nullptr);
 
 	// The one and only window has been initialized, so show and update it
-	pFrame->ShowWindow(SW_SHOW);
+	pFrame->ShowWindow(SW_SHOWMAXIMIZED);
 	pFrame->UpdateWindow();
 	return TRUE;
 }

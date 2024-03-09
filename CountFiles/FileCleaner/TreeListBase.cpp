@@ -128,18 +128,44 @@ void TreeListCtrl::ResumeCacheFile()
 {
 	m_TlU.RestoreNode();
 }
-void TreeListCtrl::SetRealPath(int side,const string& path)
+CString MingleListTitle(const string& left,const string& right)
+{
+	CString sep=_T("<->"),strMingle;
+	if(left==""&&right=="")
+		return CString();
+	if(left==""||left==right)
+		strMingle=a2t(right);
+	else if(right=="")
+		strMingle=a2t(left);
+	if(strMingle==_T(""))
+		strMingle.Format(_T("%s %s %s"),a2t(left),(LPCTSTR)sep,a2t(right));
+	return strMingle;
+}
+static inline string get_file_title(const string& path)
+{
+	int pos=(int)path.rfind("\\");
+	return pos==string::npos?path:path.substr(pos+1);
+}
+void TreeListCtrl::SetRealPath(int side,const string& path,uint notify_flag)
 {
 	if(side<0)
 		m_TlU.m_treeLeft.m_strRealPath=process_path(path);
 	else
 		m_TlU.m_treeRight.m_strRealPath=process_path(path);
-	SendMessageToIDWnd(IDW_PROP_WND,WM_SET_PROP_WND_TITLE,
-		(WPARAM)&m_TlU.m_treeLeft.m_strRealPath,
-		(LPARAM)&m_TlU.m_treeRight.m_strRealPath);
-	SendMessageToIDWnd(IDW_BASE_BAR,WM_SET_PROP_WND_TITLE,
-		(WPARAM)&m_TlU.m_treeLeft.m_strRealPath,
-		(LPARAM)&m_TlU.m_treeRight.m_strRealPath);
+	UpdateListTitle(m_TlU.m_treeLeft.m_strRealPath,
+		m_TlU.m_treeRight.m_strRealPath,notify_flag);
+}
+void UpdateListTitle(const string& left,const string& right,uint flags)
+{
+	if(flags&LIST_TITLE_UPDATE_PROP)
+		SendMessageToIDWnd(IDW_PROP_WND,WM_SET_PROP_WND_TITLE,
+			(WPARAM)&left,(LPARAM)&right);
+	if(flags&LIST_TITLE_UPDATE_BASEBAR)
+		SendMessageToIDWnd(IDW_BASE_BAR,WM_SET_PROP_WND_TITLE,
+			(WPARAM)&left,(LPARAM)&right);
+	if(flags&LIST_TITLE_UPDATE_CAPTION)
+		PDXSetMainWndTitle(MingleListTitle(
+			get_file_title(left),get_file_title(right)));
 }
 string TreeListCtrl::GetRealPath(int side)
 {

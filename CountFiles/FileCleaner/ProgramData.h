@@ -45,6 +45,7 @@ BOOL PDXAddToIDWndPtrMap(UINT id,CWnd* pWnd);
 BOOL PDXRemoveFromIDWndPtrMap(UINT id);
 CWnd* PDXGetWndFromID(UINT id);
 void PDXShowMessage(LPCTSTR format,...);
+void PDXSetMainWndTitle(LPCTSTR msg);
 template<typename T>
 class CAddToWndMap
 {
