@@ -187,7 +187,7 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 			PDXShowMessage(_T("\'%s\': %s"),(LPCTSTR)lpData->left,a2t(get_error_desc(ret)));
 			goto fail;
 		}
-		m_TreeList.SetRealPath(-1,path);
+		m_TreeList.SetRealPath(-1,path,LIST_TITLE_UPDATE_ALL);
 		if(type==FILE_TYPE_DIR)
 		{
 			bdir=true;
@@ -213,7 +213,7 @@ LRESULT CMainView::OnStartLoadList(WPARAM wParam,LPARAM lParam)
 						node->Release();
 						strRecentPath.clear();
 						bdir=false;
-						m_TreeList.SetRealPath(-1,"");
+						m_TreeList.SetRealPath(-1,"",LIST_TITLE_UPDATE_ALL);
 						goto right;
 					}
 					strRecentPath=path;
@@ -244,7 +244,7 @@ right:
 		}
 		else
 			strListRef=path;
-		m_TreeList.SetRealPath(1,path);
+		m_TreeList.SetRealPath(1,path,LIST_TITLE_UPDATE_ALL);
 		mask|=FILE_LIST_ATTRIB_REF;
 	}
 	if(mask!=0)
@@ -270,7 +270,7 @@ right:
 	return TRUE;
 fail:
 	m_TreeList.SetRealPath(-1,"");
-	m_TreeList.SetRealPath(1,"");
+	m_TreeList.SetRealPath(1,"",LIST_TITLE_UPDATE_ALL);
 	Invalidate();
 	return FALSE;
 }

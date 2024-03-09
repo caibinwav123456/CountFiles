@@ -29,7 +29,16 @@ enum E_TREE_ITEM_TYPE
 	eITypeErrDir,
 	eITypeErrFile,
 };
+#define LIST_TITLE_UPDATE_PROP 1
+#define LIST_TITLE_UPDATE_BASEBAR 2
+#define LIST_TITLE_UPDATE_CAPTION 4
+#define LIST_TITLE_UPDATE_ALL \
+	(LIST_TITLE_UPDATE_PROP | \
+	LIST_TITLE_UPDATE_BASEBAR | \
+	LIST_TITLE_UPDATE_CAPTION)
 COLORREF GetDispColor(E_FOLDER_STATE state);
+CString MingleListTitle(const string& left,const string& right);
+void UpdateListTitle(const string& left,const string& right,uint flags);
 struct TLItem;
 struct TLItemDir;
 struct ItStkItem;
@@ -330,7 +339,7 @@ public:
 	void SetTabInfo(const TabInfo* tab);
 	ListFileNode* GetListFilePath(int side,int idx=-1);
 	string& GetRecentDirPath(int idx=-1);
-	void SetRealPath(int side,const string& path="");
+	void SetRealPath(int side,const string& path="",uint notify_flag=0);
 	string GetRealPath(int side);
 
 //Session operations

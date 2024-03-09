@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <time.h>
+#include "resource.h"
 #define safe_release(ptr) \
 	if(ptr!=NULL) \
 	{ \
@@ -53,6 +54,16 @@ void PDXShowMessage(LPCTSTR format,...)
 	strMsg.FormatV(format, args);
 	va_end(args);
 	AfxMessageBox(strMsg);
+}
+void PDXSetMainWndTitle(LPCTSTR msg)
+{
+	CString strWndName,strWndText;
+	strWndName.LoadString(IDR_MAINFRAME);
+	if(msg==NULL||*msg==0)
+		strWndText=strWndName;
+	else
+		strWndText.Format(_T("%s - %s"),msg,(LPCTSTR)strWndName);
+	AfxGetMainWnd()->SetWindowText(strWndText);
 }
 class CBaseTree;
 class CBaseList;
