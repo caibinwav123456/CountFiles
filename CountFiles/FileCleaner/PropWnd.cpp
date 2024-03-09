@@ -115,7 +115,7 @@ void PropTabStat::SetCurTabString(const string& left,const string& right)
 	if(cursel!=NULL)
 		cursel->UpdateString(left,right);
 }
-CPropWnd::CPropWnd():m_iBaseX(PROP_START_X),m_iShiftTab(0),m_nGrabIndex(-1),m_bShowMove(FALSE),m_eGType(eGrabNone)
+CPropWnd::CPropWnd():m_iBaseX(PROP_START_X),m_iShiftTab(0),m_nGrabIndex(-1),m_bShowMove(FALSE),m_eGType(eGrabNone),m_nCancelMMove(0)
 {
 
 }
@@ -556,6 +556,7 @@ void CPropWnd::OnLButtonDown(UINT nFlags, CPoint point)
 		int ctrlid=m_PropStat.SelectTab(m_nGrabIndex,unchanged);
 		if(ctrlid>=0&&!unchanged)
 		{
+			m_nCancelMMove=2;
 			SendMessageToIDWnd(IDW_MAIN_VIEW,WM_SWITCH_SESSION,(WPARAM)ctrlid);
 		}
 	}
@@ -628,6 +629,12 @@ void CPropWnd::OnLButtonUp(UINT nFlags, CPoint point)
 void CPropWnd::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+	if(m_nCancelMMove>0)
+	{
+		CWnd::OnMouseMove(nFlags, point);
+		m_nCancelMMove--;
+		return;
+	}
 	TRACKMOUSEEVENT tme;
 	ZeroMemory(&tme,sizeof(tme));
 	tme.cbSize=sizeof(TRACKMOUSEEVENT);

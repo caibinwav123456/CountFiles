@@ -98,6 +98,8 @@ private:
 	BOOL m_bShowMove;
 	E_PROP_GRAB_TYPE m_eGType;
 
+	int m_nCancelMMove;
+
 private:
 	void GetBitmapList(BitmapLoadInfo** blist,int* num);
 	void DeleteBitmaps();
