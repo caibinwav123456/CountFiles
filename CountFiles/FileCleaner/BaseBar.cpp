@@ -598,14 +598,14 @@ void ExportRecFile(CBaseBar* basebar,int side)
 void CBaseBar::OnCmdMenuExpRecFile()
 {
 	// TODO: Add your command handler code here
-	ExportRecFile(this,-1);
+	ExportRecFile(this,LEFT_SIDE);
 }
 
 
 void CBaseBar::OnCmdMenuExpRecFileRef()
 {
 	// TODO: Add your command handler code here
-	ExportRecFile(this,1);
+	ExportRecFile(this,RIGHT_SIDE);
 }
 
 LRESULT CBaseBar::OnSetCurPath(WPARAM wParam, LPARAM lParam)

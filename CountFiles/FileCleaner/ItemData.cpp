@@ -208,28 +208,28 @@ static inline void set_item_stack(ItStkItem* stk,TLItemDir* dir,uint idx,int sid
 	if(stk->m_pJItem->left==NULL)
 	{
 		stk->m_pItem=stk->m_pJItem->right;
-		stk->side=1;
+		stk->side=RIGHT_SIDE;
 	}
 	else if(stk->m_pJItem->right==NULL)
 	{
 		stk->m_pItem=stk->m_pJItem->left;
-		stk->side=-1;
+		stk->side=LEFT_SIDE;
 	}
 	else if(stk->m_pJItem->left->type==eITypeDir
 		&&stk->m_pJItem->right->type!=eITypeDir)
 	{
 		stk->m_pItem=stk->m_pJItem->left;
-		stk->side=-1;
+		stk->side=LEFT_SIDE;
 	}
 	else if(stk->m_pJItem->left->type!=eITypeDir
 		&&stk->m_pJItem->right->type==eITypeDir)
 	{
 		stk->m_pItem=stk->m_pJItem->right;
-		stk->side=1;
+		stk->side=RIGHT_SIDE;
 	}
 	else
 	{
-		stk->m_pItem=(side<=0?stk->m_pJItem->left:stk->m_pJItem->right);
+		stk->m_pItem=(_IS_LEFT_SIDE(side)?stk->m_pJItem->left:stk->m_pJItem->right);
 		stk->side=side;
 	}
 }

@@ -130,20 +130,23 @@ void TreeListCtrl::ResumeCacheFile()
 }
 CString MingleListTitle(const string& left,const string& right)
 {
-	CString sep=_T("<->"),strMingle;
 	if(left==""&&right=="")
 		return CString();
 	if(left==""||left==right)
-		strMingle=a2t(right);
+		return a2t(right);
 	else if(right=="")
-		strMingle=a2t(left);
-	if(strMingle==_T(""))
-		strMingle.Format(_T("%s %s %s"),a2t(left),(LPCTSTR)sep,a2t(right));
-	return strMingle;
+		return a2t(left);
+	else
+	{
+		LPCTSTR sep=_T("<->");
+		CString strMingle;
+		strMingle.Format(_T("%s %s %s"),a2t(left),sep,a2t(right));
+		return strMingle;
+	}
 }
 void TreeListCtrl::SetRealPath(int side,const string& path,uint notify_flag)
 {
-	if(side<0)
+	if(IS_LEFT_SIDE(side))
 		m_TlU.m_treeLeft.m_strRealPath=path;
 	else
 		m_TlU.m_treeRight.m_strRealPath=path;
@@ -168,7 +171,7 @@ void TLUnit::UpdateListTitle(uint flags)
 }
 string TreeListCtrl::GetRealPath(int side)
 {
-	if(side<0)
+	if(IS_LEFT_SIDE(side))
 		return m_TlU.m_treeLeft.m_strRealPath;
 	else
 		return m_TlU.m_treeRight.m_strRealPath;
