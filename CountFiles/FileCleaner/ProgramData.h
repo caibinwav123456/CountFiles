@@ -9,7 +9,7 @@ using namespace std;
 #define DUAL_SIDE 0
 #define IS_LEFT_SIDE(side)   ((side)<0)
 #define IS_RIGHT_SIDE(side)  ((side)>0)
-#define IS_DUAL(side)        ((side)==0)
+#define IS_DUAL_SIDE(side)   ((side)==0)
 #define _IS_LEFT_SIDE(side)  ((side)<=0)
 #define _IS_RIGHT_SIDE(side) ((side)>=0)
 

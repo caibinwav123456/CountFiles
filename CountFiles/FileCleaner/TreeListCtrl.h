@@ -346,7 +346,7 @@ public:
 //Session operations
 	int NewSession();
 	int SwitchToSession(int idx);
-	int CloseSession(int idx,int trans_to);
+	int EndSession(int idx,int trans_to);
 
 //Draw callbacks
 	void Draw(CDC* pClientDC,bool buffered);

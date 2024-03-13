@@ -57,7 +57,7 @@ BEGIN_MESSAGE_MAP(CMainView, CScrollView)
 	ON_MESSAGE(WM_EXPORT_LIST_FILE,OnExportListFile)
 	ON_MESSAGE(WM_LIST_FILE_VALID,OnExportIsValid)
 	ON_MESSAGE(WM_NEW_SESSION,OnNewSession)
-	ON_MESSAGE(WM_CLOSE_SESSION,OnCloseSession)
+	ON_MESSAGE(WM_END_SESSION,OnEndSession)
 	ON_MESSAGE(WM_SWITCH_SESSION,OnSwitchSession)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
@@ -316,9 +316,9 @@ LRESULT CMainView::OnNewSession(WPARAM wParam, LPARAM lParam)
 	m_TreeList.NewSession();
 	return 0;
 }
-LRESULT CMainView::OnCloseSession(WPARAM wParam, LPARAM lParam)
+LRESULT CMainView::OnEndSession(WPARAM wParam, LPARAM lParam)
 {
-	m_TreeList.CloseSession((int)wParam,(int)lParam);
+	m_TreeList.EndSession((int)wParam,(int)lParam);
 	return 0;
 }
 LRESULT CMainView::OnSwitchSession(WPARAM wParam, LPARAM lParam)

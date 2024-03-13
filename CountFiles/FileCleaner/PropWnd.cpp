@@ -429,7 +429,7 @@ void CPropWnd::AlignNewTab()
 BEGIN_MESSAGE_MAP(CPropWnd, CWnd)
 	ON_MESSAGE(WM_SIZEPARENT, &CPropWnd::OnSizeParent)
 	ON_MESSAGE(WM_SET_PROP_WND_TITLE, &CPropWnd::OnSetCurTitle)
-	ON_MESSAGE(WM_CLOSE_CURRENT_SESSION, &CPropWnd::OnCloseCurrentSession)
+	ON_MESSAGE(WM_CLOSE_CURRENT_PROP_TAB, &CPropWnd::OnCloseCurrentProp)
 	ON_WM_CREATE()
 	ON_WM_PAINT()
 	ON_WM_SIZE()
@@ -592,7 +592,7 @@ void CPropWnd::OnLButtonUp(UINT nFlags, CPoint point)
 				ShowPropWnd(FALSE);
 			if(ctrlid>=0)
 			{
-				SendMessageToIDWnd(IDW_MAIN_VIEW,WM_CLOSE_SESSION,(WPARAM)ctrlid,(LPARAM)next);
+				SendMessageToIDWnd(IDW_MAIN_VIEW,WM_END_SESSION,(WPARAM)ctrlid,(LPARAM)next);
 			}
 		}
 		break;
@@ -741,7 +741,7 @@ LRESULT CPropWnd::OnSetCurTitle(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-LRESULT CPropWnd::OnCloseCurrentSession(WPARAM wParam, LPARAM lParam)
+LRESULT CPropWnd::OnCloseCurrentProp(WPARAM wParam, LPARAM lParam)
 {
 	int idx;
 	PropTabData* pProp=m_PropStat.GetSelTab();
@@ -761,7 +761,7 @@ LRESULT CPropWnd::OnCloseCurrentSession(WPARAM wParam, LPARAM lParam)
 	AdjustMoveBtn();
 	if(ctrlid>=0)
 	{
-		SendMessageToIDWnd(IDW_MAIN_VIEW,WM_CLOSE_SESSION,(WPARAM)ctrlid,(LPARAM)next);
+		SendMessageToIDWnd(IDW_MAIN_VIEW,WM_END_SESSION,(WPARAM)ctrlid,(LPARAM)next);
 	}
 	Invalidate();
 	return 0;
