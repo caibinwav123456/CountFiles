@@ -1,6 +1,7 @@
 #ifndef _PROGRAM_DATA_H_
 #define _PROGRAM_DATA_H_
 #include <string>
+#include "defines.h"
 using namespace std;
 
 #ifdef UNICODE
@@ -84,7 +85,13 @@ inline string process_path(const string& path)
 {
 	if(path.empty())
 		return "";
-	return path.back()=='\\'?path.substr(0,path.size()-1):path;
+	return path.back()==dir_symbol?path.substr(0,path.size()-1):path;
+}
+inline string get_path_title(const string& path)
+{
+	string path_no_dir=process_path(path);
+	int pos=(int)path_no_dir.rfind(dir_symbol);
+	return pos==string::npos?path_no_dir:path_no_dir.substr(pos+1);
 }
 class CBaseTree;
 class CBaseList;

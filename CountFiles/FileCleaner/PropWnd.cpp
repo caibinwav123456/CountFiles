@@ -19,9 +19,7 @@ void PropTabData::Remove()
 }
 inline void update_path_title(const string& path,CString& fullpath,CString& title)
 {
-	int pos=(int)path.rfind("\\");
-	string strtitle=pos==string::npos?path:path.substr(pos+1);
-	fullpath=a2tstr(path),title=a2tstr(strtitle);
+	fullpath=a2tstr(path),title=a2tstr(get_path_title(path));
 }
 void PropTabData::UpdateString(const string& left,const string& right)
 {
