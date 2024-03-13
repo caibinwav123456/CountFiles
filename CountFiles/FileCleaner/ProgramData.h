@@ -4,6 +4,15 @@
 #include "defines.h"
 using namespace std;
 
+#define LEFT_SIDE -1
+#define RIGHT_SIDE 1
+#define DUAL_SIDE 0
+#define IS_LEFT_SIDE(side)   ((side)<0)
+#define IS_RIGHT_SIDE(side)  ((side)>0)
+#define IS_DUAL(side)        ((side)==0)
+#define _IS_LEFT_SIDE(side)  ((side)<=0)
+#define _IS_RIGHT_SIDE(side) ((side)>=0)
+
 #ifdef UNICODE
 #define t2a(p) ConvertTStrToAnsiStr(p).c_str()
 #define a2t(p) (LPCTSTR)ConvertAnsiStrToTStr(p)

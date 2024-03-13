@@ -58,7 +58,7 @@ struct ItStkItem
 	int parentidx;
 	ItStkItem* next;
 	ItStkItem(TLItem* pItem,TLItemPair* pJItem=NULL)
-		:m_pItem(pItem),m_pJItem(pJItem),side(0)
+		:m_pItem(pItem),m_pJItem(pJItem),side(DUAL_SIDE)
 		,parentidx(-1),next(NULL){}
 	TLItem* get_item(int _side);
 };
@@ -71,7 +71,7 @@ public:
 		TLItemPair* pair;
 		int side;
 		int iline;
-		SelItem(TLItem* _item=NULL,TLItemPair* p=NULL,int i=-1,int s=0):item(_item),pair(p),side(s),iline(i){}
+		SelItem(TLItem* _item=NULL,TLItemPair* p=NULL,int i=-1,int s=DUAL_SIDE):item(_item),pair(p),side(s),iline(i){}
 		SelItem(ItStkItem* stk,int i=-1)
 		{
 			item=stk->m_pItem;
@@ -84,7 +84,7 @@ public:
 			item=NULL;
 			pair=NULL;
 			iline=-1;
-			side=0;
+			side=DUAL_SIDE;
 		}
 		bool operator<(const SelItem& other) const
 		{
@@ -221,7 +221,7 @@ struct TLItemDir:public TLItem
 	virtual bool IsBase();
 	virtual void Release();
 	virtual uint GetDispLength();
-	ItStkItem* FromLineNum(int iline,int& lvl,int side=0);
+	ItStkItem* FromLineNum(int iline,int& lvl,int side=DUAL_SIDE);
 	size_t size() const;
 private:
 	void clear();

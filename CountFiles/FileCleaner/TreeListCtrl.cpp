@@ -160,29 +160,29 @@ TLCore* TLUnit::GetPrimaryBase(int* side)
 		side=&dummy;
 	if(m_pItemJoint!=NULL)
 	{
-		*side=0;
+		*side=DUAL_SIDE;
 		return &m_treeLeft;
 	}
 	else if(m_treeLeft.m_pBaseItem!=NULL)
 	{
-		*side=-1;
+		*side=LEFT_SIDE;
 		return &m_treeLeft;
 	}
 	else if(m_treeRight.m_pBaseItem!=NULL)
 	{
-		*side=1;
+		*side=RIGHT_SIDE;
 		return &m_treeRight;
 	}
 	else
 	{
-		*side=0;
+		*side=DUAL_SIDE;
 		return NULL;
 	}
 }
 ListFileNode* TLUnit::GetListFilePath(int side)
 {
 	TLCore* core;
-	if(side<=0)
+	if(_IS_LEFT_SIDE(side))
 		core=&m_treeLeft;
 	else
 		core=&m_treeRight;
@@ -408,7 +408,7 @@ void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,int sid
 		if(pstk->m_pJItem!=NULL)
 		{
 			TLItemSplice* splice=pstk->m_pItem->parent->subpairs;
-			int maxidx=side<=0?splice->lmax:splice->rmax;
+			int maxidx=_IS_LEFT_SIDE(side)?splice->lmax:splice->rmax;
 			last=(pstk->m_pItem->parentidx>=maxidx);
 		}
 		else if(sitem!=NULL)
@@ -465,7 +465,7 @@ void TreeListCtrl::DrawLineGrp(CDrawer& drawer,const ListCtrlIterator& iter,TLCo
 	TreeListTabGrid& tab=*tltree.m_pTab;
 	assert(tab.mask&TLTAB_NAME);
 	CPoint pos(tab.rcTotal.left,LINE_HEIGHT*iter.m_iline);
-	int side=(&tltree==&tltree.m_pTlUnit->m_treeLeft?-1:1);
+	int side=(&tltree==&tltree.m_pTlUnit->m_treeLeft?LEFT_SIDE:RIGHT_SIDE);
 	TLItem* item=iter.m_pStkItem->get_item(side);
 	drawer.SetClipRect(&CRect(pos,CPoint(tab.arrTab[0].rect.right,pos.y+LINE_HEIGHT)));
 	DrawConn(drawer,iter,side,tab.rcTotal.left);
