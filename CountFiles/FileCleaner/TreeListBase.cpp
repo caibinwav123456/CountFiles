@@ -152,6 +152,13 @@ void TreeListCtrl::SetRealPath(int side,const string& path,uint notify_flag)
 		m_TlU.m_treeRight.m_strRealPath=path;
 	m_TlU.UpdateListTitle(notify_flag);
 }
+string TreeListCtrl::GetRealPath(int side)
+{
+	if(IS_LEFT_SIDE(side))
+		return m_TlU.m_treeLeft.m_strRealPath;
+	else
+		return m_TlU.m_treeRight.m_strRealPath;
+}
 void UpdateListTitle(const string& left,const string& right,uint flags)
 {
 	if(flags&LIST_TITLE_UPDATE_PROP)
@@ -168,11 +175,3 @@ void TLUnit::UpdateListTitle(uint flags)
 {
 	::UpdateListTitle(m_treeLeft.m_strRealPath,m_treeRight.m_strRealPath,flags);
 }
-string TreeListCtrl::GetRealPath(int side)
-{
-	if(IS_LEFT_SIDE(side))
-		return m_TlU.m_treeLeft.m_strRealPath;
-	else
-		return m_TlU.m_treeRight.m_strRealPath;
-}
-
