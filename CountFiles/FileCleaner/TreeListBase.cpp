@@ -150,8 +150,7 @@ void TreeListCtrl::SetRealPath(int side,const string& path,uint notify_flag)
 		m_TlU.m_treeLeft.m_strRealPath=path;
 	else
 		m_TlU.m_treeRight.m_strRealPath=path;
-	UpdateListTitle(m_TlU.m_treeLeft.m_strRealPath,
-		m_TlU.m_treeRight.m_strRealPath,notify_flag);
+	m_TlU.UpdateListTitle(notify_flag);
 }
 void UpdateListTitle(const string& left,const string& right,uint flags)
 {
