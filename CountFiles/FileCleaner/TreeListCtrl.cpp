@@ -125,7 +125,7 @@ int TreeListCtrl::SwitchToSession(int idx)
 	Invalidate();
 	return 0;
 }
-int TreeListCtrl::CloseSession(int idx,int trans_to)
+int TreeListCtrl::EndSession(int idx,int trans_to)
 {
 	if(idx<0||idx>=(int)m_vecLists.size())
 		return -1;

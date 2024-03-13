@@ -57,7 +57,7 @@ public:
 	afx_msg LRESULT OnExportListFile(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnExportIsValid(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnNewSession(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnCloseSession(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnEndSession(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSwitchSession(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);

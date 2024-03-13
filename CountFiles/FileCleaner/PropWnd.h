@@ -123,7 +123,7 @@ private:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg LRESULT OnSizeParent(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSetCurTitle(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnCloseCurrentSession(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCloseCurrentProp(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);

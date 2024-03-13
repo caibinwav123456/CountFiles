@@ -164,7 +164,7 @@ void CMainFrame::OnClose()
 		CFrameWnd::OnClose();
 		break;
 	case IDNO:
-		SendMessageToIDWnd(IDW_PROP_WND,WM_CLOSE_CURRENT_SESSION);
+		SendMessageToIDWnd(IDW_PROP_WND,WM_CLOSE_CURRENT_PROP_TAB);
 		break;
 	default:
 		break;
