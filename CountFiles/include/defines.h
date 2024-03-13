@@ -134,6 +134,7 @@
 #define TAG_ERR_DESC       "error: "
 
 #define dir_symbol         '\\'
+#define dir_symbol_str     "\\"
 
 #define VIEW_FONT          _T("Arial")
 

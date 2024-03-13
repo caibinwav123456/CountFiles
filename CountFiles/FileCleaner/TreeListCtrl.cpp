@@ -121,10 +121,7 @@ int TreeListCtrl::SwitchToSession(int idx)
 	m_pCurTlU=m_vecLists[m_iVec];
 	UpdateListStat(false);
 	SetScrollPos(m_TlU.m_ptScrollPos);
-	UpdateListTitle(
-		m_TlU.m_treeLeft.m_strRealPath,
-		m_TlU.m_treeRight.m_strRealPath,
-		LIST_TITLE_UPDATE_BASEBAR|LIST_TITLE_UPDATE_CAPTION);
+	m_TlU.UpdateListTitle(LIST_TITLE_UPDATE_BASEBAR|LIST_TITLE_UPDATE_CAPTION);
 	Invalidate();
 	return 0;
 }

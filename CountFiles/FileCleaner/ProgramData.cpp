@@ -1,6 +1,5 @@
 #include "pch.h"
 #include <math.h>
-#include "defines.h"
 #include "datetime.h"
 #include "algor_templ.h"
 #include "utility.h"
@@ -146,22 +145,22 @@ PathNode* PathNodeList::DupInternal()
 PathNode* PathNodeList::GetSub(const string& name)
 {
 	PathNodeList* node=new PathNodeList;
-	node->extern_path=extern_path+"\\"+name;
+	node->extern_path=extern_path+dir_symbol+name;
 	CProgramData::GetPathList()->AddNode(node);
 	return node;
 }
 PathNode* PathNodeList::GetSibling(const string& name)
 {
-	int pos=extern_path.rfind('\\');
+	int pos=extern_path.rfind(dir_symbol);
 	string base=pos==string::npos?extern_path:extern_path.substr(0,pos);
 	PathNodeList* node=new PathNodeList;
-	node->extern_path=base+"\\"+name;
+	node->extern_path=base+dir_symbol+name;
 	CProgramData::GetPathList()->AddNode(node);
 	return node;
 }
 bool PathNodeList::PeekSub(const string& name)
 {
-	string path=extern_path+"\\"+name;
+	string path=extern_path+dir_symbol+name;
 	return sys_fstat((char*)path.c_str(),NULL)==0;
 }
 void PathNodeList::Remove()
@@ -192,7 +191,7 @@ string PathNodeTree::GetPathInternal()
 	reverse(vname.begin(),vname.end());
 	string path=node->t.hosttree->base_path;
 	for(vector<string*>::iterator it=vname.begin();it<vname.end();it++)
-		path+=(string("\\")+**it);
+		path+=(string(dir_symbol_str)+**it);
 	return path;
 }
 PathNode* PathNodeTree::DupInternal()
@@ -351,7 +350,7 @@ PathNode* CProgramData::GetPathNode(const string& path)
 PathNode* CProgramData::GetErrListFileNode(PathNode* node)
 {
 	string filepath=node->GetPath();
-	int pos=filepath.rfind('\\');
+	int pos=filepath.rfind(dir_symbol);
 	string filename=pos==string::npos?filepath:filepath.substr(pos+1);
 	return node->GetSibling(GetErrListFilePath(filename));
 }
@@ -424,7 +423,7 @@ bool CProgramData::IsValidImpExpFilePath(const string& path)
 	string cache_path=process_path(GetCacheDirPath());
 	if(path.size()<cache_path.size())
 		return true;
-	if(path.size()>cache_path.size()&&path[cache_path.size()]!='\\')
+	if(path.size()>cache_path.size()&&path[cache_path.size()]!=dir_symbol)
 		return true;
 	return compare_pathname(path.substr(0,cache_path.size()),cache_path)!=0;
 }

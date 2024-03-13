@@ -41,7 +41,7 @@ int TLUnit::PrepareBase()
 	random_integer64(uuid);
 	string idstr=FormatI64Hex(uuid);
 	while(CProgramData::GetBasePathNode()->PeekSub(idstr)
-		||sys_fstat((char*)(CProgramData::GetBasePathNode()->GetPath()+"\\"+idstr).c_str(),NULL)==0)
+		||sys_fstat((char*)(CProgramData::GetBasePathNode()->GetPath()+dir_symbol+idstr).c_str(),NULL)==0)
 	{
 		uuid+=UInteger64(1);
 		idstr=FormatI64Hex(uuid);
@@ -141,17 +141,12 @@ CString MingleListTitle(const string& left,const string& right)
 		strMingle.Format(_T("%s %s %s"),a2t(left),(LPCTSTR)sep,a2t(right));
 	return strMingle;
 }
-static inline string get_file_title(const string& path)
-{
-	int pos=(int)path.rfind("\\");
-	return pos==string::npos?path:path.substr(pos+1);
-}
 void TreeListCtrl::SetRealPath(int side,const string& path,uint notify_flag)
 {
 	if(side<0)
-		m_TlU.m_treeLeft.m_strRealPath=process_path(path);
+		m_TlU.m_treeLeft.m_strRealPath=path;
 	else
-		m_TlU.m_treeRight.m_strRealPath=process_path(path);
+		m_TlU.m_treeRight.m_strRealPath=path;
 	UpdateListTitle(m_TlU.m_treeLeft.m_strRealPath,
 		m_TlU.m_treeRight.m_strRealPath,notify_flag);
 }
@@ -165,7 +160,11 @@ void UpdateListTitle(const string& left,const string& right,uint flags)
 			(WPARAM)&left,(LPARAM)&right);
 	if(flags&LIST_TITLE_UPDATE_CAPTION)
 		PDXSetMainWndTitle(MingleListTitle(
-			get_file_title(left),get_file_title(right)));
+			get_path_title(left),get_path_title(right)));
+}
+void TLUnit::UpdateListTitle(uint flags)
+{
+	::UpdateListTitle(m_treeLeft.m_strRealPath,m_treeRight.m_strRealPath,flags);
 }
 string TreeListCtrl::GetRealPath(int side)
 {

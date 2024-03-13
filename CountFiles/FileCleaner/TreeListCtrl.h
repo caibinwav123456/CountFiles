@@ -289,6 +289,7 @@ struct TLUnit
 	void Curl();
 	int PrepareBase();
 	void DestroyBase();
+	void UpdateListTitle(uint flags);
 };
 class ListCtrlIterator
 {

@@ -253,12 +253,12 @@ static int cb_stat(char* pathname,dword type,void* param,char dsym)
 DLLAPI(int) sys_recurse_fcopy(char* from,char* to,file_recurse_cbdata* cbdata)
 {
 	file_recurse_callback cb={sys_fstat,sys_ftraverse,sys_mkdir,sys_fcopy,sys_fdelete};
-	return recurse_fcopy(from,to,&cb,cbdata,'\\');
+	return recurse_fcopy(from,to,&cb,cbdata,dir_symbol);
 }
 DLLAPI(int) sys_recurse_fdelete(char* pathname,file_recurse_cbdata* cbdata)
 {
 	file_recurse_callback cb={sys_fstat,sys_ftraverse,sys_mkdir,sys_fcopy,sys_fdelete};
-	return recurse_fdelete(pathname,&cb,cbdata,'\\');
+	return recurse_fdelete(pathname,&cb,cbdata,dir_symbol);
 }
 DLLAPI(int) sys_recurse_fstat(char* pathname,path_recurse_stat* pstat,file_recurse_cbdata* cbdata)
 {
@@ -266,7 +266,7 @@ DLLAPI(int) sys_recurse_fstat(char* pathname,path_recurse_stat* pstat,file_recur
 	pstat->ndir=0;
 	pstat->size.sizeh=pstat->size.sizel=0;
 	file_recurse_handle_callback cb={sys_fstat,sys_ftraverse,cb_stat};
-	return recurse_fhandle(pathname,&cb,true,pstat,cbdata,'\\');
+	return recurse_fhandle(pathname,&cb,true,pstat,cbdata,dir_symbol);
 }
 DLLAPI(void) random_integer64(UInteger64& num)
 {

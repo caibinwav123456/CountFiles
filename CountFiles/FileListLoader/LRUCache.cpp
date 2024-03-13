@@ -2,6 +2,7 @@
 #include "LRUCache.h"
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #define clear_mem(m) memset(&m,0,sizeof(m))
 #define NULLSLOT ((uint)-1)
 #define clear_list(head,tail) \
@@ -151,6 +152,7 @@ void LRUCache::put(void* item,void** phandle)
 	}
 	else
 	{
+		assert(tail_lru.prev!=&head_lru);
 		pslot=container_of(tail_lru.prev,itemlru,HandleSlot);
 		free_item(pslot->item);
 		pslot->oldsid=pslot->sid;
