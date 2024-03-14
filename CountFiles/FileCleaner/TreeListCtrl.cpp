@@ -122,6 +122,9 @@ int TreeListCtrl::SwitchToSession(int idx)
 	UpdateListStat(false);
 	SetScrollPos(m_TlU.m_ptScrollPos);
 	m_TlU.UpdateListTitle(LIST_TITLE_UPDATE_BASEBAR|LIST_TITLE_UPDATE_CAPTION);
+	CRect rect;
+	GetCanvasRect(&rect);
+	SendMessageToIDWnd(IDW_HEAD_BAR,WM_SET_VIEW_SIZE,(WPARAM)&rect);
 	Invalidate();
 	return 0;
 }
