@@ -612,6 +612,8 @@ LRESULT CBaseBar::OnSetCurPath(WPARAM wParam, LPARAM lParam)
 {
 	m_strBasePath=m_strComboBasePath=a2tstr(*(const string*)wParam);
 	m_strBasePathRef=m_strComboBasePathRef=a2tstr(*(const string*)lParam);
+	m_btnGo.EnableButton(FALSE);
+	m_btnGo2.EnableButton(FALSE);
 	UpdateData(FALSE);
 	return 0;
 }
