@@ -337,7 +337,7 @@ void CPropWnd::DrawTab(CDrawer& drawer,int xpos,int tabidx,const CString& left,c
 	if(width>szLeft.cx)
 		width=szLeft.cx;
 	CRect rcLeft(rcString.TopLeft(),CPoint(rcString.left+width,rcString.bottom));
-	CRect rcMid(CPoint(rcLeft.right,rcLeft.top),sz);
+	CRect rcMid(CPoint(rcLeft.right,rcLeft.top),CSize(sz.cx,rcString.Height()));
 	CRect rcRight(CPoint(rcMid.right,rcMid.top),rcString.BottomRight());
 	drawer.DrawText(rcLeft,DT_ALIGN_LEFT,left,TEXT_HEIGHT,RGB(0,0,0),TRANSPARENT,VIEW_FONT);
 	drawer.DrawText(rcMid,DT_ALIGN_LEFT,sep,TEXT_HEIGHT,RGB(0,0,0),TRANSPARENT,VIEW_FONT);
