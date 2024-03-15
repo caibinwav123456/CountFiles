@@ -1,4 +1,5 @@
 #include "datetime.h"
+#include <string.h>
 const uint weekday_epoch=5;//2000/1/1
 const char* abbrev_weekday[]=
 {
@@ -128,6 +129,12 @@ CDateTime::CDateTime(uint _year,byte _month,byte _day,
 	minute=_minute;
 	second=_second;
 	millisecond=_millisecond;
+	weekday=CalculateWeekDay();
+}
+void CDateTime::InitDefault()
+{
+	memset(this,0,sizeof(CDateTime));
+	year=2000;
 	weekday=CalculateWeekDay();
 }
 CDateTime::CDateTime(const DateTime& date_time)
@@ -430,32 +437,83 @@ void CDateTime::Format(string& str,dword flags,const char* sepday,const char* se
 		}
 	}
 }
-#define advance_ptr(ptr,len,step) \
-	if(len<step) \
-		return ERR_BUFFER_OVERFLOW; \
-	ptr+=step; \
-	len-=step
-#define pass_byte(c) \
-	buf=ptr; \
-	advance_ptr(ptr,len,1); \
-	if(*buf!=(byte)(c)) \
-		return ERR_BAD_CONFIG_FORMAT; \
-	buf=ptr
-#define pass_space pass_byte(' ')
+static inline uint forward_str(const byte*& ptr,uint& len,uint step)
+{
+	uint cstep;
+	if(len>step)
+		cstep=step;
+	else
+		cstep=len;
+	ptr+=cstep;
+	len-=cstep;
+	return cstep;
+}
 static inline bool find_byte(const byte*& ptr,uint& len,byte c)
 {
-	for(;len>0;ptr++,len--)
+	for(;len>0;forward_str(ptr,len,1))
 	{
 		if(*ptr==c)
 			return true;
 	}
 	return false;
 }
-static inline int extract_next_decimal(int& num,const byte*& ptr,uint& len,char token,byte* tmpbuf,uint tmpbuflen)
+static inline bool find_str(const byte*& ptr,uint& len,const char* str)
+{
+	uint slen=strlen(str);
+	for(;;)
+	{
+		if(len<slen)
+			break;
+		if(memcmp((const char*)ptr,str,slen)==0)
+			return true;
+		if(len>slen)
+			forward_str(ptr,len,1);
+		else
+			break;
+	}
+	return false;
+}
+#define advance_ptr(ptr,len,step) \
+	if(forward_str(ptr,len,step)<step) \
+		return ERR_BUFFER_OVERFLOW
+#define pass_byte(c) \
+	buf=ptr; \
+	advance_ptr(ptr,len,1); \
+	if(*buf!=(byte)(c)) \
+		return ERR_BAD_CONFIG_FORMAT; \
+	buf=ptr
+#define pass_byte_spec(buf,ptr,len,c) \
+	buf=ptr; \
+	advance_ptr(ptr,len,1); \
+	if(*buf!=(byte)(c)) \
+		return ERR_BAD_CONFIG_FORMAT; \
+	buf=ptr
+#define pass_space pass_byte(' ')
+#define pass_space_spec(buf,ptr,len) pass_byte_spec(buf,ptr,len,' ')
+static inline bool match_tag(const char* str,const byte*& ptr,uint& len)
+{
+	const byte* buf=ptr;
+	uint slen=strlen(str);
+	if(len<slen)
+		return false;
+	ptr+=slen,len-=slen;
+	if(memcmp(buf,str,slen)!=0)
+		return false;
+	return true;
+}
+#define pass_str(str) \
+	if(!match_tag(str,ptr,len)) \
+		return ERR_BAD_CONFIG_FORMAT; \
+	buf=ptr
+#define pass_str_spec(buf,ptr,len,str) \
+	if(!match_tag(str,ptr,len)) \
+		return ERR_BAD_CONFIG_FORMAT; \
+	buf=ptr
+static inline int extract_next_decimal(int& num,const byte*& ptr,uint& len,const char* token,byte* tmpbuf,uint tmpbuflen)
 {
 	uint tmplen;
 	const byte* buf=ptr;
-	if(token==0)
+	if(token==NULL)
 	{
 		int i;
 		for(i=0;len>0;ptr++,len--,i++)
@@ -466,7 +524,7 @@ static inline int extract_next_decimal(int& num,const byte*& ptr,uint& len,char 
 		if(i!=2)
 			return ERR_BAD_CONFIG_FORMAT;
 	}
-	else if(!find_byte(ptr,len,token))
+	else if(!find_str(ptr,len,token))
 		return ERR_BAD_CONFIG_FORMAT;
 	tmplen=ptr-buf;
 	if(tmplen>=tmpbuflen)
@@ -476,50 +534,65 @@ static inline int extract_next_decimal(int& num,const byte*& ptr,uint& len,char 
 	sscanf((char*)tmpbuf,"%d",&num);
 	return 0;
 }
-int CDateTime::FromString(const byte*& ptr,uint& len,char sepday,char septime,char sep)
+int CDateTime::FromString(const byte*& ptr,uint& len,dword flags,const char* sepday,const char* septime,const char* sep)
 {
 	int ret=0;
 	int num=0;
 	const byte* buf=ptr;
 	byte tmpbuf[20];
+	InitDefault();
 
-	return_ret(ret,0,extract_next_decimal(num,ptr,len,sepday,tmpbuf,20));
-	year=num;
-	pass_byte(sepday);
-
-	return_ret(ret,0,extract_next_decimal(num,ptr,len,sepday,tmpbuf,20));
-	month=num-1;
-	pass_byte(sepday);
-
-	return_ret(ret,0,extract_next_decimal(num,ptr,len,sep,tmpbuf,20));
-	day=num-1;
-	pass_space;
-
-	weekday=0xff;
-	for(int i=0;i<sizeof(abbrev_weekday)/sizeof(char);i++)
+	if(flags&FORMAT_DATE)
 	{
-		if(memcmp(ptr,abbrev_weekday[i],3)==0)
-		{
-			weekday=i;
-			break;
-		}
+		return_ret(ret,0,extract_next_decimal(num,ptr,len,sepday,tmpbuf,20));
+		year=num;
+		pass_str(sepday);
+
+		return_ret(ret,0,extract_next_decimal(num,ptr,len,sepday,tmpbuf,20));
+		month=num-1;
+		pass_str(sepday);
+
+		return_ret(ret,0,extract_next_decimal(num,ptr,len,sep,tmpbuf,20));
+		day=num-1;
 	}
-	if(weekday==0xff)
-		return ERR_BAD_CONFIG_FORMAT;
-	advance_ptr(ptr,len,3);
-	pass_byte(sep);
 
-	return_ret(ret,0,extract_next_decimal(num,ptr,len,septime,tmpbuf,20));
-	hour=num;
-	pass_byte(septime);
+	if(flags&FORMAT_WEEKDAY)
+	{
+		pass_space;
+		weekday=0xff;
+		if(len<3)
+			return ERR_BAD_CONFIG_FORMAT;
+		for(int i=0;i<sizeof(abbrev_weekday)/sizeof(char);i++)
+		{
+			if(memcmp(ptr,abbrev_weekday[i],3)==0)
+			{
+				weekday=i;
+				break;
+			}
+		}
+		if(weekday==0xff)
+			return ERR_BAD_CONFIG_FORMAT;
+		advance_ptr(ptr,len,3);
+	}
+	else
+		weekday=CalculateWeekDay();
 
-	return_ret(ret,0,extract_next_decimal(num,ptr,len,septime,tmpbuf,20));
-	minute=num;
-	pass_byte(septime);
+	if((flags&(FORMAT_DATE|FORMAT_TIME))==(FORMAT_DATE|FORMAT_TIME))
+		pass_str(sep);
 
-	return_ret(ret,0,extract_next_decimal(num,ptr,len,0,tmpbuf,20));
-	second=num;
+	if(flags&FORMAT_TIME)
+	{
+		return_ret(ret,0,extract_next_decimal(num,ptr,len,septime,tmpbuf,20));
+		hour=num;
+		pass_str(septime);
 
+		return_ret(ret,0,extract_next_decimal(num,ptr,len,septime,tmpbuf,20));
+		minute=num;
+		pass_str(septime);
+
+		return_ret(ret,0,extract_next_decimal(num,ptr,len,NULL,tmpbuf,20));
+		second=num;
+	}
 	if(!ValidDate())
 		return ERR_BAD_CONFIG_FORMAT;
 
