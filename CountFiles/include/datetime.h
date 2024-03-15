@@ -39,6 +39,7 @@ public:
 		ushort _millisecond=0);
 	CDateTime(const DateTime& date_time);
 	bool ValidDate() const;
+	void InitDefault();
 	void InitWithCurrentDateTime();
 	bool operator<(const CDateTime& other) const;
 	bool operator>(const CDateTime& other) const;
@@ -54,7 +55,7 @@ public:
 	void ConvertFromEpoch(int days);
 	byte CalculateWeekDay() const;
 	void Format(string& str,dword flags,const char* sepday="/",const char* septime=":",const char* sep=" ") const;
-	int FromString(const byte*& ptr,uint& len,char sepday='/',char septime=':',char sep=' ');
+	int FromString(const byte*& ptr,uint& len,dword flags,const char* sepday="/",const char* septime=":",const char* sep=" ");
 	static void SetWorkDay(bool workday);
 	static bool GetWorkDay();
 private:

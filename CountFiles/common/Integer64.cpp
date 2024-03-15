@@ -300,39 +300,50 @@ DLL bool I64FromHex(const string& hex,_Integer64<T>& i)
 	i=_Integer64<T>(low,&high);
 	return true;
 }
-DLL void __unused_int64_func__()
-{
-	Integer64 int64_1,int64_2;
-	UInteger64 uint64_1,uint64_2;
-	Integer64 sum=int64_1+int64_2,
-		diff=int64_1-int64_2;
-	UInteger64 usum=uint64_1+uint64_2,
-		udiff=uint64_1-uint64_2;
-	int64_1+=int64_2;
-	int64_1-=int64_2;
-	uint64_1+=uint64_2;
-	uint64_1-=uint64_2;
-	string s;
-	if(int64_1==int64_2&&int64_1!=int64_2
-		&&int64_1<=int64_2&&int64_1>=int64_2
-		&&int64_1<int64_2&&int64_1>int64_2)
-	{
-		printf("unuesd\n");
-	}
-	if(uint64_1==uint64_2&&uint64_1!=uint64_2
-		&&uint64_1<=uint64_2&&uint64_1>=uint64_2
-		&&uint64_1<uint64_2&&uint64_1>uint64_2)
-	{
-		printf("unuesd\n");
-	}
-	Mul64(int64_1,int64_2,(Integer64*)NULL);
-	Mul64(uint64_1,uint64_2,(UInteger64*)NULL);
-	FormatI64(int64_1);
-	FormatI64(uint64_1);
-	FormatI64Hex(int64_1);
-	FormatI64Hex(uint64_1);
-	I64FromDec(s,int64_1);
-	I64FromDec(s,uint64_1);
-	I64FromHex(s,int64_1);
-	I64FromHex(s,uint64_1);
-}
+template DLL _Integer64<int> operator-<int>(const _Integer64<int>& a);
+template DLL _Integer64<uint> operator-<uint>(const _Integer64<uint>& a);
+
+template DLL _Integer64<int> operator+<int>(const _Integer64<int>& a,const _Integer64<int>& b);
+template DLL _Integer64<uint> operator+<uint>(const _Integer64<uint>& a,const _Integer64<uint>& b);
+
+template DLL _Integer64<int> operator-<int>(const _Integer64<int>& a,const _Integer64<int>& b);
+template DLL _Integer64<uint> operator-<uint>(const _Integer64<uint>& a,const _Integer64<uint>& b);
+
+template DLL _Integer64<int>& operator+=<int>(_Integer64<int>& a,const _Integer64<int>& b);
+template DLL _Integer64<uint>& operator+=<uint>(_Integer64<uint>& a,const _Integer64<uint>& b);
+
+template DLL _Integer64<int>& operator-=<int>(_Integer64<int>& a,const _Integer64<int>& b);
+template DLL _Integer64<uint>& operator-=<uint>(_Integer64<uint>& a,const _Integer64<uint>& b);
+
+template DLL _Integer64<int> Mul64<int>(const _Integer64<int>& a,const _Integer64<int>& b,_Integer64<int>* phigh);
+template DLL _Integer64<uint> Mul64<uint>(const _Integer64<uint>& a,const _Integer64<uint>& b,_Integer64<uint>* phigh);
+
+template DLL bool operator==<int>(const _Integer64<int>& a,const _Integer64<int>& b);
+template DLL bool operator==<uint>(const _Integer64<uint>& a,const _Integer64<uint>& b);
+
+template DLL bool operator!=<int>(const _Integer64<int>& a,const _Integer64<int>& b);
+template DLL bool operator!=<uint>(const _Integer64<uint>& a,const _Integer64<uint>& b);
+
+template DLL bool operator< <int>(const _Integer64<int>& a,const _Integer64<int>& b);
+template DLL bool operator< <uint>(const _Integer64<uint>& a,const _Integer64<uint>& b);
+
+template DLL bool operator><int>(const _Integer64<int>& a,const _Integer64<int>& b);
+template DLL bool operator><uint>(const _Integer64<uint>& a,const _Integer64<uint>& b);
+
+template DLL bool operator<=<int>(const _Integer64<int>& a,const _Integer64<int>& b);
+template DLL bool operator<=<uint>(const _Integer64<uint>& a,const _Integer64<uint>& b);
+
+template DLL bool operator>=<int>(const _Integer64<int>& a,const _Integer64<int>& b);
+template DLL bool operator>=<uint>(const _Integer64<uint>& a,const _Integer64<uint>& b);
+
+template DLL string FormatI64<int>(const _Integer64<int>& i);
+template DLL string FormatI64<uint>(const _Integer64<uint>& i);
+
+template DLL string FormatI64Hex<int>(const _Integer64<int>& i,bool bFillZero);
+template DLL string FormatI64Hex<uint>(const _Integer64<uint>& i,bool bFillZero);
+
+template DLL bool I64FromDec<int>(const string& dec,_Integer64<int>& i);
+template DLL bool I64FromDec<uint>(const string& dec,_Integer64<uint>& i);
+
+template DLL bool I64FromHex<int>(const string& hex,_Integer64<int>& i);
+template DLL bool I64FromHex<uint>(const string& hex,_Integer64<uint>& i);

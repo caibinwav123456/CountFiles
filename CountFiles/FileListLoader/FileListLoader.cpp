@@ -130,7 +130,7 @@ static int parse_rec(const byte* buf,uint len,file_node_info* pinfo,UInteger64& 
 	pinfo->size=tmpsize;
 	pass_space;
 
-	return_ret(ret,0,pinfo->mod_time.FromString(ptr,len));
+	return_ret(ret,0,pinfo->mod_time.FromString(ptr,len,FORMAT_DATE|FORMAT_TIME|FORMAT_WEEKDAY));
 	pass_byte('\n');
 
 	if(len!=0)
