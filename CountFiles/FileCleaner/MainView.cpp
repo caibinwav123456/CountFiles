@@ -433,8 +433,8 @@ void CMainView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	{
 	case SB_LEFT: pos = info.nMin; break;
 	case SB_RIGHT: pos = info.nMax; break;
-	case SB_LINELEFT: pos--; break;
-	case SB_LINERIGHT: pos++;  break;
+	case SB_LINELEFT: pos -= m_lineDev.cy; break;
+	case SB_LINERIGHT: pos += m_lineDev.cy;  break;
 	case SB_PAGELEFT: pos -= info.nPage; break;
 	case SB_PAGERIGHT: pos += info.nPage; break;
 	case SB_THUMBPOSITION: pos = info.nTrackPos; break;
