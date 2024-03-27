@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "PropWnd.h"
-#include "defines.h"
+#include "common.h"
 #include "resource.h"
 IMPLEMENT_DYNAMIC(CPropWnd,CWnd)
 IMPLEMENT_ID2WND_MAP(CPropWnd,IDW_PROP_WND)
@@ -721,10 +721,15 @@ void CPropWnd::OnMouseLeave()
 void CPropWnd::OnFileNewTab()
 {
 	// TODO: Add your command handler code here
+	int ret=0;
+	fail_op(ret,0,SendMessageToIDWnd(IDW_MAIN_VIEW,WM_NEW_SESSION),
+	{
+		PDXShowMessage(_T("Open new tab failed: %s"),a2t(get_error_desc(ret)));
+		return;
+	})
 	m_PropStat.NewTab();
 	ShowPropWnd(TRUE);
 	AlignNewTab();
-	SendMessageToIDWnd(IDW_MAIN_VIEW,WM_NEW_SESSION);
 	Invalidate();
 }
 

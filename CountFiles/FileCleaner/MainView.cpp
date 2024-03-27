@@ -317,18 +317,15 @@ fail:
 }
 LRESULT CMainView::OnNewSession(WPARAM wParam, LPARAM lParam)
 {
-	m_TreeList.NewSession();
-	return 0;
+	return m_TreeList.NewSession();
 }
 LRESULT CMainView::OnEndSession(WPARAM wParam, LPARAM lParam)
 {
-	m_TreeList.EndSession((int)wParam,(int)lParam);
-	return 0;
+	return m_TreeList.EndSession((int)wParam,(int)lParam);
 }
 LRESULT CMainView::OnSwitchSession(WPARAM wParam, LPARAM lParam)
 {
-	m_TreeList.SwitchToSession((int)wParam);
-	return 0;
+	return m_TreeList.SwitchToSession((int)wParam);
 }
 
 static inline UINT GetKey()
