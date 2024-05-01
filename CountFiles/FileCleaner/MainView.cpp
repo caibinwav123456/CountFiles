@@ -425,7 +425,6 @@ void CMainView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	GetScrollInfo(SB_VERT, &info, SIF_ALL);
 
 	int pos = info.nPos;
-	int save = pos;
 	switch (nSBCode)
 	{
 	case SB_LEFT: pos = info.nMin; break;
@@ -439,11 +438,11 @@ void CMainView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	}
 
 	//make sure the new position is within range
-	if (pos < info.nMin) pos = info.nMin;
 	int max = info.nMax - info.nPage + 1;
 	if (pos > max) pos = max;
+	if (pos < info.nMin) pos = info.nMin;
 
-	OnScrollBy(CSize(0, pos - save), 1);
+	OnScrollBy(CSize(0, pos - info.nPos), 1);
 
 	//EDIT: moved this line after OnScrollBy and added condition
 	if (info.nPos != pos)

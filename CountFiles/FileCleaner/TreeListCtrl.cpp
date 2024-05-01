@@ -562,6 +562,8 @@ void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 {
 	CDCDraw canvas(m_pWnd,pClientDC,buffered);
 	CDrawer drawer(&canvas);
+	if(m_pCurTlU==NULL)
+		return;
 	for(ListCtrlIterator it=GetDrawIter();it;it++)
 	{
 		DrawLine(drawer,it);
@@ -590,6 +592,8 @@ void TreeListCtrl::UpdateListStat(bool bCalcLineNum)
 void TreeListCtrl::OnLBDown(const CPoint& pt,UINT nFlags)
 {
 	m_iCurLine=-1;
+	if(m_pCurTlU==NULL)
+		return;
 	int iline=LineNumFromPt((POINT*)&pt);
 	if(!m_TlU.m_ItemSel.valid(iline))
 		goto end;
@@ -621,11 +625,15 @@ end:
 void TreeListCtrl::OnLBUp(const CPoint& pt,UINT nFlags)
 {
 	m_iCurLine=-1;
+	if(m_pCurTlU==NULL)
+		return;
 	Invalidate();
 }
 void TreeListCtrl::OnLBDblClick(const CPoint& pt,UINT nFlags)
 {
 	m_iCurLine=-1;
+	if(m_pCurTlU==NULL)
+		return;
 	int iline=LineNumFromPt((POINT*)&pt);
 	if(!m_TlU.m_ItemSel.valid(iline))
 		goto end;
@@ -649,16 +657,22 @@ end:
 }
 void TreeListCtrl::OnRBDown(const CPoint& pt,UINT nFlags)
 {
+	if(m_pCurTlU==NULL)
+		return;
 	m_TlU.m_ItemSel.EndDragSel();
 	Invalidate();
 }
 void TreeListCtrl::OnRBUp(const CPoint& pt,UINT nFlags)
 {
+	if(m_pCurTlU==NULL)
+		return;
 	m_TlU.m_ItemSel.EndDragSel();
 	Invalidate();
 }
 void TreeListCtrl::OnMMove(const CPoint& pt,UINT nFlags)
 {
+	if(m_pCurTlU==NULL)
+		return;
 	int iline=LineNumFromPt((POINT*)&pt);
 	if((nFlags&MK_LBUTTON)&&m_TlU.m_ItemSel.valid(iline)&&m_TlU.m_ItemSel.valid(m_iCurLine)
 		&&iline!=m_iCurLine)
