@@ -6,7 +6,7 @@ using namespace std;
 
 #define LEFT_SIDE -1
 #define RIGHT_SIDE 1
-#define DUAL_SIDE 0
+#define DUAL_SIDE  0
 #define IS_LEFT_SIDE(side)   ((side)<0)
 #define IS_RIGHT_SIDE(side)  ((side)>0)
 #define IS_DUAL_SIDE(side)   ((side)==0)
