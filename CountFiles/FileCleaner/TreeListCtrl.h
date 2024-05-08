@@ -5,7 +5,9 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <assert.h>
 #define m_TlU (*m_pCurTlU)
+#define reset_cur_state m_iCurLine=-1;m_iCurSide=DUAL_SIDE
 enum E_FOLDER_STATE
 {
 	eFSNone,
@@ -70,14 +72,14 @@ public:
 		TLItem* item;
 		TLItemPair* pair;
 		int side;
+		int sel_side;
 		int iline;
-		SelItem(TLItem* _item=NULL,TLItemPair* p=NULL,int i=-1,int s=DUAL_SIDE):item(_item),pair(p),side(s),iline(i){}
-		SelItem(ItStkItem* stk,int i=-1)
+		SelItem(TLItem* _item=NULL,TLItemPair* p=NULL,int i=-1,int s=DUAL_SIDE):item(_item),pair(p),side(s),sel_side(DUAL_SIDE),iline(i){}
+		SelItem(ItStkItem* stk,int i=-1):sel_side(DUAL_SIDE),iline(i)
 		{
 			item=stk->m_pItem;
 			pair=stk->m_pJItem;
 			side=stk->side;
-			iline=i;
 		}
 		void clear()
 		{
@@ -85,36 +87,52 @@ public:
 			pair=NULL;
 			iline=-1;
 			side=DUAL_SIDE;
+			sel_side=DUAL_SIDE;
 		}
 		bool operator<(const SelItem& other) const
 		{
 			return iline<other.iline;
 		}
 	};
-	ItemSelector(TreeListCtrl* pOwner):m_pOwner(pOwner),m_iItemSel(-1),
-		m_iDragStart(-1),m_iDragEnd(-1),m_bCancelRgn(false){}
-	int GetFocus();
-	bool IsFocus(int iline);
-	bool IsSelected(TLItem* item,int iline);
-	bool InDragRegion(int iline,bool* cancel=NULL);
-	void SetSel(ItStkItem* item,int iline);
-	void AddSel(ItStkItem* item,int iline);
-	void CancelSel(ItStkItem* item,int iline);
-	void ToggleSel(ItStkItem* item,int iline);
-	bool BeginDragSel(int iline,bool cancel);
-	bool DragSelTo(int iline);
-	bool CompoundSel(int iline);
-	bool ClearAndDragSel(ItStkItem* item,int iline);
+	ItemSelector(TreeListCtrl* pOwner):m_pOwner(pOwner),m_iItemSel(-1),m_iSideSel(DUAL_SIDE){}
+	int GetFocus(int& side);
+	bool IsFocus(int iline,int& side);
+	bool IsSelected(TLItem* item,int iline,int& side);
+	bool InDragRegion(int iline,int& side,bool* cancel=NULL);
+	void SetSel(ItStkItem* item,int iline,int side);
+	void AddSel(ItStkItem* item,int iline,int side);
+	void CancelSel(ItStkItem* item,int iline,int side);
+	void ToggleSel(ItStkItem* item,int iline,int side);
+	bool BeginDragSel(int iline,int side,bool cancel);
+	bool DragSelTo(int iline,int side);
+	bool CompoundSel(ItStkItem* item,int iline,int side);
+	bool ClearAndDragSel(ItStkItem* item,int iline,int side);
 	void EndDragSel();
 	void SortSelection(SortedSelItemNode& tree);
 	bool valid(int iline);
 private:
 	set<SelItem> m_setSel;
 	int m_iItemSel;
-	int m_iDragStart;
-	int m_iDragEnd;
+	int m_iSideSel;
+	struct SelRegion
+	{
+		int m_iDragStart;
+		int m_iDragEnd;
+		int m_iSideStart;
+		int m_iSideEnd;
+		bool m_bCancelRgn;
+		SelRegion();
+		void Reset();
+		int GetSelSide() const;
+		static int SynthSelState(int originsel,int rgnsel,bool bcancel,bool* bclean=NULL);
+		bool valid() const
+		{
+			assert(m_iDragStart<0||m_iDragEnd>=0);
+			return m_iDragStart>=0;
+		}
+	}m_RegionSel;
+	static void set_item_sel_flag(const ItemSelector::SelItem& selitem,int side,bool bcancel);
 	TreeListCtrl* m_pOwner;
-	bool m_bCancelRgn;
 };
 struct SortedSelItemNode
 {
@@ -337,6 +355,7 @@ public:
 
 	int GetUnitCount(){return m_iVec;}
 	void GetCanvasRect(RECT* rc);
+	int TestHitSide(int x);
 	void SetTabInfo(const TabInfo* tab);
 	ListFileNode* GetListFilePath(int side,int idx=-1);
 	string& GetRecentDirPath(int idx=-1);
@@ -382,6 +401,7 @@ private:
 	CBitmap m_bmpDiffMask;
 
 	int m_iCurLine;
+	int m_iCurSide;
 
 //List data
 protected:
@@ -402,6 +422,7 @@ protected:
 	ListCtrlIterator GetDrawIter(POINT* pt=NULL);
 	ListCtrlIterator GetListIter(int iline);
 	int LineNumFromPt(POINT* pt);
+	void GetSideBoundary(int* left,int* right,int* width=NULL);
 	bool EndOfDraw(int iline);
 	void DrawLine(CDrawer& drawer,int iline,TLItem* pItem);
 	void DrawCmpIndicator(CDrawer& drawer,const ListCtrlIterator& iter);

@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "TreeListCtrl.h"
-#include <assert.h>
 inline TLItemSplice* TLItem::GetSplice()
 {
 	if(this==NULL)
@@ -450,46 +449,107 @@ bool ListCtrlIterator::operator<=(const ListCtrlIterator& other) const
 		return false;
 	return m_iline<=other.m_iline;
 }
-int ItemSelector::GetFocus()
+ItemSelector::SelRegion::SelRegion()
 {
+	Reset();
+}
+void ItemSelector::SelRegion::Reset()
+{
+	m_iDragStart=-1;
+	m_iDragEnd=-1;
+	m_iSideStart=DUAL_SIDE;
+	m_iSideEnd=DUAL_SIDE;
+	m_bCancelRgn=false;
+}
+int ItemSelector::SelRegion::GetSelSide() const
+{
+	if(IS_DUAL_SIDE(m_iSideStart)||IS_DUAL_SIDE(m_iSideEnd))
+		return DUAL_SIDE;
+	if((IS_LEFT_SIDE(m_iSideStart)&&IS_RIGHT_SIDE(m_iSideEnd))
+		||(IS_RIGHT_SIDE(m_iSideStart)&&IS_LEFT_SIDE(m_iSideEnd)))
+		return DUAL_SIDE;
+	return m_iSideStart; //identical side
+}
+int ItemSelector::SelRegion::SynthSelState(int originsel,int rgnsel,bool bcancel,bool* bclean)
+{
+	if(bclean!=NULL)
+		*bclean=false;
+	bool bleft=_IS_LEFT_SIDE(originsel);
+	bool bright=_IS_RIGHT_SIDE(originsel);
+	if(_IS_LEFT_SIDE(rgnsel))
+		bleft=!bcancel;
+	if(_IS_RIGHT_SIDE(rgnsel))
+		bright=!bcancel;
+	if(bleft&&bright)
+		return DUAL_SIDE;
+	if(bleft)
+		return LEFT_SIDE;
+	if(bright)
+		return RIGHT_SIDE;
+	if(bclean!=NULL)
+		*bclean=true;
+	return DUAL_SIDE; //none side
+}
+int ItemSelector::GetFocus(int& side)
+{
+	side=m_iSideSel;
 	return m_iItemSel;
 }
-bool ItemSelector::IsFocus(int iline)
+bool ItemSelector::IsFocus(int iline,int& side)
 {
-	if(m_iItemSel<0)
+	if(m_iItemSel<0||iline!=m_iItemSel)
 		return false;
-	return iline==m_iItemSel;
+	side=m_iSideSel;
+	return true;
 }
-bool ItemSelector::InDragRegion(int iline,bool* cancel)
+bool ItemSelector::InDragRegion(int iline,int& side,bool* cancel)
 {
 	if(!valid(iline))
 		return false;
-	if(m_iDragStart<0||m_iDragEnd<0)
+	if(!m_RegionSel.valid())
 		return false;
-	int start=m_iDragStart,end=m_iDragEnd;
+	int start=m_RegionSel.m_iDragStart,end=m_RegionSel.m_iDragEnd;
 	if(start>end)
 		swap(start,end);
 	if(iline>=start&&iline<=end)
 	{
+		side=m_RegionSel.GetSelSide();
 		if(cancel!=NULL)
-			*cancel=m_bCancelRgn;
+			*cancel=m_RegionSel.m_bCancelRgn;
 		return true;
 	}
 	return false;
 }
-bool ItemSelector::IsSelected(TLItem* item,int iline)
+bool ItemSelector::IsSelected(TLItem* item,int iline,int& side)
 {
 	if(item==NULL)
 		return false;
-	if(InDragRegion(iline))
-		return !m_bCancelRgn;
-	return item->issel;
+	int iside=DUAL_SIDE;
+	if(InDragRegion(iline,iside)&&IS_DUAL_SIDE(iside))
+	{
+		if(!m_RegionSel.m_bCancelRgn)
+			side=DUAL_SIDE;
+		return !m_RegionSel.m_bCancelRgn;
+	}
+	set<SelItem>::iterator it=m_setSel.find(SelItem(item,NULL,iline));
+	if(it==m_setSel.end())
+	{
+		if(IS_DUAL_SIDE(iside)||m_RegionSel.m_bCancelRgn)
+			return false;
+		side=iside;
+		return true;
+	}
+	if(IS_DUAL_SIDE(iside)) //Indicating not in drag region!
+		side=it->sel_side;
+	else
+		side=SelRegion::SynthSelState(it->sel_side,iside,m_RegionSel.m_bCancelRgn);
+	return true;
 }
-void ItemSelector::SetSel(ItStkItem* item,int iline)
+void ItemSelector::SetSel(ItStkItem* item,int iline,int side)
 {
 	for(set<SelItem>::iterator it=m_setSel.begin();it!=m_setSel.end();it++)
 	{
-		SelItem& selitem=(SelItem&)*it;
+		const SelItem& selitem=*it;
 		if(selitem.pair!=NULL)
 		{
 			if(selitem.pair->left!=NULL)
@@ -502,164 +562,174 @@ void ItemSelector::SetSel(ItStkItem* item,int iline)
 	}
 	m_setSel.clear();
 	m_iItemSel=-1;
-	m_iDragStart=m_iDragEnd=-1;
-	m_bCancelRgn=false;
+	m_iSideSel=DUAL_SIDE;
+	m_RegionSel.Reset();
 	if(item==NULL||!valid(iline))
 		return;
-	AddSel(item,iline);
-	BeginDragSel(iline,false);
+	AddSel(item,iline,side);
+	BeginDragSel(iline,side,false);
 	m_iItemSel=iline;
+	m_iSideSel=side;
 }
-void ItemSelector::AddSel(ItStkItem* item,int iline)
+void ItemSelector::set_item_sel_flag(const ItemSelector::SelItem& selitem,int side,bool bcancel)
+{
+	if(selitem.pair!=NULL)
+	{
+		if(_IS_LEFT_SIDE(side)&&selitem.pair->left!=NULL)
+			selitem.pair->left->issel=!bcancel;
+		if(_IS_RIGHT_SIDE(side)&&selitem.pair->right!=NULL)
+			selitem.pair->right->issel=!bcancel;
+	}
+	else
+	{
+		assert(!IS_DUAL_SIDE(selitem.side));
+		if(IS_LEFT_SIDE(selitem.side)&&_IS_LEFT_SIDE(side)
+			||(IS_RIGHT_SIDE(selitem.side)&&_IS_RIGHT_SIDE(side)))
+			selitem.item->issel=!bcancel;
+	}
+}
+void ItemSelector::AddSel(ItStkItem* item,int iline,int side)
 {
 	if(item==NULL)
 		return;
 	assert(valid(iline));
-	assert(m_setSel.find(SelItem(item,iline))==m_setSel.end());
-	if(item->m_pJItem!=NULL)
+	SelItem selitem(item,iline);
+	set<SelItem>::iterator it=m_setSel.find(selitem);
+	if(it==m_setSel.end())
 	{
-		if(item->m_pJItem->left!=NULL)
-		{
-			assert(!item->m_pJItem->left->issel);
-			item->m_pJItem->left->issel=true;
-		}
-		if(item->m_pJItem->right!=NULL)
-		{
-			assert(!item->m_pJItem->right->issel);
-			item->m_pJItem->right->issel=true;
-		}
+		selitem.sel_side=side;
+		set_item_sel_flag(selitem,side,false);
+		m_setSel.insert(selitem);
 	}
 	else
 	{
-		assert(!item->m_pItem->issel);
-		item->m_pItem->issel=true;
+		SelItem inplaceitem=*it;
+		inplaceitem.sel_side=SelRegion::SynthSelState(inplaceitem.sel_side,side,false);
+		set_item_sel_flag(inplaceitem,side,false);
+		m_setSel.erase(it);
+		m_setSel.insert(inplaceitem);
 	}
-	m_setSel.insert(SelItem(item,iline));
 }
-void ItemSelector::CancelSel(ItStkItem* item,int iline)
+void ItemSelector::CancelSel(ItStkItem* item,int iline,int side)
 {
 	if(item==NULL)
 		return;
 	assert(valid(iline));
-	assert(m_setSel.find(SelItem(item,iline))!=m_setSel.end());
-	if(item->m_pJItem!=NULL)
-	{
-		if(item->m_pJItem->left!=NULL)
-		{
-			assert(item->m_pJItem->left->issel);
-			item->m_pJItem->left->issel=false;
-		}
-		if(item->m_pJItem->right!=NULL)
-		{
-			assert(item->m_pJItem->right->issel);
-			item->m_pJItem->right->issel=false;
-		}
-	}
-	else
-	{
-		assert(item->m_pItem->issel);
-		item->m_pItem->issel=false;
-	}
-	m_setSel.erase(SelItem(item,iline));
+	SelItem selitem(item,iline);
+	set<SelItem>::iterator it=m_setSel.find(selitem);
+	if(it==m_setSel.end())
+		return;
+	SelItem inplaceitem=*it;
+	bool bclean;
+	inplaceitem.sel_side=SelRegion::SynthSelState(inplaceitem.sel_side,side,true,&bclean);
+	set_item_sel_flag(inplaceitem,side,true);
+	m_setSel.erase(it);
+	if(!bclean)
+		m_setSel.insert(inplaceitem);
 }
-void ItemSelector::ToggleSel(ItStkItem* item,int iline)
+void ItemSelector::ToggleSel(ItStkItem* item,int iline,int side)
 {
 	if(item==NULL)
 		return;
 	assert(valid(iline));
 	EndDragSel();
-	if(item->m_pItem->issel)
+	set<SelItem>::iterator it=m_setSel.find(SelItem(item,iline));
+	bool bcancel;
+	if(it==m_setSel.end())
+		bcancel=false;
+	else
+		bcancel=(SelRegion::SynthSelState(it->sel_side,side,false)==it->sel_side);
+	if(bcancel)
 	{
-		CancelSel(item,iline);
-		BeginDragSel(iline,true);
+		CancelSel(item,iline,side);
+		BeginDragSel(iline,side,true);
 	}
 	else
 	{
-		AddSel(item,iline);
-		BeginDragSel(iline,false);
+		AddSel(item,iline,side);
+		BeginDragSel(iline,side,false);
 	}
 	m_iItemSel=iline;
+	m_iSideSel=side;
 }
-bool ItemSelector::BeginDragSel(int iline,bool cancel)
+bool ItemSelector::BeginDragSel(int iline,int side,bool cancel)
 {
 	if(!valid(iline))
 		return false;
-	m_iDragStart=iline;
-	m_iDragEnd=iline;
-	m_bCancelRgn=cancel;
+	m_RegionSel.m_iDragStart=iline;
+	m_RegionSel.m_iDragEnd=iline;
+	m_RegionSel.m_iSideStart=side;
+	m_RegionSel.m_iSideEnd=side;
+	m_RegionSel.m_bCancelRgn=cancel;
 	return true;
 }
-bool ItemSelector::DragSelTo(int iline)
+bool ItemSelector::DragSelTo(int iline,int side)
 {
 	if(!valid(iline))
 		return false;
-	if(m_iDragStart<0)
+	if(!m_RegionSel.valid())
 		return false;
-	m_iDragEnd=iline;
+	m_RegionSel.m_iDragEnd=iline;
+	m_RegionSel.m_iSideEnd=side;
 	m_iItemSel=iline;
+	m_iSideSel=side;
 	return true;
 }
-bool ItemSelector::CompoundSel(int iline)
+bool ItemSelector::CompoundSel(ItStkItem* item,int iline,int side)
 {
 	if(!valid(iline))
 		return false;
-	if(m_iDragStart<0)
-		return false;
-	DragSelTo(iline);
+	if((!m_RegionSel.valid())||m_iItemSel<0)
+	{
+		SetSel(item,iline,side);
+		return true;
+	}
+	DragSelTo(iline,side);
 	EndDragSel();
-	BeginDragSel(iline,false);
+	BeginDragSel(iline,side,false);
 	m_iItemSel=iline;
+	m_iSideSel=side;
 	return true;
 }
-bool ItemSelector::ClearAndDragSel(ItStkItem* item,int iline)
+bool ItemSelector::ClearAndDragSel(ItStkItem* item,int iline,int side)
 {
 	if(item==NULL||!valid(iline))
 		return false;
-	if(m_iDragStart<0||m_iItemSel<0)
+	if((!m_RegionSel.valid())||m_iItemSel<0)
 	{
-		SetSel(item,iline);
+		SetSel(item,iline,side);
 		return true;
 	}
-	else if(m_iDragStart>=0)
-	{
-		int pos=m_iDragStart;
-		ListCtrlIterator it=m_pOwner->GetListIter(pos);
-		if(it.m_pStkItem==NULL)
-			return false;
-		SetSel(it.m_pStkItem,pos);
-		DragSelTo(iline);
-		return true;
-	}
-	return false;
+	int pos=m_RegionSel.m_iDragStart;
+	ListCtrlIterator it=m_pOwner->GetListIter(pos);
+	if(it.m_pStkItem==NULL)
+		return false;
+	SetSel(it.m_pStkItem,pos,m_RegionSel.m_iSideStart);
+	DragSelTo(iline,side);
+	return true;
 }
 void ItemSelector::EndDragSel()
 {
-	if(m_iDragStart<0||m_iDragEnd<0)
+	if(!m_RegionSel.valid())
 		goto end;
 	{
-		bool bRev=m_iDragStart>m_iDragEnd;
-		ListCtrlIterator itstart=m_pOwner->GetListIter(m_iDragStart),
-			itend=m_pOwner->GetListIter(m_iDragEnd);
+		int side=m_RegionSel.GetSelSide();
+		bool bRev=m_RegionSel.m_iDragStart>m_RegionSel.m_iDragEnd;
+		ListCtrlIterator itstart=m_pOwner->GetListIter(m_RegionSel.m_iDragStart),
+			itend=m_pOwner->GetListIter(m_RegionSel.m_iDragEnd);
 		for(;bRev?itstart>=itend:itstart<=itend;bRev?itstart--:itstart++)
 		{
 			ItStkItem* stk=itstart.m_pStkItem;
 			if(stk==NULL)
 				continue;
-			if(m_bCancelRgn)
-			{
-				if(stk->m_pItem->issel)
-					CancelSel(stk,itstart.m_iline);
-			}
+			if(m_RegionSel.m_bCancelRgn)
+				CancelSel(stk,itstart.m_iline,side);
 			else
-			{
-				if(!stk->m_pItem->issel)
-					AddSel(stk,itstart.m_iline);
-			}
+				AddSel(stk,itstart.m_iline,side);
 		}
 	}
 end:
-	m_bCancelRgn=false;
-	m_iDragStart=m_iDragEnd=-1;
+	m_RegionSel.Reset();
 }
 void ItemSelector::SortSelection(SortedSelItemNode& tree)
 {
@@ -670,7 +740,6 @@ void ItemSelector::SortSelection(SortedSelItemNode& tree)
 	{
 		ItemSelector::SelItem item=*it;
 		int iline=item.iline;
-		int side=item.side;
 		SortedSelItemNode* pcnode=NULL;
 		bool isbase=false;
 		do
@@ -705,7 +774,6 @@ void ItemSelector::SortSelection(SortedSelItemNode& tree)
 				continue;
 			item.item=item.item->parent;
 			item.pair=item.item->GetCouple();
-			item.side=side;
 			iline=item.iline=item.item->ToLineNum();
 		}while(!isbase);
 	}

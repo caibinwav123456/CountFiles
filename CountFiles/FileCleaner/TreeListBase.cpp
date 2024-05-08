@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "TreeListCtrl.h"
 #include "utility.h"
-#include <assert.h>
 #define safe_release(ptr) \
 	if(ptr!=NULL) \
 	{ \
