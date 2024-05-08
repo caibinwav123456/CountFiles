@@ -2,7 +2,6 @@
 #include "TreeListCtrl.h"
 #include "utility.h"
 #include "resource.h"
-#include <assert.h>
 COLORREF __get_disp_color__(uint state)
 {
 	switch(state)
@@ -36,7 +35,7 @@ COLORREF GetDispColor(E_FOLDER_STATE state)
 	}clr_array;
 	return clr_array.arr[state];
 }
-TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_iCurLine(-1),m_iVec(-1),m_pCurTlU(NULL)
+TreeListCtrl::TreeListCtrl(CWnd* pWnd):m_pWnd(pWnd),m_iCurLine(-1),m_iCurSide(0),m_iVec(-1),m_pCurTlU(NULL)
 {
 }
 TreeListCtrl::~TreeListCtrl()
@@ -48,6 +47,31 @@ inline void TreeListCtrl::GetCanvasRect(RECT* rc)
 {
 	m_pWnd->GetClientRect(rc);
 	((CRect*)rc)->MoveToXY(GetScrollPos());
+}
+void TreeListCtrl::GetSideBoundary(int* left,int* right,int* width)
+{
+	int w;
+	if(width!=NULL)
+		w=*width;
+	else
+	{
+		CRect rc;
+		GetCanvasRect(&rc);
+		w=rc.Width();
+	}
+	int grplen=(max(w,MIN_SCROLL_WIDTH)-BAR_CENTER_SPACE)/2;
+	*left=grplen;
+	*right=grplen+BAR_CENTER_SPACE;
+}
+int TreeListCtrl::TestHitSide(int x)
+{
+	int left,right;
+	GetSideBoundary(&left,&right);
+	if(x<left)
+		return LEFT_SIDE;
+	if(x>right)
+		return RIGHT_SIDE;
+	return DUAL_SIDE;
 }
 void TreeListCtrl::SetTabInfo(const TabInfo* tab)
 {
@@ -144,7 +168,7 @@ int TreeListCtrl::EndSession(int idx,int trans_to)
 		m_iVec--;
 	TLUnit* pUnitDel=m_vecLists[idx];
 	m_vecLists.erase(m_vecLists.begin()+idx);
-	pUnitDel->m_ItemSel.SetSel(NULL,-1);
+	pUnitDel->m_ItemSel.SetSel(NULL,-1,DUAL_SIDE);
 	pUnitDel->UnLoad(true);
 	pUnitDel->DestroyBase();
 	delete pUnitDel;
@@ -270,26 +294,26 @@ void TLUnit::UnLoad(bool release_cache)
 int TreeListCtrl::Load(UINT mask,const char* lfile,const char* efile,
 	const char* lfileref,const char* efileref)
 {
-	m_iCurLine=-1;
+	reset_cur_state;
 	int ret=m_TlU.Load(mask,lfile,efile,lfileref,efileref);
 	UpdateListStat();
 	return ret;
 }
 void TreeListCtrl::UnLoad(bool bAll,bool release_cache)
 {
-	m_iCurLine=-1;
+	reset_cur_state;
 	if(!bAll)
 	{
 		if(m_pCurTlU==NULL)
 			return;
-		m_TlU.m_ItemSel.SetSel(NULL,-1);
+		m_TlU.m_ItemSel.SetSel(NULL,-1,DUAL_SIDE);
 		m_TlU.UnLoad(release_cache);
 	}
 	else
 	{
 		for(int i=0;i<(int)m_vecLists.size();i++)
 		{
-			m_vecLists[i]->m_ItemSel.SetSel(NULL,-1);
+			m_vecLists[i]->m_ItemSel.SetSel(NULL,-1,DUAL_SIDE);
 			m_vecLists[i]->UnLoad(true);
 		}
 	}
@@ -384,14 +408,31 @@ void TreeListCtrl::DrawLine(CDrawer& drawer,int iline,TLItem* pItem)
 	rcline.MoveToXY(0,starty);
 	bool grey=!!(iline%2);
 	COLORREF color=grey?GREY_COLOR:RGB(255,255,255);
-	if(m_TlU.m_ItemSel.IsSelected(pItem,iline))
+	int side=DUAL_SIDE;
+	int left,right;
+	GetSideBoundary(&left,&right);
+	if(m_TlU.m_ItemSel.IsSelected(pItem,iline,side)&&side==DUAL_SIDE)
 		color=SEL_COLOR;
 	CRect rect=rcline;
 	rect.InflateRect(&CRect(0,0,1,1));
-	drawer.FillRect(&rect,color);
 	rcline.DeflateRect(&CRect(0,0,1,1));
-	if(pItem!=NULL&&m_TlU.m_ItemSel.IsFocus(iline))
+	drawer.FillRect(&rect,color);
+	if(!IS_DUAL_SIDE(side))
+	{
+		if(IS_LEFT_SIDE(side))
+			rect.right=left+1;
+		else //right side
+			rect.left=right+1;
+		drawer.FillRect(&rect,SEL_COLOR);
+	}
+	if(pItem!=NULL&&m_TlU.m_ItemSel.IsFocus(iline,side))
+	{
+		if(IS_LEFT_SIDE(side))
+			rcline.right=left-1;
+		else if(IS_RIGHT_SIDE(side))
+			rcline.left=right+1;
 		drawer.DrawRect(&rcline,RGB(0,0,0),1,PS_DOT);
+	}
 }
 void TreeListCtrl::DrawConn(CDrawer& drawer,const ListCtrlIterator& iter,int side,int xbase)
 {
@@ -571,13 +612,13 @@ void TreeListCtrl::Draw(CDC* pClientDC,bool buffered)
 
 	//Draw separator
 	CRect rc;
+	int left,right;
 	GetCanvasRect(&rc);
-	int grplen=(max(rc.Width(),MIN_SCROLL_WIDTH)-BAR_CENTER_SPACE)/2;
+	GetSideBoundary(&left,&right);
 	int top=max(0,rc.top);
 	int bottom=min((int)m_TlU.m_nTotalLine*LINE_HEIGHT,rc.bottom);
-	drawer.DrawLine(&CPoint(grplen,top),&CPoint(grplen,bottom),BACK_GREY_COLOR,1,PS_SOLID);
-	drawer.DrawLine(&CPoint(grplen+BAR_CENTER_SPACE,top),&CPoint(grplen+BAR_CENTER_SPACE,bottom),
-		BACK_GREY_COLOR,1,PS_SOLID);
+	drawer.DrawLine(&CPoint(left,top),&CPoint(left,bottom),BACK_GREY_COLOR,1,PS_SOLID);
+	drawer.DrawLine(&CPoint(right,top),&CPoint(right,bottom),BACK_GREY_COLOR,1,PS_SOLID);
 }
 void TreeListCtrl::UpdateListStat(bool bCalcLineNum)
 {
@@ -591,10 +632,11 @@ void TreeListCtrl::UpdateListStat(bool bCalcLineNum)
 }
 void TreeListCtrl::OnLBDown(const CPoint& pt,UINT nFlags)
 {
-	m_iCurLine=-1;
+	reset_cur_state;
 	if(m_pCurTlU==NULL)
 		return;
 	int iline=LineNumFromPt((POINT*)&pt);
+	int side=TestHitSide(pt.x);
 	if(!m_TlU.m_ItemSel.valid(iline))
 		goto end;
 	{
@@ -603,38 +645,40 @@ void TreeListCtrl::OnLBDown(const CPoint& pt,UINT nFlags)
 			goto end;
 		if((nFlags&MK_CONTROL)&&(nFlags&MK_SHIFT))
 		{
-			m_TlU.m_ItemSel.CompoundSel(iline);
+			m_TlU.m_ItemSel.CompoundSel(it.m_pStkItem,iline,side);
 		}
 		else if(nFlags&MK_CONTROL)
 		{
-			m_TlU.m_ItemSel.ToggleSel(it.m_pStkItem,iline);
+			m_TlU.m_ItemSel.ToggleSel(it.m_pStkItem,iline,side);
 		}
 		else if(nFlags&MK_SHIFT)
 		{
-			m_TlU.m_ItemSel.ClearAndDragSel(it.m_pStkItem,iline);
+			m_TlU.m_ItemSel.ClearAndDragSel(it.m_pStkItem,iline,side);
 		}
 		else
 		{
-			m_TlU.m_ItemSel.SetSel(it.m_pStkItem,iline);
+			m_TlU.m_ItemSel.SetSel(it.m_pStkItem,iline,side);
 		}
 		m_iCurLine=iline;
+		m_iCurSide=side;
 	}
 end:
 	Invalidate();
 }
 void TreeListCtrl::OnLBUp(const CPoint& pt,UINT nFlags)
 {
-	m_iCurLine=-1;
+	reset_cur_state;
 	if(m_pCurTlU==NULL)
 		return;
 	Invalidate();
 }
 void TreeListCtrl::OnLBDblClick(const CPoint& pt,UINT nFlags)
 {
-	m_iCurLine=-1;
+	reset_cur_state;
 	if(m_pCurTlU==NULL)
 		return;
 	int iline=LineNumFromPt((POINT*)&pt);
+	int side=TestHitSide(pt.x);
 	if(!m_TlU.m_ItemSel.valid(iline))
 		goto end;
 	{
@@ -642,13 +686,13 @@ void TreeListCtrl::OnLBDblClick(const CPoint& pt,UINT nFlags)
 		if(it.m_pStkItem==NULL)
 			goto end;
 		TLItem* pItem=it.m_pStkItem->m_pItem;
-		assert(pItem!=NULL&&pItem->issel);
+		assert(pItem!=NULL);
 		if(pItem->type==eITypeDir)
 		{
-			m_TlU.m_ItemSel.SetSel(NULL,-1);
+			m_TlU.m_ItemSel.SetSel(NULL,-1,DUAL_SIDE);
 			TLItemDir* dir=dynamic_cast<TLItemDir*>(pItem);
 			dir->OpenDir(!dir->isopen,false);
-			m_TlU.m_ItemSel.SetSel(it.m_pStkItem,iline);
+			m_TlU.m_ItemSel.SetSel(it.m_pStkItem,iline,side);
 			UpdateListStat();
 		}
 	}
@@ -674,11 +718,20 @@ void TreeListCtrl::OnMMove(const CPoint& pt,UINT nFlags)
 	if(m_pCurTlU==NULL)
 		return;
 	int iline=LineNumFromPt((POINT*)&pt);
+	int side=TestHitSide(pt.x);
 	if((nFlags&MK_LBUTTON)&&m_TlU.m_ItemSel.valid(iline)&&m_TlU.m_ItemSel.valid(m_iCurLine)
-		&&iline!=m_iCurLine)
+		&&(iline!=m_iCurLine||side!=m_iCurSide))
 	{
-		m_TlU.m_ItemSel.DragSelTo(iline);
+		if((nFlags&MK_CONTROL)&&(nFlags&MK_SHIFT))
+		{
+			ListCtrlIterator it=GetListIter(iline);
+			if(it.m_pStkItem!=NULL)
+				m_TlU.m_ItemSel.CompoundSel(it.m_pStkItem,iline,side);
+		}
+		else
+			m_TlU.m_ItemSel.DragSelTo(iline,side);
 		m_iCurLine=iline;
+		m_iCurSide=side;
 		Invalidate();
 	}
 }
