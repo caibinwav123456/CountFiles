@@ -60,6 +60,9 @@
 #define IDB_BMP_TABR_N                  357
 #define IDC_CUR_BAN                     358
 #define IDC_CUR_MOVE                    359
+#define IDR_TOOLBAR_COMP                360
+#define IDR_TOOLBAR_VIEW                361
+#define IDR_TOOLBAR_OP                  362
 #define IDC_COMBO_BASE_PATH             1000
 #define IDC_BUTTON_GO                   1001
 #define IDC_BUTTON_OPEN                 1002
@@ -79,13 +82,34 @@
 #define ID_CMD_MENU_EXPRECFILE          32775
 #define ID_CMD_MENU_EXPRECFILE_REF      32776
 #define ID_FILE_NEW_TAB                 32777
+#define ID_CMP_COMPARE                  32778
+#define ID_CMP_COPY                     32779
+#define ID_CMP_COPY_DIR                 32780
+#define ID_CMP_DELETE                   32781
+#define ID_CMP_UPDATE_R                 32782
+#define ID_CMP_UPDATE_L                 32783
+#define ID_VIEW_ALL                     32784
+#define ID_VIEW_DIFF                    32785
+#define ID_VIEW_DIFF_LIST               32786
+#define ID_VIEW_EQUAL                   32787
+#define ID_VIEW_STRUCT                  32788
+#define ID_VIEW_STRUCT_LIST             32789
+#define ID_VIEW_IGNORE_MINOR            32790
+#define ID_VIEW_RULE                    32791
+#define ID_OP_EXP_ALL                   32792
+#define ID_OP_FOLD_ALL                  32793
+#define ID_OP_SEL_ALL                   32794
+#define ID_OP_SEL_ALL_FILE              32795
+#define ID_OP_RELOAD                    32796
+#define ID_OP_SWAP_SIDES                32797
+#define ID_OP_STOP_LOADING              32798
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        360
-#define _APS_NEXT_COMMAND_VALUE         32778
+#define _APS_NEXT_RESOURCE_VALUE        363
+#define _APS_NEXT_COMMAND_VALUE         32799
 #define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

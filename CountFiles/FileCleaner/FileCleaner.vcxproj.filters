@@ -290,5 +290,14 @@
     <Image Include="res\tabright_normal.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\ToolbarCompare.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ToolbarView.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ToolbarOp.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
