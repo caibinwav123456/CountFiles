@@ -3,7 +3,6 @@
 //
 
 #include "pch.h"
-#include "framework.h"
 #include "FileCleaner.h"
 #include "MainView.h"
 #include "DrawObject.h"

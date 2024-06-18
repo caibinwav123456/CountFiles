@@ -3,7 +3,6 @@
 //
 
 #include "pch.h"
-#include "framework.h"
 #include "ContainerWnd.h"
 
 #ifdef _DEBUG

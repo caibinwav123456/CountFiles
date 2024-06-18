@@ -5,6 +5,7 @@
 #pragma once
 #include "ContainerWnd.h"
 #include "BaseBar.h"
+#include "MyToolBar.h"
 #include "PropWnd.h"
 
 class CMainFrame : public CFrameWnd
@@ -35,7 +36,9 @@ public:
 #endif
 
 protected:  // control bar embedded members
-	CToolBar          m_wndToolBar;
+	CMyToolBar        m_wndToolBarComp;
+	CMyToolBar        m_wndToolBarView;
+	CMyToolBar        m_wndToolBarOper;
 	CBaseBar          m_wndBaseBar;
 	CStatusBar        m_wndStatusBar;
 	CContainerWnd*    m_pWndView;

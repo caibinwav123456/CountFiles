@@ -3,7 +3,6 @@
 //
 
 #include "pch.h"
-#include "framework.h"
 #include "FileCleaner.h"
 
 #include "MainFrm.h"
@@ -67,17 +66,36 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	}
 
-	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_BORDER_ANY | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
-		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
+	struct ToolBarLoadData
 	{
-		TRACE0("Failed to create toolbar\n");
-		return -1;      // fail to create
-	}
+		CMyToolBar* pToolBar;
+		UINT nIDRsrc;
+	};
+	ToolBarLoadData arrToolBar[]={
+		{&m_wndToolBarComp,IDR_TOOLBAR_COMP},
+		{&m_wndToolBarView,IDR_TOOLBAR_VIEW},
+		{&m_wndToolBarOper,IDR_TOOLBAR_OP},
+	};
 
-	// TODO: Delete these three lines if you don't want the toolbar to be dockable
-	m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
-	EnableDocking(CBRS_ALIGN_ANY);
-	DockControlBar(&m_wndToolBar);
+	for(int i=0;i<sizeof(arrToolBar)/sizeof(ToolBarLoadData);i++)
+	{
+		if (!arrToolBar[i].pToolBar->CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_BORDER_ANY | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC))
+		{
+			TRACE0("Failed to create toolbar\n");
+			return -1;      // fail to create
+		}
+
+		if(!arrToolBar[i].pToolBar->LoadToolBar(arrToolBar[i].nIDRsrc))
+		{
+			TRACE0("Failed to create toolbar\n");
+			return -1;      // fail to create
+		}
+
+		// TODO: Delete these three lines if you don't want the toolbar to be dockable
+		arrToolBar[i].pToolBar->EnableDocking(CBRS_ALIGN_ANY);
+		EnableDocking(CBRS_ALIGN_ANY);
+		DockControlBar(arrToolBar[i].pToolBar);
+	}
 
 	if (!m_wndBaseBar.CreateBar(this))
 	{
