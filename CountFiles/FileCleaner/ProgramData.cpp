@@ -366,6 +366,10 @@ CPoint CProgramData::GetRealPoint(POINT pt)
 {
 	return CPoint(GetRealPixelsX(pt.x),GetRealPixelsY(pt.y));
 }
+CSize CProgramData::GetRealSize(SIZE size)
+{
+	return CSize(GetRealPixelsX(size.cx),GetRealPixelsY(size.cy));
+}
 CRect CProgramData::GetRealRect(RECT rect)
 {
 	return CRect(GetRealPoint(CRect(rect).TopLeft()),GetRealPoint(CRect(rect).BottomRight()));

@@ -148,6 +148,7 @@ public:
 	static int GetRealPixelsY(int logicy);
 
 	static CPoint GetRealPoint(POINT pt);
+	static CSize GetRealSize(SIZE size);
 	static CRect GetRealRect(RECT rect);
 
 	static CBaseList* GetPathList();

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "MyToolBar.h"
+#include "DrawObject.h"
 struct CToolBarData
 {
 	WORD wVersion;
@@ -35,10 +36,6 @@ BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo)
 		return FALSE;
 	ASSERT(pData->wVersion == 1);
 
-	CImageList image;
-	CBitmap bmp;
-	BITMAP bm;
-
 	UINT* pItems = new UINT[pData->wItemCount];
 	for (int i = 0; i < pData->wItemCount; i++)
 		pItems[i] = pData->items()[i];
@@ -52,23 +49,11 @@ BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo)
 	{
 		CSize sizeImage(pData->wWidth, pData->wHeight);
 		CSize sizeButton(pData->wWidth + 7, pData->wHeight + 7);
-		SetSizes(sizeButton, sizeImage);
-	}
-
-	{
-		//SetButtonInfo();
+		SetSizes(CProgramData::GetRealSize(sizeButton), CProgramData::GetRealSize(sizeImage));
 	}
 
 	// load bitmap now that sizes are known by the toolbar control
-	bResult=bmp.LoadBitmap(lpszResourceName);
-	if(!bResult)
-		goto end;
-	bmp.GetBitmap(&bm);
-	image.Create(pData->wWidth, bm.bmHeight, ILC_MASK | ILC_COLOR24, 1, 1);
-	image.Add(&bmp,RGB(255,255,255));
-	GetToolBarCtrl().SetImageList(&image);
-	image.Detach();
-	bmp.Detach();
+	bResult=m_bmpButton.LoadBitmap(lpszResourceName);
 
 end:
 	UnlockResource(hGlobal);
@@ -82,4 +67,81 @@ void CMyToolBar::OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHandler)
 {
 	// TODO: Add your specialized code here and/or call the base class
 	CToolBar::OnUpdateCmdUI(pTarget,m_bDisableIfNoHandler);
+}
+
+BEGIN_MESSAGE_MAP(CMyToolBar, CToolBar)
+	ON_WM_PAINT()
+	ON_WM_ERASEBKGND()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_WM_MOUSELEAVE()
+	ON_WM_DESTROY()
+END_MESSAGE_MAP()
+
+
+void CMyToolBar::OnPaint()
+{
+	CPaintDC dc(this); // device context for painting
+					   // TODO: Add your message handler code here
+					   // Do not call CToolBar::OnPaint() for painting messages
+	CDCDraw canvas(this,&dc,true);
+	CDrawer drawer(&canvas);
+	BITMAP bm;
+	m_bmpButton.GetBitmap(&bm);
+	CRect rc(0,0,bm.bmWidth,bm.bmHeight),rcWnd;
+	rc=CProgramData::GetRealRect(rc);
+	GetWindowRect(&rcWnd);
+	int offset=(rcWnd.Height()-rc.Height())/2;
+	rc.OffsetRect(offset,offset);
+	drawer.DrawBitmapScaled(&m_bmpButton,&rc);
+}
+
+
+BOOL CMyToolBar::OnEraseBkgnd(CDC* pDC)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	return CToolBar::OnEraseBkgnd(pDC);
+}
+
+
+void CMyToolBar::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	CToolBar::OnLButtonDown(nFlags, point);
+}
+
+
+void CMyToolBar::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	CToolBar::OnLButtonUp(nFlags, point);
+}
+
+
+void CMyToolBar::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	CToolBar::OnMouseMove(nFlags, point);
+}
+
+
+void CMyToolBar::OnMouseLeave()
+{
+	// TODO: Add your message handler code here and/or call default
+
+	CToolBar::OnMouseLeave();
+}
+
+
+void CMyToolBar::OnDestroy()
+{
+	CToolBar::OnDestroy();
+
+	// TODO: Add your message handler code here
+	m_bmpButton.DeleteObject();
 }
