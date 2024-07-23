@@ -14,7 +14,12 @@ struct CToolBarData
 };
 CMyToolBar::CMyToolBar():CToolBar()
 {
-	m_bDisableIfNoHandler=false;
+	m_pData=NULL;
+}
+CMyToolBar::~CMyToolBar()
+{
+	if (m_pData!=NULL)
+		delete[] m_pData;
 }
 BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo)
 {
@@ -40,10 +45,18 @@ BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo)
 	for (int i = 0; i < pData->wItemCount; i++)
 		pItems[i] = pData->items()[i];
 	BOOL bResult = SetButtons(pItems, pData->wItemCount);
-	delete[] pItems;
-
 	if(!bResult)
+	{
+		delete[] pItems;
 		goto end;
+	}
+	m_pData=new MyToolBarData[m_nCount];
+	memset(m_pData,0,m_nCount*sizeof(MyToolBarData));
+	for(int i=0;i<m_nCount;i++)
+	{
+		m_pData[i].nID=pItems[i];
+	}
+	delete[] pItems;
 
 	// set new sizes of the buttons
 	{
@@ -62,12 +75,6 @@ end:
 	return bResult;
 }
 
-
-void CMyToolBar::OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHandler)
-{
-	// TODO: Add your specialized code here and/or call the base class
-	CToolBar::OnUpdateCmdUI(pTarget,m_bDisableIfNoHandler);
-}
 
 BEGIN_MESSAGE_MAP(CMyToolBar, CToolBar)
 	ON_WM_PAINT()

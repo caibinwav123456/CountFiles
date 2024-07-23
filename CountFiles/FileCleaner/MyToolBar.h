@@ -1,9 +1,17 @@
 #pragma once
+struct MyToolBarData
+{
+	UINT nID;
+	UINT style;
+	UINT state;
+	UINT nCmdMsg;
+};
 class CMyToolBar :
 	public CToolBar
 {
 public:
 	CMyToolBar();
+	~CMyToolBar();
 	BOOL LoadToolBar(UINT nIDResource)
 	{
 		CString strInfo;
@@ -11,14 +19,14 @@ public:
 		return LoadToolBar(MAKEINTRESOURCE(nIDResource),strInfo);
 	}
 	BOOL LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo);
-public:
-	virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHandler);
 protected:
 	CSize GetButtonSize(){return m_sizeButton;}
 	CSize GetImageSize(){return m_sizeImage;}
+	UINT GetButtonCount(){return m_nCount;}
+	BOOL IsVertical(){return !!(GetStyle()&(CBRS_ALIGN_LEFT|CBRS_ALIGN_RIGHT));}
 private:
-	bool m_bDisableIfNoHandler;
 	CBitmap m_bmpButton;
+	MyToolBarData* m_pData;
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
