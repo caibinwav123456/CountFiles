@@ -59,8 +59,16 @@ CMyToolBar::ItemIterator::ItemIterator(CMyToolBar* host)
 		return;
 	if(m_pData[0].nID==0)
 	{
-		m_rcBtn=CRect(CPoint(m_nBtnOffset,m_nBtnOffset),CSize(m_nBtnWidthT,SEPARATOR_THICKNESS));
-		m_rcImg=CRect(CPoint(m_nImgOffset,m_nImgOffset),CSize(m_nImgWidthT,SEPARATOR_THICKNESS));
+		if(!m_bVert)
+		{
+			m_rcBtn=CRect(CPoint(m_nBtnOffset,m_nBtnOffset),CSize(SEPARATOR_THICKNESS,m_nBtnHeightT));
+			m_rcImg=CRect(CPoint(m_nImgOffset,m_nImgOffset),CSize(SEPARATOR_THICKNESS,m_nImgHeightT));
+		}
+		else
+		{
+			m_rcBtn=CRect(CPoint(m_nBtnOffset,m_nBtnOffset),CSize(m_nBtnWidthT,SEPARATOR_THICKNESS));
+			m_rcImg=CRect(CPoint(m_nImgOffset,m_nImgOffset),CSize(m_nImgWidthT,SEPARATOR_THICKNESS));
+		}
 		m_rcImgSrc=CRect(0,0,0,m_szImg.cy);
 		return;
 	}
