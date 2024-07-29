@@ -55,20 +55,26 @@ CMyToolBar::ItemIterator::ItemIterator(CMyToolBar* host)
 	m_nImgWidthT=CProgramData::GetRealPixelsX(m_szImg.cx);
 	m_nImgHeightT=CProgramData::GetRealPixelsY(m_szImg.cy);
 
-	if(m_idx<m_nCnt)
+	if(m_nCnt==0)
+		return;
+	if(m_pData[0].nID==0)
 	{
-		m_rcBtn=CRect(CPoint(m_nBtnOffset,m_nBtnOffset),CSize(m_nBtnWidthT,m_nBtnHeightT));
-		m_rcImg=CRect(CPoint(m_nImgOffset,m_nImgOffset),CSize(m_nImgWidthT,m_nImgHeightT));
-		m_rcImgSrc=CRect(CPoint(0,0),m_szImg);
-		if(IsDropDown(m_idx))
-		{
-			m_rcDrop=m_rcBtn;
-			m_rcDrop.left=m_rcImg.right;
-			m_rcDrop.right=m_rcBtn.left+m_nExBtnWidthT;
-			m_rcBtn.right=m_rcImg.right;
-			m_rcImg.right=m_rcImg.left+m_nExImgWidthT;
-			m_rcImgSrc.right+=m_nDropWidth;
-		}
+		m_rcBtn=CRect(CPoint(m_nBtnOffset,m_nBtnOffset),CSize(m_nBtnWidthT,SEPARATOR_THICKNESS));
+		m_rcImg=CRect(CPoint(m_nImgOffset,m_nImgOffset),CSize(m_nImgWidthT,SEPARATOR_THICKNESS));
+		m_rcImgSrc=CRect(0,0,0,m_szImg.cy);
+		return;
+	}
+	m_rcBtn=CRect(CPoint(m_nBtnOffset,m_nBtnOffset),CSize(m_nBtnWidthT,m_nBtnHeightT));
+	m_rcImg=CRect(CPoint(m_nImgOffset,m_nImgOffset),CSize(m_nImgWidthT,m_nImgHeightT));
+	m_rcImgSrc=CRect(CPoint(0,0),m_szImg);
+	if(IsDropDown(0))
+	{
+		m_rcDrop=m_rcBtn;
+		m_rcDrop.left=m_rcImg.right;
+		m_rcDrop.right=m_rcBtn.left+m_nExBtnWidthT;
+		m_rcBtn.right=m_rcImg.right;
+		m_rcImg.right=m_rcImg.left+m_nExImgWidthT;
+		m_rcImgSrc.right+=m_nDropWidth;
 	}
 }
 CMyToolBar::ItemIterator::operator bool()
