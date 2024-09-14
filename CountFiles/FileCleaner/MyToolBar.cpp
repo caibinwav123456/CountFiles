@@ -293,14 +293,13 @@ BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo)
 		m_pData[i].nID=pItems[i];
 	}
 	bResult=ParseConfigString(strInfo);
+	delete[] pItems;
 	if(!bResult)
 	{
 		delete[] m_pData;
 		m_pData=NULL;
-		delete[] pItems;
 		goto end;
 	}
-	delete[] pItems;
 
 	// set new sizes of the buttons
 	{
