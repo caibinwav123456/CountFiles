@@ -307,7 +307,7 @@ BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo)
 		CSize sizeButton(pData->wWidth + 7, pData->wHeight + 7);
 		m_szImgOrg=sizeImage;
 		m_szBtnOrg=sizeButton;
-		SetSizes(CProgramData::GetRealSize(sizeButton), CProgramData::GetRealSize(sizeImage));
+		SetSizes(CProgramData::GetRealSize(sizeButton+CSize(7,3)), CProgramData::GetRealSize(sizeImage+CSize(7,3)));
 	}
 
 	// load bitmap now that sizes are known by the toolbar control
@@ -329,6 +329,7 @@ BEGIN_MESSAGE_MAP(CMyToolBar, CToolBar)
 	ON_WM_MOUSEMOVE()
 	ON_WM_MOUSELEAVE()
 	ON_WM_DESTROY()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
@@ -398,4 +399,12 @@ void CMyToolBar::OnDestroy()
 
 	// TODO: Add your message handler code here
 	m_bmpButton.DeleteObject();
+}
+
+
+void CMyToolBar::OnSize(UINT nType, int cx, int cy)
+{
+	CToolBar::OnSize(nType, cx, cy);
+
+	// TODO: Add your message handler code here
 }

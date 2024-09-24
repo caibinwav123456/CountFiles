@@ -19,6 +19,7 @@ struct MyToolBarData
 	BOOL checked;
 	MyToolBarData* pGrpNext;
 };
+#include "resource.h"
 class CMyToolBar : public CToolBar
 {
 public:
@@ -55,6 +56,18 @@ public:
 	~CMyToolBar();
 	BOOL LoadToolBar(UINT nIDResource)
 	{
+		switch(nIDResource)
+		{
+		case IDR_TOOLBAR_COMP:
+			m_debStr=_T("TB_COMP");
+			break;
+		case IDR_TOOLBAR_VIEW:
+			m_debStr=_T("TB_VIEW");
+			break;
+		case IDR_TOOLBAR_OP:
+			m_debStr=_T("TB_OP");
+			break;
+		}
 		CString strInfo;
 		strInfo.LoadString(nIDResource);
 		return LoadToolBar(MAKEINTRESOURCE(nIDResource),strInfo);
@@ -72,6 +85,8 @@ private:
 	CSize m_szBtnOrg;
 	CSize m_szImgOrg;
 
+	CString m_debStr;
+
 	BOOL ParseConfigString(LPCTSTR strInfo);
 
 	DECLARE_MESSAGE_MAP()
@@ -82,4 +97,5 @@ private:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnMouseLeave();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 };
