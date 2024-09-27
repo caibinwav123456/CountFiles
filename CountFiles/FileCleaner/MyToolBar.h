@@ -25,7 +25,7 @@ class CMyToolBar : public CToolBar
 public:
 	struct ItemIterator
 	{
-		ItemIterator(CMyToolBar* host);
+		ItemIterator(CMyToolBar* host,BOOL vert=FALSE,CRect* prcWnd=NULL);
 		operator bool();
 		void operator++(int);
 		BOOL m_bVert;
@@ -35,6 +35,7 @@ public:
 		CRect m_rcDrop;
 		CRect m_rcImg;
 		CRect m_rcImgSrc;
+		CRect m_rcWnd;
 		INT m_nDropWidth;
 		INT m_nExBtnWidthT;
 		INT m_nBtnWidthT;
@@ -73,6 +74,9 @@ public:
 		return LoadToolBar(MAKEINTRESOURCE(nIDResource),strInfo);
 	}
 	BOOL LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo);
+	void InitialDock(CFrameWnd* frame);
+	virtual CSize CalcFixedLayout(BOOL bStretch, BOOL bHorz);
+	virtual CSize CalcDynamicLayout(int nLength, DWORD nMode);
 protected:
 	CSize GetButtonSize(){return m_sizeButton;}
 	CSize GetImageSize(){return m_sizeImage;}
@@ -84,10 +88,14 @@ private:
 	INT m_nDropWidth;
 	CSize m_szBtnOrg;
 	CSize m_szImgOrg;
+	CSize m_szBarHorz;
+	CSize m_szBarVert;
 
 	CString m_debStr;
 
 	BOOL ParseConfigString(LPCTSTR strInfo);
+	void CalcSize(void* lpVoid);
+	CSize GetBarSize(BOOL bHorz);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
@@ -99,3 +107,7 @@ private:
 	afx_msg void OnMouseLeave();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 };
+inline CSize CMyToolBar::GetBarSize(BOOL bHorz)
+{
+	return bHorz?m_szBarHorz:m_szBarVert;
+}

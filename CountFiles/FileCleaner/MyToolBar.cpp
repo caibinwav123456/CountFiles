@@ -25,8 +25,8 @@ struct CToolBarData
 	WORD* items()
 		{ return (WORD*)(this+1); }
 };
-CMyToolBar::ItemIterator::ItemIterator(CMyToolBar* host)
-	:m_bVert(host->IsVertical())
+CMyToolBar::ItemIterator::ItemIterator(CMyToolBar* host,BOOL vert,CRect* prcWnd)
+	:m_bVert(FALSE)
 	,m_szBtn(host->m_szBtnOrg)
 	,m_szImg(host->m_szImgOrg)
 	,m_nDropWidth(host->m_nDropWidth)
@@ -34,17 +34,25 @@ CMyToolBar::ItemIterator::ItemIterator(CMyToolBar* host)
 	,m_pData(host->m_pData)
 	,m_idx(0)
 {
-	CRect rect;
-	host->GetWindowRect(&rect);
-	if(!m_bVert)
+	if(prcWnd==NULL)
 	{
-		m_nBtnOffset=(rect.Height()-CProgramData::GetRealPixelsY(m_szBtn.cy))/2;
-		m_nImgOffset=(rect.Height()-CProgramData::GetRealPixelsY(m_szImg.cy))/2;
+		host->GetWindowRect(&m_rcWnd);
+		m_bVert=host->IsVertical();
 	}
 	else
 	{
-		m_nBtnOffset=(rect.Width()-CProgramData::GetRealPixelsX(m_szBtn.cx))/2;
-		m_nImgOffset=(rect.Width()-CProgramData::GetRealPixelsX(m_szImg.cx))/2;
+		m_rcWnd.CopyRect(prcWnd);
+		m_bVert=vert;
+	}
+	if(!m_bVert)
+	{
+		m_nBtnOffset=(m_rcWnd.Height()-CProgramData::GetRealPixelsY(m_szBtn.cy))/2;
+		m_nImgOffset=(m_rcWnd.Height()-CProgramData::GetRealPixelsY(m_szImg.cy))/2;
+	}
+	else
+	{
+		m_nBtnOffset=(m_rcWnd.Width()-CProgramData::GetRealPixelsX(m_szBtn.cx))/2;
+		m_nImgOffset=(m_rcWnd.Width()-CProgramData::GetRealPixelsX(m_szImg.cx))/2;
 	}
 
 	m_nExBtnWidthT=CProgramData::GetRealPixelsX(m_szBtn.cx+m_nDropWidth);
@@ -91,9 +99,9 @@ CMyToolBar::ItemIterator::operator bool()
 }
 void CMyToolBar::ItemIterator::operator++(int)
 {
+	m_idx++;
 	if(m_idx>=m_nCnt)
 		return;
-	m_idx++;
 	if(!m_bVert)
 	{
 		if(m_pData[m_idx-1].nID!=0)
@@ -302,13 +310,7 @@ BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo)
 	}
 
 	// set new sizes of the buttons
-	{
-		CSize sizeImage(pData->wWidth, pData->wHeight);
-		CSize sizeButton(pData->wWidth + 7, pData->wHeight + 7);
-		m_szImgOrg=sizeImage;
-		m_szBtnOrg=sizeButton;
-		SetSizes(CProgramData::GetRealSize(sizeButton+CSize(7,3)), CProgramData::GetRealSize(sizeImage+CSize(7,3)));
-	}
+	CalcSize(pData);
 
 	// load bitmap now that sizes are known by the toolbar control
 	bResult=m_bmpButton.LoadBitmap(lpszResourceName);
@@ -320,6 +322,41 @@ end:
 	return bResult;
 }
 
+void CMyToolBar::InitialDock(CFrameWnd* frame)
+{
+	frame->DockControlBar(this,(UINT)0,NULL);
+}
+
+CSize CMyToolBar::CalcFixedLayout(BOOL bStretch,BOOL bHorz)
+{
+	return GetBarSize(bHorz);
+}
+
+CSize CMyToolBar::CalcDynamicLayout(int nLength,DWORD dwMode)
+{
+	return GetBarSize(dwMode&(LM_HORZ|LM_HORZDOCK));
+}
+
+void CMyToolBar::CalcSize(void* lpVoid)
+{
+	CToolBarData* pData=(CToolBarData*)lpVoid;
+	CSize sizeImage(pData->wWidth, pData->wHeight);
+	CSize sizeButton(pData->wWidth + 7, pData->wHeight + 7);
+	m_szImgOrg=sizeImage;
+	m_szBtnOrg=sizeButton;
+	{
+		ItemIterator iter(this,FALSE,&CRect(0,0,m_szBtnOrg.cx,m_szBtnOrg.cy));
+		for(;iter;iter++);
+		m_szBarHorz=CSize(iter.m_rcBtn.right,iter.m_nBtnHeightT);
+	}
+	{
+		ItemIterator iter(this,TRUE,&CRect(0,0,m_szBtnOrg.cx,m_szBtnOrg.cy));
+		for(;iter;iter++);
+		m_szBarVert=CSize(iter.m_nBtnWidthT+2*(iter.m_nExBtnWidthT-iter.m_nBtnWidthT)
+			,iter.m_rcBtn.bottom);
+	}
+	SetSizes(m_szBtnOrg,m_szImgOrg);
+}
 
 BEGIN_MESSAGE_MAP(CMyToolBar, CToolBar)
 	ON_WM_PAINT()
@@ -335,6 +372,9 @@ END_MESSAGE_MAP()
 
 void CMyToolBar::OnPaint()
 {
+	if(m_bDelayedButtonLayout)
+		Layout();
+
 	CPaintDC dc(this); // device context for painting
 					   // TODO: Add your message handler code here
 					   // Do not call CToolBar::OnPaint() for painting messages
@@ -343,7 +383,12 @@ void CMyToolBar::OnPaint()
 	for_each_item(btn)
 	{
 		if(m_pData[btn.m_idx].nID!=0)
+		{
+			drawer.FillRect(&btn.m_rcBtn,RGB(0,0,255));
+			if(m_pData[btn.m_idx].style&MTB_STYLE_DROPBTN)
+				drawer.FillRect(&btn.m_rcDrop,RGB(0,0,128));
 			drawer.DrawBitmapScaled(&m_bmpButton,&btn.m_rcImg,&btn.m_rcImgSrc);
+		}
 		else
 		{
 			drawer.DrawRect(&btn.m_rcImg,SEPARATOR_COLOR);

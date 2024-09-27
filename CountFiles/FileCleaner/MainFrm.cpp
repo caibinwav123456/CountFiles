@@ -94,7 +94,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		// TODO: Delete these three lines if you don't want the toolbar to be dockable
 		arrToolBar[i].pToolBar->EnableDocking(CBRS_ALIGN_ANY);
 		EnableDocking(CBRS_ALIGN_ANY);
-		DockControlBar(arrToolBar[i].pToolBar);
+		arrToolBar[i].pToolBar->InitialDock(this);
 	}
 
 	if (!m_wndBaseBar.CreateBar(this))
