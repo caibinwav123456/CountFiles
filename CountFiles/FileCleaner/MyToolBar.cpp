@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "MyToolBar.h"
 #include "DrawObject.h"
+#define ORIGIN 1
 #define SEPARATOR_THICKNESS 2
 #define SEPARATOR_COLOR     RGB(140,140,140)
 #define for_each_item(iter) for(ItemIterator iter(this);iter;iter++)
@@ -329,12 +330,24 @@ void CMyToolBar::InitialDock(CFrameWnd* frame)
 
 CSize CMyToolBar::CalcFixedLayout(BOOL bStretch,BOOL bHorz)
 {
+#if ORIGIN
+	CSize sz=CToolBar::CalcFixedLayout(bStretch,bHorz);
+	bHorz?sz.cx+=10:sz.cy+=10;
+	return sz;
+#else
 	return GetBarSize(bHorz);
+#endif
 }
 
 CSize CMyToolBar::CalcDynamicLayout(int nLength,DWORD dwMode)
 {
+#if ORIGIN
+	CSize sz=CToolBar::CalcDynamicLayout(nLength,dwMode);
+	(dwMode&(LM_HORZ|LM_HORZDOCK))?sz.cx+=10:sz.cy+=10;
+	return sz;
+#else
 	return GetBarSize(dwMode&(LM_HORZ|LM_HORZDOCK));
+#endif
 }
 
 void CMyToolBar::CalcSize(void* lpVoid)
@@ -372,8 +385,10 @@ END_MESSAGE_MAP()
 
 void CMyToolBar::OnPaint()
 {
+#if ORIGIN
 	if(m_bDelayedButtonLayout)
 		Layout();
+#endif
 
 	CPaintDC dc(this); // device context for painting
 					   // TODO: Add your message handler code here
