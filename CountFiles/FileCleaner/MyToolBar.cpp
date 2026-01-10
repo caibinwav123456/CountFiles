@@ -1,9 +1,10 @@
 #include "pch.h"
 #include "MyToolBar.h"
 #include "DrawObject.h"
-#define ORIGIN 1
 #define SEPARATOR_THICKNESS 2
 #define SEPARATOR_COLOR     RGB(140,140,140)
+#define TOOLBAR_HORZ_PAD    5
+#define TOOLBAR_VERT_PAD    5
 #define for_each_item(iter) for(ItemIterator iter(this);iter;iter++)
 LPCTSTR MTB_TAGS[]={_T("NULL"),_T("CHECK"),_T("GROUP"),_T("DROP"),_T("DROPW")};
 enum
@@ -47,13 +48,15 @@ CMyToolBar::ItemIterator::ItemIterator(CMyToolBar* host,BOOL vert,CRect* prcWnd)
 	}
 	if(!m_bVert)
 	{
-		m_nBtnOffset=(m_rcWnd.Height()-CProgramData::GetRealPixelsY(m_szBtn.cy))/2;
-		m_nImgOffset=(m_rcWnd.Height()-CProgramData::GetRealPixelsY(m_szImg.cy))/2;
+		m_ptBtnOffset=CPoint(0,(m_rcWnd.Height()-CProgramData::GetRealPixelsY(m_szBtn.cy))/2);
+		m_ptImgOffset=CPoint(CProgramData::GetRealPixelsX((m_szBtn.cx-m_szImg.cx)/2),
+			(m_rcWnd.Height()-CProgramData::GetRealPixelsY(m_szImg.cy))/2);
 	}
 	else
 	{
-		m_nBtnOffset=(m_rcWnd.Width()-CProgramData::GetRealPixelsX(m_szBtn.cx))/2;
-		m_nImgOffset=(m_rcWnd.Width()-CProgramData::GetRealPixelsX(m_szImg.cx))/2;
+		m_ptBtnOffset=CPoint((m_rcWnd.Width()-CProgramData::GetRealPixelsX(m_szBtn.cx))/2,0);
+		m_ptImgOffset=CPoint((m_rcWnd.Width()-CProgramData::GetRealPixelsX(m_szImg.cx))/2,
+			CProgramData::GetRealPixelsY((m_szBtn.cy-m_szImg.cy)/2));
 	}
 
 	m_nExBtnWidthT=CProgramData::GetRealPixelsX(m_szBtn.cx+m_nDropWidth);
@@ -70,19 +73,19 @@ CMyToolBar::ItemIterator::ItemIterator(CMyToolBar* host,BOOL vert,CRect* prcWnd)
 	{
 		if(!m_bVert)
 		{
-			m_rcBtn=CRect(CPoint(m_nBtnOffset,m_nBtnOffset),CSize(SEPARATOR_THICKNESS,m_nBtnHeightT));
-			m_rcImg=CRect(CPoint(m_nImgOffset,m_nImgOffset),CSize(SEPARATOR_THICKNESS,m_nImgHeightT));
+			m_rcBtn=CRect(m_ptBtnOffset,CSize(SEPARATOR_THICKNESS,m_nBtnHeightT));
+			m_rcImg=CRect(m_ptImgOffset,CSize(SEPARATOR_THICKNESS,m_nImgHeightT));
 		}
 		else
 		{
-			m_rcBtn=CRect(CPoint(m_nBtnOffset,m_nBtnOffset),CSize(m_nBtnWidthT,SEPARATOR_THICKNESS));
-			m_rcImg=CRect(CPoint(m_nImgOffset,m_nImgOffset),CSize(m_nImgWidthT,SEPARATOR_THICKNESS));
+			m_rcBtn=CRect(m_ptBtnOffset,CSize(m_nBtnWidthT,SEPARATOR_THICKNESS));
+			m_rcImg=CRect(m_ptImgOffset,CSize(m_nImgWidthT,SEPARATOR_THICKNESS));
 		}
 		m_rcImgSrc=CRect(0,0,0,m_szImg.cy);
 		return;
 	}
-	m_rcBtn=CRect(CPoint(m_nBtnOffset,m_nBtnOffset),CSize(m_nBtnWidthT,m_nBtnHeightT));
-	m_rcImg=CRect(CPoint(m_nImgOffset,m_nImgOffset),CSize(m_nImgWidthT,m_nImgHeightT));
+	m_rcBtn=CRect(m_ptBtnOffset,CSize(m_nBtnWidthT,m_nBtnHeightT));
+	m_rcImg=CRect(m_ptImgOffset,CSize(m_nImgWidthT,m_nImgHeightT));
 	m_rcImgSrc=CRect(CPoint(0,0),m_szImg);
 	if(IsDropDown(0))
 	{
@@ -169,10 +172,13 @@ void CMyToolBar::ItemIterator::operator++(int)
 		}
 	}
 }
+CPoint CMyToolBar::s_ptBarTileOrg(0,0);
+int CMyToolBar::s_nBarRowHeight=0;
 CMyToolBar::CMyToolBar():CToolBar()
 {
 	m_pData=NULL;
 	m_nDropWidth=0;
+	m_nDropCnt=0;
 }
 CMyToolBar::~CMyToolBar()
 {
@@ -264,6 +270,12 @@ BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo)
 			break;
 		}
 	}
+	m_nDropCnt=0;
+	for(int i=0;i<(int)GetButtonCount();i++)
+	{
+		if(m_pData[i].style&MTB_STYLE_DROPBTN)
+			m_nDropCnt++;
+	}
 	return TRUE;
 }
 BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo)
@@ -295,14 +307,12 @@ BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo)
 		delete[] pItems;
 		goto end;
 	}
+	delete[] pItems;
 	m_pData=new MyToolBarData[m_nCount];
 	memset(m_pData,0,m_nCount*sizeof(MyToolBarData));
 	for(int i=0;i<m_nCount;i++)
-	{
-		m_pData[i].nID=pItems[i];
-	}
+		m_pData[i].nID=pData->items()[i];
 	bResult=ParseConfigString(strInfo);
-	delete[] pItems;
 	if(!bResult)
 	{
 		delete[] m_pData;
@@ -323,31 +333,38 @@ end:
 	return bResult;
 }
 
-void CMyToolBar::InitialDock(CFrameWnd* frame)
+void CMyToolBar::InitialDock(CFrameWnd* frame,BOOL bNewRow)
 {
-	frame->DockControlBar(this,(UINT)0,NULL);
-}
-
-CSize CMyToolBar::CalcFixedLayout(BOOL bStretch,BOOL bHorz)
-{
-#if ORIGIN
-	CSize sz=CToolBar::CalcFixedLayout(bStretch,bHorz);
-	bHorz?sz.cx+=10:sz.cy+=10;
-	return sz;
-#else
-	return GetBarSize(bHorz);
-#endif
+	CRect rect,rcBar;
+	CSize size=GetBarSize()+CSize(TOOLBAR_HORZ_PAD,TOOLBAR_VERT_PAD);
+	frame->GetClientRect(rect);
+	rcBar=CRect(s_ptBarTileOrg,size);
+	if(rcBar.right>rect.right||bNewRow)
+	{
+		s_ptBarTileOrg.x=0;
+		s_ptBarTileOrg.y+=s_nBarRowHeight;
+		s_nBarRowHeight=size.cy;
+		rcBar=CRect(s_ptBarTileOrg,size);
+	}
+	else
+	{
+		s_ptBarTileOrg.x+=size.cx;
+		s_nBarRowHeight=max(s_nBarRowHeight,size.cy);
+	}
+	ClientToScreen(&rcBar);
+	frame->DockControlBar(this,(UINT)0,&rcBar);
 }
 
 CSize CMyToolBar::CalcDynamicLayout(int nLength,DWORD dwMode)
 {
-#if ORIGIN
 	CSize sz=CToolBar::CalcDynamicLayout(nLength,dwMode);
-	(dwMode&(LM_HORZ|LM_HORZDOCK))?sz.cx+=10:sz.cy+=10;
+	if((dwMode&(LM_VERTDOCK))&&m_nDropCnt>0)
+	{
+		sz.cx+=CProgramData::GetRealPixelsX(2*m_nDropWidth);
+		int nDrop=CProgramData::GetRealPixelsX(m_szBtnOrg.cx+m_nDropWidth);
+		sz.cy-=m_nDropCnt*(nDrop-SEPARATOR_THICKNESS);
+	}
 	return sz;
-#else
-	return GetBarSize(dwMode&(LM_HORZ|LM_HORZDOCK));
-#endif
 }
 
 void CMyToolBar::CalcSize(void* lpVoid)
@@ -357,18 +374,36 @@ void CMyToolBar::CalcSize(void* lpVoid)
 	CSize sizeButton(pData->wWidth + 7, pData->wHeight + 7);
 	m_szImgOrg=sizeImage;
 	m_szBtnOrg=sizeButton;
+	CSize szBtnT=CProgramData::GetRealSize(m_szBtnOrg);
+	CSize szImgT=CProgramData::GetRealSize(m_szImgOrg);
+	int nDrop=CProgramData::GetRealPixelsX(m_szBtnOrg.cx+m_nDropWidth);
+	for(int i=0;i<(int)GetButtonCount();i++)
 	{
-		ItemIterator iter(this,FALSE,&CRect(0,0,m_szBtnOrg.cx,m_szBtnOrg.cy));
-		for(;iter;iter++);
-		m_szBarHorz=CSize(iter.m_rcBtn.right,iter.m_nBtnHeightT);
+		BOOL bDrop=m_pData[i].style&MTB_STYLE_DROPBTN;
+		BOOL bSep=m_pData[i].nID==0;
+		SetButtonInfo(i,bDrop?0:m_pData[i].nID,
+			MAKELONG((bDrop||bSep)?TBSTYLE_SEP:TBSTYLE_BUTTON,TBSTATE_ENABLED),
+			bDrop?nDrop:(bSep?SEPARATOR_THICKNESS:0));
 	}
+	SetSizes(szBtnT,szImgT);
+}
+
+CSize CMyToolBar::GetBarSize()
+{
+	if(m_pData==NULL)
+		return CSize(0,0);
+	ItemIterator it(this);
+	CSize sz(0,it.m_nBtnHeightT);
+	for(int i=0;i<(int)GetButtonCount();i++)
 	{
-		ItemIterator iter(this,TRUE,&CRect(0,0,m_szBtnOrg.cx,m_szBtnOrg.cy));
-		for(;iter;iter++);
-		m_szBarVert=CSize(iter.m_nBtnWidthT+2*(iter.m_nExBtnWidthT-iter.m_nBtnWidthT)
-			,iter.m_rcBtn.bottom);
+		if(m_pData[i].nID==0)
+			sz.cx+=SEPARATOR_THICKNESS;
+		else if(m_pData[i].style&MTB_STYLE_DROPBTN)
+			sz.cx+=it.m_nExBtnWidthT;
+		else
+			sz.cx+=it.m_nBtnWidthT;
 	}
-	SetSizes(m_szBtnOrg,m_szImgOrg);
+	return sz;
 }
 
 BEGIN_MESSAGE_MAP(CMyToolBar, CToolBar)
@@ -379,16 +414,13 @@ BEGIN_MESSAGE_MAP(CMyToolBar, CToolBar)
 	ON_WM_MOUSEMOVE()
 	ON_WM_MOUSELEAVE()
 	ON_WM_DESTROY()
-	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
 void CMyToolBar::OnPaint()
 {
-#if ORIGIN
 	if(m_bDelayedButtonLayout)
 		Layout();
-#endif
 
 	CPaintDC dc(this); // device context for painting
 					   // TODO: Add your message handler code here
@@ -398,12 +430,7 @@ void CMyToolBar::OnPaint()
 	for_each_item(btn)
 	{
 		if(m_pData[btn.m_idx].nID!=0)
-		{
-			drawer.FillRect(&btn.m_rcBtn,RGB(0,0,255));
-			if(m_pData[btn.m_idx].style&MTB_STYLE_DROPBTN)
-				drawer.FillRect(&btn.m_rcDrop,RGB(0,0,128));
 			drawer.DrawBitmapScaled(&m_bmpButton,&btn.m_rcImg,&btn.m_rcImgSrc);
-		}
 		else
 		{
 			drawer.DrawRect(&btn.m_rcImg,SEPARATOR_COLOR);
@@ -417,7 +444,7 @@ BOOL CMyToolBar::OnEraseBkgnd(CDC* pDC)
 {
 	// TODO: Add your message handler code here and/or call default
 
-	return TRUE;//CToolBar::OnEraseBkgnd(pDC);
+	return CToolBar::OnEraseBkgnd(pDC);
 }
 
 
@@ -459,12 +486,4 @@ void CMyToolBar::OnDestroy()
 
 	// TODO: Add your message handler code here
 	m_bmpButton.DeleteObject();
-}
-
-
-void CMyToolBar::OnSize(UINT nType, int cx, int cy)
-{
-	CToolBar::OnSize(nType, cx, cy);
-
-	// TODO: Add your message handler code here
 }

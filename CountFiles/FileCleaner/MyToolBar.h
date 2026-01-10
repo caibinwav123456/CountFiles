@@ -19,7 +19,6 @@ struct MyToolBarData
 	BOOL checked;
 	MyToolBarData* pGrpNext;
 };
-#include "resource.h"
 class CMyToolBar : public CToolBar
 {
 public:
@@ -43,8 +42,8 @@ public:
 		INT m_nExImgWidthT;
 		INT m_nImgWidthT;
 		INT m_nImgHeightT;
-		int m_nBtnOffset;
-		int m_nImgOffset;
+		CPoint m_ptBtnOffset;
+		CPoint m_ptImgOffset;
 		UINT m_nCnt;
 		UINT m_idx;
 		MyToolBarData* m_pData;
@@ -57,25 +56,12 @@ public:
 	~CMyToolBar();
 	BOOL LoadToolBar(UINT nIDResource)
 	{
-		switch(nIDResource)
-		{
-		case IDR_TOOLBAR_COMP:
-			m_debStr=_T("TB_COMP");
-			break;
-		case IDR_TOOLBAR_VIEW:
-			m_debStr=_T("TB_VIEW");
-			break;
-		case IDR_TOOLBAR_OP:
-			m_debStr=_T("TB_OP");
-			break;
-		}
 		CString strInfo;
 		strInfo.LoadString(nIDResource);
 		return LoadToolBar(MAKEINTRESOURCE(nIDResource),strInfo);
 	}
 	BOOL LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo);
-	void InitialDock(CFrameWnd* frame);
-	virtual CSize CalcFixedLayout(BOOL bStretch, BOOL bHorz);
+	void InitialDock(CFrameWnd* frame,BOOL bNewRow=FALSE);
 	virtual CSize CalcDynamicLayout(int nLength, DWORD nMode);
 protected:
 	CSize GetButtonSize(){return m_sizeButton;}
@@ -86,16 +72,13 @@ private:
 	CBitmap m_bmpButton;
 	MyToolBarData* m_pData;
 	INT m_nDropWidth;
+	int m_nDropCnt;
 	CSize m_szBtnOrg;
 	CSize m_szImgOrg;
-	CSize m_szBarHorz;
-	CSize m_szBarVert;
-
-	CString m_debStr;
 
 	BOOL ParseConfigString(LPCTSTR strInfo);
 	void CalcSize(void* lpVoid);
-	CSize GetBarSize(BOOL bHorz);
+	CSize GetBarSize();
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
@@ -105,9 +88,7 @@ private:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnMouseLeave();
-	afx_msg void OnSize(UINT nType, int cx, int cy);
+
+	static CPoint s_ptBarTileOrg;
+	static int s_nBarRowHeight;
 };
-inline CSize CMyToolBar::GetBarSize(BOOL bHorz)
-{
-	return bHorz?m_szBarHorz:m_szBarVert;
-}
