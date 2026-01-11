@@ -172,7 +172,7 @@ void CMyToolBar::ItemIterator::operator++(int)
 		}
 	}
 }
-CPoint CMyToolBar::s_ptBarTileOrg(0,0);
+CPoint CMyToolBar::s_ptBarTileOrg(-10,0);
 int CMyToolBar::s_nBarRowHeight=0;
 CMyToolBar::CMyToolBar():CToolBar()
 {
@@ -335,6 +335,12 @@ end:
 
 void CMyToolBar::InitialDock(CFrameWnd* frame,BOOL bNewRow)
 {
+	static BOOL bFirstCall=TRUE;
+	if(bFirstCall)
+	{
+		bFirstCall=FALSE;
+		s_ptBarTileOrg=CProgramData::GetRealPoint(s_ptBarTileOrg);
+	}
 	CRect rect,rcBar;
 	CSize size=GetBarSize()+CSize(TOOLBAR_HORZ_PAD,TOOLBAR_VERT_PAD);
 	frame->GetClientRect(rect);
