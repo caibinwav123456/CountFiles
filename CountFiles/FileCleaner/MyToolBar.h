@@ -68,6 +68,7 @@ protected:
 	CSize GetImageSize(){return m_sizeImage;}
 	UINT GetButtonCount(){return m_nCount;}
 	BOOL IsVertical(){return !!(GetBarStyle()&(CBRS_ALIGN_LEFT|CBRS_ALIGN_RIGHT));}
+	BOOL HitTest(CPoint pt);
 private:
 	CBitmap m_bmpButton;
 	MyToolBarData* m_pData;
@@ -75,6 +76,7 @@ private:
 	int m_nDropCnt;
 	CSize m_szBtnOrg;
 	CSize m_szImgOrg;
+	BOOL m_bNMMsgHandle;
 
 	BOOL ParseConfigString(LPCTSTR strInfo);
 	void CalcSize(void* lpVoid);

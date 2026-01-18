@@ -7,6 +7,8 @@
 
 #include "MainFrm.h"
 
+#include "resource.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -19,6 +21,12 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
 	ON_WM_CLOSE()
+	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLBAR_COMP, &CMainFrame::OnUpdateControlBarMenu)
+	ON_COMMAND_EX(ID_VIEW_TOOLBAR_COMP, &CMainFrame::OnBarCheck)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLBAR_OP, &CMainFrame::OnUpdateControlBarMenu)
+	ON_COMMAND_EX(ID_VIEW_TOOLBAR_OP, &CMainFrame::OnBarCheck)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLBAR_VIEW, &CMainFrame::OnUpdateControlBarMenu)
+	ON_COMMAND_EX(ID_VIEW_TOOLBAR_VIEW, &CMainFrame::OnBarCheck)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -79,7 +87,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	for(int i=0;i<sizeof(arrToolBar)/sizeof(ToolBarLoadData);i++)
 	{
-		if (!arrToolBar[i].pToolBar->CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_BORDER_ANY | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC))
+		if (!arrToolBar[i].pToolBar->CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_BORDER_ANY | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC, CRect(0,0,0,0), arrToolBar[i].nIDRsrc))
 		{
 			TRACE0("Failed to create toolbar\n");
 			return -1;      // fail to create
@@ -187,4 +195,14 @@ void CMainFrame::OnClose()
 	default:
 		break;
 	}
+}
+
+void CMainFrame::OnUpdateControlBarMenu(CCmdUI* pCmdUI)
+{
+	CFrameWnd::OnUpdateControlBarMenu(pCmdUI);
+}
+
+BOOL CMainFrame::OnBarCheck(UINT nID)
+{
+	return CFrameWnd::OnBarCheck(nID);
 }

@@ -6,7 +6,6 @@
 #define IDD_DIALOGBAR                   103
 #define IDR_MAINFRAME                   128
 #define IDI_MAINFRAME                   129
-#define IDR_FileCleanerTYPE             130
 #define IDS_TAB_NAME                    129
 #define IDS_TAB_SIZE                    130
 #define IDS_TAB_MODIFY                  131
@@ -60,9 +59,9 @@
 #define IDB_BMP_TABR_N                  357
 #define IDC_CUR_BAN                     358
 #define IDC_CUR_MOVE                    359
-#define IDR_TOOLBAR_COMP                360
-#define IDR_TOOLBAR_VIEW                361
-#define IDR_TOOLBAR_OP                  362
+#define IDR_TOOLBAR_COMP                32799
+#define IDR_TOOLBAR_VIEW                32800
+#define IDR_TOOLBAR_OP                  32801
 #define IDC_COMBO_BASE_PATH             1000
 #define IDC_BUTTON_GO                   1001
 #define IDC_BUTTON_OPEN                 1002
@@ -103,13 +102,16 @@
 #define ID_OP_RELOAD                    32796
 #define ID_OP_SWAP_SIDES                32797
 #define ID_OP_STOP_LOADING              32798
+#define ID_VIEW_TOOLBAR_COMP            32799
+#define ID_VIEW_TOOLBAR_VIEW            32800
+#define ID_VIEW_TOOLBAR_OP              32801
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        363
-#define _APS_NEXT_COMMAND_VALUE         32799
+#define _APS_NEXT_COMMAND_VALUE         32802
 #define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

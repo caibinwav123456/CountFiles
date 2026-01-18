@@ -49,5 +49,7 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	afx_msg void OnClose();
+	afx_msg void OnUpdateControlBarMenu(CCmdUI* pCmdUI);
+	afx_msg BOOL OnBarCheck(UINT nID);
 	DECLARE_MESSAGE_MAP()
 };

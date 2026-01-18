@@ -172,13 +172,14 @@ void CMyToolBar::ItemIterator::operator++(int)
 		}
 	}
 }
-CPoint CMyToolBar::s_ptBarTileOrg(-10,0);
+CPoint CMyToolBar::s_ptBarTileOrg(-9,0);
 int CMyToolBar::s_nBarRowHeight=0;
 CMyToolBar::CMyToolBar():CToolBar()
 {
 	m_pData=NULL;
 	m_nDropWidth=0;
 	m_nDropCnt=0;
+	m_bNMMsgHandle=FALSE;
 }
 CMyToolBar::~CMyToolBar()
 {
@@ -454,35 +455,67 @@ BOOL CMyToolBar::OnEraseBkgnd(CDC* pDC)
 }
 
 
+BOOL CMyToolBar::HitTest(CPoint pt)
+{
+	if(!IsVertical())
+		return pt.x <= 0 && pt.x >= -10;
+	else
+		return pt.y <= 0 && pt.y >= -10;
+}
+
+
 void CMyToolBar::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	// TODO: Add your message handler code here and/or call default
-
-	CToolBar::OnLButtonDown(nFlags, point);
+	// only start dragging if clicked in "void" space
+	if (m_pDockBar != NULL && HitTest(point))
+	{
+		m_bNMMsgHandle=TRUE;
+		// start the drag
+		ASSERT(m_pDockContext != NULL);
+		ClientToScreen(&point);
+		m_pDockContext->StartDrag(point);
+	}
+	else
+	{
+	}
 }
 
 
 void CMyToolBar::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	// TODO: Add your message handler code here and/or call default
-
-	CToolBar::OnLButtonUp(nFlags, point);
+	if(m_bNMMsgHandle)
+	{
+		m_bNMMsgHandle=FALSE;
+		CToolBar::OnLButtonUp(nFlags, point);
+	}
+	else
+	{
+	}
 }
 
 
 void CMyToolBar::OnMouseMove(UINT nFlags, CPoint point)
 {
-	// TODO: Add your message handler code here and/or call default
-
-	CToolBar::OnMouseMove(nFlags, point);
+	if(m_bNMMsgHandle)
+	{
+		CToolBar::OnMouseMove(nFlags, point);
+	}
+	else
+	{
+	}
 }
 
 
 void CMyToolBar::OnMouseLeave()
 {
-	// TODO: Add your message handler code here and/or call default
-
-	CToolBar::OnMouseLeave();
+	if(m_bNMMsgHandle)
+	{
+		m_bNMMsgHandle=FALSE;
+		CToolBar::OnMouseLeave();
+	}
+	else
+	{
+	}
 }
 
 
