@@ -7,8 +7,6 @@
 
 #include "MainFrm.h"
 
-#include "resource.h"
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
