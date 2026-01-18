@@ -19,12 +19,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
 	ON_WM_CLOSE()
-	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLBAR_COMP, &CMainFrame::OnUpdateControlBarMenu)
-	ON_COMMAND_EX(ID_VIEW_TOOLBAR_COMP, &CMainFrame::OnBarCheck)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLBAR_OP, &CMainFrame::OnUpdateControlBarMenu)
-	ON_COMMAND_EX(ID_VIEW_TOOLBAR_OP, &CMainFrame::OnBarCheck)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLBAR_VIEW, &CMainFrame::OnUpdateControlBarMenu)
-	ON_COMMAND_EX(ID_VIEW_TOOLBAR_VIEW, &CMainFrame::OnBarCheck)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_TOOLBAR_VIEW_COMP, ID_TOOLBAR_VIEW_OP, &CMainFrame::OnUpdateControlBarMenu)
+	ON_COMMAND_EX_RANGE(ID_TOOLBAR_VIEW_COMP, ID_TOOLBAR_VIEW_OP, &CMainFrame::OnBarCheck)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -78,9 +74,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		UINT nIDRsrc;
 	};
 	ToolBarLoadData arrToolBar[]={
-		{&m_wndToolBarComp,IDR_TOOLBAR_COMP},
-		{&m_wndToolBarView,IDR_TOOLBAR_VIEW},
-		{&m_wndToolBarOper,IDR_TOOLBAR_OP},
+		{&m_wndToolBarComp,ID_TOOLBAR_VIEW_COMP},
+		{&m_wndToolBarView,ID_TOOLBAR_VIEW_VIEW},
+		{&m_wndToolBarOper,ID_TOOLBAR_VIEW_OP},
 	};
 
 	for(int i=0;i<sizeof(arrToolBar)/sizeof(ToolBarLoadData);i++)
