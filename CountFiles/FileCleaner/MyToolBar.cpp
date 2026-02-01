@@ -158,6 +158,22 @@ CMyToolBar::~CMyToolBar()
 {
 	SAFE_DELETE_ARRAY(m_pData);
 }
+BOOL CMyToolBar::MyCreate(UINT nID,CFrameWnd* pParentFrm)
+{
+	if (!CreateEx(pParentFrm, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP |
+		CBRS_BORDER_ANY | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC,
+		CRect(0,0,0,0), nID))
+		return FALSE;      // fail to create
+
+	if(!LoadToolBar(nID))
+		return FALSE;      // fail to create
+
+	EnableDocking(CBRS_ALIGN_ANY);
+	pParentFrm->EnableDocking(CBRS_ALIGN_ANY);
+	InitialDock(pParentFrm);
+
+	return TRUE;
+}
 BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt)
 {
 	UINT status=status_null;
@@ -661,13 +677,22 @@ CSize CMyToolBar::GetBarSize()
 }
 
 BEGIN_MESSAGE_MAP(CMyToolBar, CToolBar)
+	ON_WM_DESTROY()
 	ON_WM_PAINT()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_MOUSELEAVE()
-	ON_WM_DESTROY()
 END_MESSAGE_MAP()
+
+
+void CMyToolBar::OnDestroy()
+{
+	CToolBar::OnDestroy();
+
+	// TODO: Add your message handler code here
+	m_bmpButton.DeleteObject();
+}
 
 
 void CMyToolBar::OnPaint()
@@ -754,13 +779,4 @@ void CMyToolBar::OnMouseLeave()
 	else
 	{
 	}
-}
-
-
-void CMyToolBar::OnDestroy()
-{
-	CToolBar::OnDestroy();
-
-	// TODO: Add your message handler code here
-	m_bmpButton.DeleteObject();
 }

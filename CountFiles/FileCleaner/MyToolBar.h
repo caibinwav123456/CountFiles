@@ -62,6 +62,7 @@ public:
 	};
 	CMyToolBar();
 	~CMyToolBar();
+	BOOL MyCreate(UINT nID,CFrameWnd* pParentFrm);
 	BOOL LoadToolBar(UINT nIDResource)
 	{
 		CString strInfo;

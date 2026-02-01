@@ -81,22 +81,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	for(int i=0;i<sizeof(arrToolBar)/sizeof(ToolBarLoadData);i++)
 	{
-		if (!arrToolBar[i].pToolBar->CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_BORDER_ANY | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC, CRect(0,0,0,0), arrToolBar[i].nIDRsrc))
+		if (!arrToolBar[i].pToolBar->MyCreate(arrToolBar[i].nIDRsrc, this))
 		{
-			TRACE0("Failed to create toolbar\n");
+			TRACE("Failed to create toolbar ID:0x%08X\n", arrToolBar[i].nIDRsrc);
 			return -1;      // fail to create
 		}
-
-		if(!arrToolBar[i].pToolBar->LoadToolBar(arrToolBar[i].nIDRsrc))
-		{
-			TRACE0("Failed to create toolbar\n");
-			return -1;      // fail to create
-		}
-
-		// TODO: Delete these three lines if you don't want the toolbar to be dockable
-		arrToolBar[i].pToolBar->EnableDocking(CBRS_ALIGN_ANY);
-		EnableDocking(CBRS_ALIGN_ANY);
-		arrToolBar[i].pToolBar->InitialDock(this);
 	}
 
 	if (!m_wndBaseBar.CreateBar(this))
