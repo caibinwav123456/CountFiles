@@ -246,12 +246,12 @@ BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt
 				vData[index].checked=TRUE;
 			break;
 		case status_group:
+			vData[index].style|=MTB_STYLE_GROUPBTN;
 			if(bSet)
 				vData[index].checked=TRUE;
 			ASSERT(vData[index].pGrpNext==NULL);
 			if(vData[index].pGrpNext!=NULL)
 				return FALSE;
-			vData[index].style|=MTB_STYLE_GROUPBTN;
 			if(grpfirst==NULL)
 				grpfirst=grplast=(MyToolBarData*)&off_table[index];
 			else

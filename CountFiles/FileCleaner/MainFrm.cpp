@@ -83,7 +83,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	{
 		if (!arrToolBar[i].pToolBar->MyCreate(arrToolBar[i].nIDRsrc, this))
 		{
-			TRACE("Failed to create toolbar ID:0x%08X\n", arrToolBar[i].nIDRsrc);
+			TRACE("Failed to create toolbar ID 0x%04X\n", arrToolBar[i].nIDRsrc);
 			return -1;      // fail to create
 		}
 	}
