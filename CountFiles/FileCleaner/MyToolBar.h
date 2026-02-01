@@ -3,6 +3,11 @@
 #define MTB_STYLE_CHECK    1
 #define MTB_STYLE_GROUPBTN 2
 #define MTB_STYLE_DROPBTN  4
+#define MTB_STYLE_PLACEHOLDER 0x10
+#define MTB_STYLE_WRAP     0x20
+
+#define MTB_STYLE_CUSTOM   MTB_STYLE_DROPBTN
+
 enum E_MTB_STATE
 {
 	eMTBNormal,
@@ -24,7 +29,7 @@ class CMyToolBar : public CToolBar
 public:
 	struct ItemIterator
 	{
-		ItemIterator(CMyToolBar* host,BOOL vert=FALSE,CRect* prcWnd=NULL);
+		ItemIterator(CMyToolBar* host,CRect* prcWnd=NULL);
 		operator bool();
 		void operator++(int);
 		BOOL m_bVert;
@@ -34,7 +39,12 @@ public:
 		CRect m_rcDrop;
 		CRect m_rcImg;
 		CRect m_rcImgSrc;
+		CRect m_rcSep;
+		CRect m_rcWrapSep;
 		CRect m_rcWnd;
+		CRect m_rcBtnOffset;
+		CRect m_rcImgOffset;
+		CPoint m_ptCur;
 		INT m_nDropWidth;
 		INT m_nExBtnWidthT;
 		INT m_nBtnWidthT;
@@ -42,15 +52,13 @@ public:
 		INT m_nExImgWidthT;
 		INT m_nImgWidthT;
 		INT m_nImgHeightT;
-		CPoint m_ptBtnOffset;
-		CPoint m_ptImgOffset;
 		UINT m_nCnt;
 		UINT m_idx;
+		UINT m_iNext;
 		MyToolBarData* m_pData;
-		bool IsDropDown(UINT idx)
-		{
-			return !!(m_pData[idx].style&MTB_STYLE_DROPBTN);
-		}
+		void CalcItemRect(BOOL bSep, BOOL bWrap, BOOL bDrop);
+		void NextItem(BOOL bSep, BOOL bWrap, BOOL bDrop);
+		void Iterate();
 	};
 	CMyToolBar();
 	~CMyToolBar();
@@ -73,19 +81,21 @@ private:
 	CBitmap m_bmpButton;
 	MyToolBarData* m_pData;
 	INT m_nDropWidth;
-	int m_nDropCnt;
 	CSize m_szBtnOrg;
 	CSize m_szImgOrg;
 	BOOL m_bNMMsgHandle;
 
-	BOOL ParseConfigString(LPCTSTR strInfo);
+	BOOL ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt);
+	void ConfigButtons(int nLength, DWORD dwMode);
+	void ConfigButton(int nLength,BOOL bVert=FALSE);
+	int ArrangeButtons(void* lpVoid,int nCount,int len);
+	void UpdateButtons();
 	void CalcSize(void* lpVoid);
 	CSize GetBarSize();
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
 	afx_msg void OnPaint();
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);

@@ -1,10 +1,25 @@
 #include "pch.h"
 #include "MyToolBar.h"
 #include "DrawObject.h"
+#include <vector>
+using namespace std;
 #define SEPARATOR_THICKNESS 2
+#define PLACEHOLDER_ID      1
 #define SEPARATOR_COLOR     RGB(140,140,140)
 #define TOOLBAR_HORZ_PAD    5
 #define TOOLBAR_VERT_PAD    5
+#define SAFE_DELETE(ptr) \
+	if(ptr!=NULL) \
+	{ \
+		delete ptr; \
+		ptr=NULL; \
+	}
+#define SAFE_DELETE_ARRAY(ptr) \
+	if(ptr!=NULL) \
+	{ \
+		delete[] ptr; \
+		ptr=NULL; \
+	}
 #define for_each_item(iter) for(ItemIterator iter(this);iter;iter++)
 LPCTSTR MTB_TAGS[]={_T("NULL"),_T("CHECK"),_T("GROUP"),_T("DROP"),_T("DROPW")};
 enum
@@ -27,37 +42,22 @@ struct CToolBarData
 	WORD* items()
 		{ return (WORD*)(this+1); }
 };
-CMyToolBar::ItemIterator::ItemIterator(CMyToolBar* host,BOOL vert,CRect* prcWnd)
-	:m_bVert(FALSE)
+CMyToolBar::ItemIterator::ItemIterator(CMyToolBar* host,CRect* prcWnd)
+	:m_bVert(host->IsVertical())
 	,m_szBtn(host->m_szBtnOrg)
 	,m_szImg(host->m_szImgOrg)
 	,m_nDropWidth(host->m_nDropWidth)
 	,m_nCnt(host->GetButtonCount())
 	,m_pData(host->m_pData)
 	,m_idx(0)
+	,m_iNext(0)
 {
-	if(prcWnd==NULL)
-	{
-		host->GetWindowRect(&m_rcWnd);
-		m_bVert=host->IsVertical();
-	}
-	else
-	{
+	if(prcWnd!=NULL)
 		m_rcWnd.CopyRect(prcWnd);
-		m_bVert=vert;
-	}
-	if(!m_bVert)
-	{
-		m_ptBtnOffset=CPoint(0,(m_rcWnd.Height()-CProgramData::GetRealPixelsY(m_szBtn.cy))/2);
-		m_ptImgOffset=CPoint(CProgramData::GetRealPixelsX((m_szBtn.cx-m_szImg.cx)/2),
-			(m_rcWnd.Height()-CProgramData::GetRealPixelsY(m_szImg.cy))/2);
-	}
 	else
-	{
-		m_ptBtnOffset=CPoint((m_rcWnd.Width()-CProgramData::GetRealPixelsX(m_szBtn.cx))/2,0);
-		m_ptImgOffset=CPoint((m_rcWnd.Width()-CProgramData::GetRealPixelsX(m_szImg.cx))/2,
-			CProgramData::GetRealPixelsY((m_szBtn.cy-m_szImg.cy)/2));
-	}
+		host->GetWindowRect(&m_rcWnd);
+	host->CalcInsideRect(m_rcWnd,!m_bVert);
+	m_rcWnd.OffsetRect(-m_rcWnd.TopLeft());
 
 	m_nExBtnWidthT=CProgramData::GetRealPixelsX(m_szBtn.cx+m_nDropWidth);
 	m_nBtnWidthT=CProgramData::GetRealPixelsX(m_szBtn.cx);
@@ -67,35 +67,76 @@ CMyToolBar::ItemIterator::ItemIterator(CMyToolBar* host,BOOL vert,CRect* prcWnd)
 	m_nImgWidthT=CProgramData::GetRealPixelsX(m_szImg.cx);
 	m_nImgHeightT=CProgramData::GetRealPixelsY(m_szImg.cy);
 
-	if(m_nCnt==0)
+	m_rcBtnOffset=CRect(0,0,m_nBtnWidthT,m_nBtnHeightT);
+	m_rcImgOffset=CRect(CPoint(CProgramData::GetRealPixelsX((m_szBtn.cx-m_szImg.cx)/2),
+		CProgramData::GetRealPixelsY((m_szBtn.cy-m_szImg.cy)/2)),CSize(m_nImgWidthT,m_nImgHeightT));
+
+	m_rcSep=CRect(0,m_rcImgOffset.top,SEPARATOR_THICKNESS,m_rcImgOffset.bottom);
+	m_rcWrapSep=CRect(CProgramData::GetRealPixelsX((m_szBtn.cx-m_szImg.cx)/2),0,
+		m_rcWnd.Width()-CProgramData::GetRealPixelsX((m_szBtn.cx-m_szImg.cx)/2),
+		SEPARATOR_THICKNESS);
+
+	m_rcImgSrc=CRect(0,0,0,m_szImg.cy);
+	m_ptCur=m_rcWnd.TopLeft();
+
+	Iterate();
+}
+void CMyToolBar::ItemIterator::Iterate()
+{
+	m_idx=m_iNext;
+	if(m_idx>=m_nCnt)
 		return;
-	if(m_pData[0].nID==0)
+	ASSERT(!(m_pData[m_idx].style&MTB_STYLE_PLACEHOLDER));
+	BOOL bWrap;
+	BOOL bSep=m_pData[m_idx].nID==0&&
+		!(m_pData[m_idx].style&MTB_STYLE_CUSTOM);
+	BOOL bDrop=(m_pData[m_idx].style&MTB_STYLE_DROPBTN);
+	int idx=m_idx;
+	if(m_idx+1<m_nCnt)
 	{
-		if(!m_bVert)
-		{
-			m_rcBtn=CRect(m_ptBtnOffset,CSize(SEPARATOR_THICKNESS,m_nBtnHeightT));
-			m_rcImg=CRect(m_ptImgOffset,CSize(SEPARATOR_THICKNESS,m_nImgHeightT));
-		}
-		else
-		{
-			m_rcBtn=CRect(m_ptBtnOffset,CSize(m_nBtnWidthT,SEPARATOR_THICKNESS));
-			m_rcImg=CRect(m_ptImgOffset,CSize(m_nImgWidthT,SEPARATOR_THICKNESS));
-		}
-		m_rcImgSrc=CRect(0,0,0,m_szImg.cy);
-		return;
+		if(m_pData[m_idx+1].style&MTB_STYLE_PLACEHOLDER)
+			m_iNext++,idx++;
+		else if(m_pData[m_idx+1].nID==0)
+			idx++;
 	}
-	m_rcBtn=CRect(m_ptBtnOffset,CSize(m_nBtnWidthT,m_nBtnHeightT));
-	m_rcImg=CRect(m_ptImgOffset,CSize(m_nImgWidthT,m_nImgHeightT));
-	m_rcImgSrc=CRect(CPoint(0,0),m_szImg);
-	if(IsDropDown(0))
+	bWrap=m_pData[idx].style&MTB_STYLE_WRAP;
+	m_iNext++;
+	CalcItemRect(bSep,bWrap,bDrop);
+	if(m_iNext>=m_nCnt)
+		return;
+	NextItem(bSep,bWrap,bDrop);
+}
+void CMyToolBar::ItemIterator::CalcItemRect(BOOL bSep, BOOL bWrap, BOOL bDrop)
+{
+	m_rcBtn=(bSep?(bWrap?m_rcWrapSep:m_rcSep):m_rcBtnOffset)+m_ptCur;
+	m_rcImg=m_rcImgOffset+m_ptCur;
+	m_rcImgSrc.left=m_rcImgSrc.right;
+	m_rcImgSrc.right+=(bSep?0:m_szImg.cx)+(bDrop?m_nDropWidth:0);
+	if(bDrop)
 	{
 		m_rcDrop=m_rcBtn;
 		m_rcDrop.left=m_rcImg.right;
 		m_rcDrop.right=m_rcBtn.left+m_nExBtnWidthT;
 		m_rcBtn.right=m_rcImg.right;
 		m_rcImg.right=m_rcImg.left+m_nExImgWidthT;
-		m_rcImgSrc.right+=m_nDropWidth;
 	}
+}
+void CMyToolBar::ItemIterator::NextItem(BOOL bSep, BOOL bWrap, BOOL bDrop)
+{
+	if(bWrap)
+	{
+		m_ptCur.x=m_rcWnd.left;
+		if(bSep)
+			m_ptCur.y+=SEPARATOR_THICKNESS;
+		else
+			m_ptCur.y+=m_nBtnHeightT;
+	}
+	else if(bSep)
+		m_ptCur.x+=SEPARATOR_THICKNESS;
+	else if(bDrop)
+		m_ptCur.x+=m_nExBtnWidthT;
+	else
+		m_ptCur.x+=m_nBtnWidthT;
 }
 CMyToolBar::ItemIterator::operator bool()
 {
@@ -103,74 +144,7 @@ CMyToolBar::ItemIterator::operator bool()
 }
 void CMyToolBar::ItemIterator::operator++(int)
 {
-	m_idx++;
-	if(m_idx>=m_nCnt)
-		return;
-	if(!m_bVert)
-	{
-		if(m_pData[m_idx-1].nID!=0)
-		{
-			bool bdrop=IsDropDown(m_idx-1);
-			m_rcBtn.OffsetRect(bdrop?m_nExBtnWidthT:m_nBtnWidthT,0);
-			m_rcImg.OffsetRect(bdrop?m_nExBtnWidthT:m_nBtnWidthT,0);
-			m_rcImgSrc.OffsetRect(bdrop?m_szImg.cx+m_nDropWidth:m_szImg.cx,0);
-		}
-		else
-		{
-			m_rcBtn.OffsetRect(SEPARATOR_THICKNESS,0);
-			m_rcImg.OffsetRect(SEPARATOR_THICKNESS,0);
-		}
-		if(m_pData[m_idx].nID==0)
-		{
-			m_rcBtn.right=m_rcBtn.left+SEPARATOR_THICKNESS;
-			m_rcImg.right=m_rcImg.left+SEPARATOR_THICKNESS;
-			m_rcImgSrc.right=m_rcImgSrc.left;
-		}
-	}
-	else
-	{
-		if(m_pData[m_idx-1].nID!=0)
-		{
-			m_rcBtn.OffsetRect(0,m_nBtnHeightT);
-			m_rcImg.OffsetRect(0,m_nBtnHeightT);
-			m_rcImgSrc.OffsetRect(IsDropDown(m_idx-1)?m_szImg.cx+m_nDropWidth:m_szImg.cx,0);
-		}
-		else
-		{
-			m_rcBtn.OffsetRect(0,SEPARATOR_THICKNESS);
-			m_rcImg.OffsetRect(0,SEPARATOR_THICKNESS);
-		}
-		if(m_pData[m_idx].nID==0)
-		{
-			m_rcBtn.bottom=m_rcBtn.top+SEPARATOR_THICKNESS;
-			m_rcBtn.right=m_rcBtn.left+m_nBtnWidthT;
-			m_rcImg.bottom=m_rcImg.top+SEPARATOR_THICKNESS;
-			m_rcImg.right=m_rcImg.left+m_nImgWidthT;
-			m_rcImgSrc.right=m_rcImgSrc.left;
-		}
-	}
-	if(m_pData[m_idx].nID!=0)
-	{
-		if(m_bVert)
-		{
-			m_rcBtn.bottom=m_rcBtn.top+m_nBtnHeightT;
-			m_rcImg.bottom=m_rcImg.top+m_nImgHeightT;
-		}
-		if(IsDropDown(m_idx))
-		{
-			m_rcDrop=m_rcBtn;
-			m_rcBtn.right=m_rcDrop.left=m_rcImg.left+m_nImgWidthT;
-			m_rcDrop.right=m_rcBtn.left+m_nExBtnWidthT;
-			m_rcImg.right=m_rcImg.left+m_nExImgWidthT;
-			m_rcImgSrc.right=m_rcImgSrc.left+m_szImg.cx+m_nDropWidth;
-		}
-		else
-		{
-			m_rcBtn.right=m_rcBtn.left+m_nBtnWidthT;
-			m_rcImg.right=m_rcImg.left+m_nImgWidthT;
-			m_rcImgSrc.right=m_rcImgSrc.left+m_szImg.cx;
-		}
-	}
+	Iterate();
 }
 CPoint CMyToolBar::s_ptBarTileOrg(-9,0);
 int CMyToolBar::s_nBarRowHeight=0;
@@ -178,20 +152,28 @@ CMyToolBar::CMyToolBar():CToolBar()
 {
 	m_pData=NULL;
 	m_nDropWidth=0;
-	m_nDropCnt=0;
 	m_bNMMsgHandle=FALSE;
 }
 CMyToolBar::~CMyToolBar()
 {
-	if (m_pData!=NULL)
-		delete[] m_pData;
+	SAFE_DELETE_ARRAY(m_pData);
 }
-BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo)
+BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt)
 {
 	UINT status=status_null;
 	TCHAR buf[50];
 	MyToolBarData *grpfirst=NULL,*grplast=NULL;
-	for(LPCTSTR pstr=strInfo,end=strInfo;*pstr!=0;pstr=end)
+	vector<MyToolBarData> vData;
+	MyToolBarData padD;
+	memset(&padD,0,sizeof(MyToolBarData));
+	int cntfinal=cnt;
+	vData.reserve(2*cnt);
+	vData.resize(cnt,padD);
+	for(int i=0;i<cnt;i++)
+		vData[i].nID=pID[i];
+	vector<UINT> off_table;
+	off_table.resize(cnt,0);
+	for(LPCTSTR pstr=strInfo,end=strInfo;;pstr=end)
 	{
 		for(;*end==' ';end++);
 		pstr=end;
@@ -199,7 +181,7 @@ BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo)
 		{
 			if(grplast!=NULL)
 			{
-				grplast->pGrpNext=grpfirst;
+				vData[(UINT*)grplast-off_table.data()].pGrpNext=grpfirst;
 				grpfirst=grplast=NULL;
 			}
 			break;
@@ -223,7 +205,7 @@ BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo)
 		{
 			if(grplast!=NULL)
 			{
-				grplast->pGrpNext=grpfirst;
+				vData[(UINT*)grplast-off_table.data()].pGrpNext=grpfirst;
 				grpfirst=grplast=NULL;
 			}
 			continue;
@@ -237,48 +219,75 @@ BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo)
 		}
 		int index=-1;
 		_stscanf_s(pstridx,_T("%d"),&index);
-		ASSERT(status==status_dropw||(index>=0&&index<(int)GetButtonCount()));
-		if(status!=status_dropw&&(index<0||index>=(int)GetButtonCount()))
+		ASSERT(status==status_dropw||(index>=0&&index<cnt));
+		if(status!=status_dropw&&(index<0||index>=cnt))
 			return FALSE;
 		switch(status)
 		{
 		case status_check:
-			m_pData[index].style|=MTB_STYLE_CHECK;
+			vData[index].style|=MTB_STYLE_CHECK;
 			if(bSet)
-				m_pData[index].checked=TRUE;
+				vData[index].checked=TRUE;
 			break;
 		case status_group:
 			if(bSet)
-				m_pData[index].checked=TRUE;
-			ASSERT(m_pData[index].pGrpNext==NULL);
-			if(m_pData[index].pGrpNext!=NULL)
+				vData[index].checked=TRUE;
+			ASSERT(vData[index].pGrpNext==NULL);
+			if(vData[index].pGrpNext!=NULL)
 				return FALSE;
-			m_pData[index].style|=MTB_STYLE_GROUPBTN;
+			vData[index].style|=MTB_STYLE_GROUPBTN;
 			if(grpfirst==NULL)
-				grpfirst=grplast=&m_pData[index];
+				grpfirst=grplast=(MyToolBarData*)&off_table[index];
 			else
 			{
 				ASSERT(grplast!=NULL);
-				grplast->pGrpNext=&m_pData[index];
-				grplast=&m_pData[index];
+				vData[(UINT*)grplast-off_table.data()].pGrpNext=
+					(MyToolBarData*)&off_table[index];
+				grplast=(MyToolBarData*)&off_table[index];
 			}
 			break;
 		case status_drop:
-			m_pData[index].style|=MTB_STYLE_DROPBTN;
+			vData[index].style|=MTB_STYLE_DROPBTN;
 			break;
 		case status_dropw:
 			m_nDropWidth=index;
 			break;
 		}
 	}
-	m_nDropCnt=0;
-	for(int i=0;i<(int)GetButtonCount();i++)
+	bool bcross=false;
+	memset(&padD,0,sizeof(MyToolBarData));
+	padD.nID=0;
+	padD.style=MTB_STYLE_PLACEHOLDER;
+	for(int i=0;i<cntfinal;i++)
 	{
-		if(m_pData[i].style&MTB_STYLE_DROPBTN)
-			m_nDropCnt++;
+		if(i>0)
+		{
+			if(bcross)
+				off_table[i+cnt-cntfinal]=off_table[i-1+cnt-cntfinal]+1;
+			else
+				off_table[i+cnt-cntfinal]=off_table[i-1+cnt-cntfinal];
+		}
+		bcross=false;
+		if((vData[i].style&MTB_STYLE_DROPBTN) &&
+			i+1<cntfinal && vData[i+1].nID!=0)
+		{
+			vData.insert(vData.begin()+i+1,padD);
+			cntfinal++,i++;
+			bcross=true;
+		}
 	}
+	m_pData=new MyToolBarData[cntfinal];
+	memcpy(m_pData,vData.data(),cntfinal*sizeof(MyToolBarData));
+	for(int i=0;i<cntfinal;i++)
+	{
+		m_pData[i].pGrpNext=(m_pData[i].pGrpNext==NULL?NULL:
+			&m_pData[*((UINT*)m_pData[i].pGrpNext)
+			+(((UINT*)m_pData[i].pGrpNext)-off_table.data())]);
+	}
+	outcnt=cntfinal;
 	return TRUE;
 }
+
 BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo)
 {
 	ASSERT_VALID(this);
@@ -299,27 +308,18 @@ BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo)
 		return FALSE;
 	ASSERT(pData->wVersion == 1);
 
-	UINT* pItems = new UINT[pData->wItemCount];
-	for (int i = 0; i < pData->wItemCount; i++)
-		pItems[i] = pData->items()[i];
-	BOOL bResult = SetButtons(pItems, pData->wItemCount);
+	UINT* pIDs;
+	int cntfinal=0;
+	BOOL bResult=ParseConfigString(strInfo,pData->items(),pData->wItemCount,cntfinal);
 	if(!bResult)
-	{
-		delete[] pItems;
 		goto end;
-	}
-	delete[] pItems;
-	m_pData=new MyToolBarData[m_nCount];
-	memset(m_pData,0,m_nCount*sizeof(MyToolBarData));
-	for(int i=0;i<m_nCount;i++)
-		m_pData[i].nID=pData->items()[i];
-	bResult=ParseConfigString(strInfo);
+	pIDs=new UINT[cntfinal];
+	for(int i=0;i<cntfinal;i++)
+		pIDs[i]=m_pData[i].nID;
+	bResult=SetButtons(pIDs,cntfinal);
+	delete[] pIDs;
 	if(!bResult)
-	{
-		delete[] m_pData;
-		m_pData=NULL;
 		goto end;
-	}
 
 	// set new sizes of the buttons
 	CalcSize(pData);
@@ -364,14 +364,257 @@ void CMyToolBar::InitialDock(CFrameWnd* frame,BOOL bNewRow)
 
 CSize CMyToolBar::CalcDynamicLayout(int nLength,DWORD dwMode)
 {
-	CSize sz=CToolBar::CalcDynamicLayout(nLength,dwMode);
-	if((dwMode&(LM_VERTDOCK))&&m_nDropCnt>0)
+	ConfigButtons(nLength,dwMode);
+	return CToolBar::CalcDynamicLayout(nLength,dwMode);
+}
+
+void CMyToolBar::ConfigButtons(int nLength, DWORD dwMode)
+{
+	BOOL bDynamic=FALSE,bMRU=FALSE,
+		bHorzDock=FALSE,bVertDock=FALSE,
+		bHorz=FALSE,bVert=FALSE;
+
+	if ((nLength == -1) && !(dwMode & LM_MRUWIDTH) && !(dwMode & LM_COMMIT) &&
+		((dwMode & LM_HORZDOCK) || (dwMode & LM_VERTDOCK)))
 	{
-		sz.cx+=CProgramData::GetRealPixelsX(2*m_nDropWidth);
-		int nDrop=CProgramData::GetRealPixelsX(m_szBtnOrg.cx+m_nDropWidth);
-		sz.cy-=m_nDropCnt*(nDrop-SEPARATOR_THICKNESS);
+		bHorz = (dwMode & LM_HORZDOCK);
 	}
-	return sz;
+	else
+	{
+		bMRU = (dwMode & LM_MRUWIDTH);
+		bHorzDock = (dwMode & LM_HORZDOCK);
+		bVertDock = (dwMode & LM_VERTDOCK);
+		bHorz = (dwMode & LM_HORZ);
+		bVert = (dwMode & LM_LENGTHY);
+	}
+
+	bDynamic = m_dwStyle & CBRS_SIZE_DYNAMIC;
+
+	if (!(m_dwStyle & CBRS_SIZE_FIXED))
+	{
+		if (bDynamic && bMRU)
+			ConfigButton(m_nMRUWidth);
+		else if (bDynamic && bHorzDock)
+			ConfigButton(32767);
+		else if (bDynamic && bVertDock)
+			ConfigButton(0);
+		else if (bDynamic && (nLength != -1))
+		{
+			CRect rect; rect.SetRectEmpty();
+			CalcInsideRect(rect, bHorz);
+			int nLen = nLength + (bVert ? rect.Height() : rect.Width());
+
+			ConfigButton(nLen, bVert);
+		}
+		else if (bDynamic && (m_dwStyle & CBRS_FLOATING))
+			ConfigButton(m_nMRUWidth);
+		else
+			ConfigButton(bHorz ? 32767 : 0);
+	}
+	UpdateButtons();
+}
+
+void CMyToolBar::ConfigButton(int nLength,BOOL bVert)
+{
+	int nCount = GetButtonCount();
+	TBBUTTON* pData = new TBBUTTON[nCount];
+	ASSERT(pData != NULL && nCount > 0);
+	memset(pData,0,nCount*sizeof(TBBUTTON));
+	ItemIterator it(this);
+	for(int i=0;i<nCount;i++)
+	{
+		pData[i].idCommand=m_pData[i].nID;
+		if(m_pData[i].style&(MTB_STYLE_DROPBTN|MTB_STYLE_PLACEHOLDER)||
+			m_pData[i].nID==0)
+			pData[i].fsStyle=TBSTYLE_SEP;
+		pData[i].iBitmap=(m_pData[i].style&MTB_STYLE_DROPBTN?it.m_nExBtnWidthT:
+			(m_pData[i].style&MTB_STYLE_PLACEHOLDER?1:
+			(m_pData[i].nID==0?SEPARATOR_THICKNESS:0)));
+	}
+
+	if (!bVert)
+	{
+		int nMin, nMax, nTarget, nCurrent, nMid;
+
+		// Wrap ToolBar as specified
+		nMax = nLength;
+		nTarget = ArrangeButtons(pData, nCount, nMax);
+
+		// Wrap ToolBar vertically
+		nMin = 0;
+		nCurrent = ArrangeButtons(pData, nCount, nMin);
+
+		if (nCurrent != nTarget)
+		{
+			while (nMin < nMax)
+			{
+				nMid = (nMin + nMax) / 2;
+				nCurrent = ArrangeButtons(pData, nCount, nMid);
+
+				if (nCurrent == nTarget)
+					nMax = nMid;
+				else
+				{
+					if (nMin == nMid)
+					{
+						ArrangeButtons(pData, nCount, nMax);
+						break;
+					}
+					nMin = nMid;
+				}
+			}
+		}
+		CSize size = CToolBar::CalcSize(pData, nCount);
+		ArrangeButtons(pData, nCount, size.cx);
+	}
+	else
+	{
+		CSize sizeMax, sizeMin, sizeMid;
+
+		// Wrap ToolBar vertically
+		ArrangeButtons(pData, nCount, 0);
+		sizeMin = CToolBar::CalcSize(pData, nCount);
+
+		// Wrap ToolBar horizontally
+		ArrangeButtons(pData, nCount, 32767);
+		sizeMax = CToolBar::CalcSize(pData, nCount);
+
+		while (sizeMin.cx < sizeMax.cx)
+		{
+			sizeMid.cx = (sizeMin.cx + sizeMax.cx) / 2;
+			ArrangeButtons(pData, nCount, sizeMid.cx);
+			sizeMid = CToolBar::CalcSize(pData, nCount);
+
+			if (nLength < sizeMid.cy)
+			{
+				if (sizeMin == sizeMid)
+				{
+					ArrangeButtons(pData, nCount, sizeMax.cx);
+					break;
+				}
+				sizeMin = sizeMid;
+			}
+			else if (nLength > sizeMid.cy)
+			{
+				if (sizeMax == sizeMid)
+				{
+					ArrangeButtons(pData, nCount, sizeMin.cx);
+					break;
+				}
+				sizeMax = sizeMid;
+			}
+			else
+				break;
+		}
+	}
+	delete[] pData;
+}
+
+int CMyToolBar::ArrangeButtons(void* lpVoid,int nCount,int len)
+{
+	TBBUTTON* pData = (TBBUTTON*)lpVoid;
+	ASSERT(pData != NULL && nCount > 0);
+
+	int nResult = 0;
+	int x = 0;
+	for (int i = 0; i < nCount; i++)
+	{
+		ASSERT(!(m_pData[i].style&MTB_STYLE_PLACEHOLDER));
+		pData[i].fsState&=~TBSTATE_WRAP;
+		m_pData[i].style&=~MTB_STYLE_WRAP;
+		int iPrev=i;
+		int iPad=0;
+		if (i+1<nCount&&(m_pData[i+1].style&MTB_STYLE_PLACEHOLDER))
+		{
+			i++;
+			ASSERT(m_pData[i].nID==0);
+			pData[i].fsState&=~TBSTATE_WRAP;
+			m_pData[i].style&=~MTB_STYLE_WRAP;
+			pData[i].idCommand=PLACEHOLDER_ID;
+			iPad=pData[i].iBitmap;
+		}
+
+		int dx, dxNext;
+		if (pData[iPrev].fsStyle & TBSTYLE_SEP)
+		{
+			dx = pData[iPrev].iBitmap;
+			dxNext = dx+iPad;
+		}
+		else
+		{
+			dx = m_sizeButton.cx;
+			dxNext = dx;
+		}
+
+		if (x + dx > len)
+		{
+			BOOL bFound = FALSE;
+			for (int j = i; j >= 0  &&  !(pData[j].fsState & TBSTATE_WRAP); j--)
+			{
+				// Find last separator that isn't hidden
+				// a separator that has a command ID is not
+				// a separator, but a custom control.
+				if ((pData[j].fsStyle & TBSTYLE_SEP) &&
+					(pData[j].idCommand == 0))
+				{
+					bFound = TRUE; i = j; x = 0;
+					pData[j].fsState |= TBSTATE_WRAP;
+					m_pData[j].style |= MTB_STYLE_WRAP;
+					nResult++;
+					break;
+				}
+			}
+			if (!bFound)
+			{
+				for (int j = iPrev - 1; j >= 0 && !(pData[j].fsState & TBSTATE_WRAP); j--)
+				{
+					// Never wrap anything that is hidden,
+					// or any custom controls
+					if (((pData[j].fsStyle & TBSTYLE_SEP) &&
+						(pData[j].idCommand != 0)))
+					{
+						ASSERT(pData[j].idCommand == PLACEHOLDER_ID);
+						ASSERT(m_pData[j].style & MTB_STYLE_PLACEHOLDER);
+						pData[j].idCommand = 0;
+					}
+					else
+						ASSERT(!(m_pData[j].style & MTB_STYLE_CUSTOM));
+
+					pData[j].fsState |= TBSTATE_WRAP;
+					m_pData[j].style |= MTB_STYLE_WRAP;
+					bFound = TRUE; i = j; x = 0;
+					nResult++;
+					break;
+				}
+				if (!bFound)
+					x += dxNext;
+			}
+		}
+		else
+			x += dxNext;
+	}
+	return nResult + 1;
+}
+
+void CMyToolBar::UpdateButtons()
+{
+	for(int i=0;i<(int)GetButtonCount();i++)
+	{
+		TBBUTTON button;
+		if(!(m_pData[i].style&MTB_STYLE_PLACEHOLDER))
+			continue;
+		ASSERT(i>0);
+		ASSERT(m_pData[i-1].style&MTB_STYLE_CUSTOM);
+		int cmd=(m_pData[i].style&MTB_STYLE_WRAP)?0:PLACEHOLDER_ID;
+
+		VERIFY(DefWindowProc(TB_GETBUTTON, i, (LPARAM)&button));
+		if(button.idCommand!=cmd)
+		{
+			button.idCommand=cmd;
+			VERIFY(DefWindowProc(TB_DELETEBUTTON,i,0));
+			VERIFY(DefWindowProc(TB_INSERTBUTTON,i,(LPARAM)&button));
+		}
+	}
 }
 
 void CMyToolBar::CalcSize(void* lpVoid)
@@ -387,10 +630,12 @@ void CMyToolBar::CalcSize(void* lpVoid)
 	for(int i=0;i<(int)GetButtonCount();i++)
 	{
 		BOOL bDrop=m_pData[i].style&MTB_STYLE_DROPBTN;
+		BOOL bPad=m_pData[i].style&MTB_STYLE_PLACEHOLDER;
 		BOOL bSep=m_pData[i].nID==0;
-		SetButtonInfo(i,bDrop?0:m_pData[i].nID,
-			MAKELONG((bDrop||bSep)?TBSTYLE_SEP:TBSTYLE_BUTTON,TBSTATE_ENABLED),
-			bDrop?nDrop:(bSep?SEPARATOR_THICKNESS:0));
+		ASSERT((!bPad)||bSep);
+		SetButtonInfo(i,bPad?PLACEHOLDER_ID:m_pData[i].nID,
+			MAKELONG((bDrop||bSep)?TBSTYLE_SEP:TBSTYLE_BUTTON,0),
+			bDrop?nDrop:(bPad?1:(bSep?SEPARATOR_THICKNESS:0)));
 	}
 	SetSizes(szBtnT,szImgT);
 }
@@ -403,7 +648,9 @@ CSize CMyToolBar::GetBarSize()
 	CSize sz(0,it.m_nBtnHeightT);
 	for(int i=0;i<(int)GetButtonCount();i++)
 	{
-		if(m_pData[i].nID==0)
+		if(m_pData[i].style&MTB_STYLE_PLACEHOLDER)
+			sz.cx+=1;
+		else if(m_pData[i].nID==0)
 			sz.cx+=SEPARATOR_THICKNESS;
 		else if(m_pData[i].style&MTB_STYLE_DROPBTN)
 			sz.cx+=it.m_nExBtnWidthT;
@@ -415,7 +662,6 @@ CSize CMyToolBar::GetBarSize()
 
 BEGIN_MESSAGE_MAP(CMyToolBar, CToolBar)
 	ON_WM_PAINT()
-	ON_WM_ERASEBKGND()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
@@ -440,27 +686,19 @@ void CMyToolBar::OnPaint()
 			drawer.DrawBitmapScaled(&m_bmpButton,&btn.m_rcImg,&btn.m_rcImgSrc);
 		else
 		{
-			drawer.DrawRect(&btn.m_rcImg,SEPARATOR_COLOR);
-			drawer.FillRect(&btn.m_rcImg,SEPARATOR_COLOR);
+			drawer.DrawRect(&btn.m_rcBtn,SEPARATOR_COLOR);
+			drawer.FillRect(&btn.m_rcBtn,SEPARATOR_COLOR);
 		}
 	}
-}
-
-
-BOOL CMyToolBar::OnEraseBkgnd(CDC* pDC)
-{
-	// TODO: Add your message handler code here and/or call default
-
-	return CToolBar::OnEraseBkgnd(pDC);
 }
 
 
 BOOL CMyToolBar::HitTest(CPoint pt)
 {
 	if(!IsVertical())
-		return pt.x <= 0 && pt.x >= -10;
+		return pt.x <= 0;
 	else
-		return pt.y <= 0 && pt.y >= -10;
+		return pt.y <= 0;
 }
 
 
