@@ -28,19 +28,19 @@ CMyToolBar::~CMyToolBar()
 	SAFE_DELETE_ARRAY(m_pData);
 }
 
-BOOL CMyToolBar::MyCreate(UINT nID,CFrameWnd* pParentFrm)
+BOOL CMyToolBar::MyCreate(UINT nID,CFrameWnd* pParentFrm,BOOL bNextRow)
 {
 	if (!CreateEx(pParentFrm, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP |
 		CBRS_BORDER_ANY | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC,
 		CRect(0,0,0,0), nID))
-		return FALSE;      // fail to create
+		return FALSE;
 
 	if(!LoadToolBar(nID))
-		return FALSE;      // fail to create
+		return FALSE;
 
 	EnableDocking(CBRS_ALIGN_ANY);
 	pParentFrm->EnableDocking(CBRS_ALIGN_ANY);
-	InitialDock(pParentFrm);
+	InitialDock(pParentFrm,bNextRow);
 
 	return TRUE;
 }

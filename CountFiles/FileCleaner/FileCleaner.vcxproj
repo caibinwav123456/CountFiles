@@ -301,7 +301,6 @@
     <Image Include="res\tabright_disable.bmp" />
     <Image Include="res\tabright_hover.bmp" />
     <Image Include="res\tabright_normal.bmp" />
-    <Image Include="res\Toolbar.bmp" />
     <Image Include="res\ToolbarCompare.bmp" />
     <Image Include="res\ToolbarOp.bmp" />
     <Image Include="res\ToolbarView.bmp" />
