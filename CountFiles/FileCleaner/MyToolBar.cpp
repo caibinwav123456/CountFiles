@@ -73,8 +73,7 @@ void CMyToolBar::OnDestroy()
 
 void CMyToolBar::OnPaint()
 {
-	if(m_bDelayedButtonLayout)
-		Layout();
+	PrepareForDraw();
 
 	CPaintDC dc(this); // device context for painting
 					   // TODO: Add your message handler code here

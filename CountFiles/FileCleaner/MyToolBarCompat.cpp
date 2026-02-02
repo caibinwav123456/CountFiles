@@ -631,6 +631,12 @@ CSize CMyToolBar::GetBarSize()
 	return sz;
 }
 
+void CMyToolBar::PrepareForDraw()
+{
+	if(m_bDelayedButtonLayout)
+		Layout();
+}
+
 BOOL CMyToolBar::HitTest(CPoint pt)
 {
 	if(!IsVertical())

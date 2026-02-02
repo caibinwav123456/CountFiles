@@ -93,6 +93,7 @@ private:
 	void UpdateButtons();
 	void CalcSize(void* lpVoid);
 	CSize GetBarSize();
+	void PrepareForDraw();
 
 	BOOL LButtonDown(UINT nFlags, CPoint point);
 	BOOL LButtonUp(UINT nFlags, CPoint point);
