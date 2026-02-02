@@ -96,54 +96,27 @@ void CMyToolBar::OnPaint()
 
 void CMyToolBar::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	// only start dragging if clicked in "void" space
-	if (m_pDockBar != NULL && HitTest(point))
-	{
-		m_bNMMsgHandle=TRUE;
-		// start the drag
-		ASSERT(m_pDockContext != NULL);
-		ClientToScreen(&point);
-		m_pDockContext->StartDrag(point);
-	}
-	else
-	{
-	}
+	if (LButtonDown(nFlags,point))
+		return;
 }
 
 
 void CMyToolBar::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	if(m_bNMMsgHandle)
-	{
-		m_bNMMsgHandle=FALSE;
-		CToolBar::OnLButtonUp(nFlags, point);
-	}
-	else
-	{
-	}
+	if(LButtonUp(nFlags,point))
+		return;
 }
 
 
 void CMyToolBar::OnMouseMove(UINT nFlags, CPoint point)
 {
-	if(m_bNMMsgHandle)
-	{
-		CToolBar::OnMouseMove(nFlags, point);
-	}
-	else
-	{
-	}
+	if(MouseMove(nFlags,point))
+		return;
 }
 
 
 void CMyToolBar::OnMouseLeave()
 {
-	if(m_bNMMsgHandle)
-	{
-		m_bNMMsgHandle=FALSE;
-		CToolBar::OnMouseLeave();
-	}
-	else
-	{
-	}
+	if(MouseLeave())
+		return;
 }

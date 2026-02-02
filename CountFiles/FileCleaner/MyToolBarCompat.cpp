@@ -638,3 +638,50 @@ BOOL CMyToolBar::HitTest(CPoint pt)
 	else
 		return pt.y <= 0;
 }
+
+BOOL CMyToolBar::LButtonDown(UINT nFlags, CPoint point)
+{
+	// only start dragging if clicked in "void" space
+	if (m_pDockBar != NULL && HitTest(point))
+	{
+		m_bNMMsgHandle=TRUE;
+		// start the drag
+		ASSERT(m_pDockContext != NULL);
+		ClientToScreen(&point);
+		m_pDockContext->StartDrag(point);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL CMyToolBar::LButtonUp(UINT nFlags, CPoint point)
+{
+	if(m_bNMMsgHandle)
+	{
+		m_bNMMsgHandle=FALSE;
+		CToolBar::OnLButtonUp(nFlags, point);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL CMyToolBar::MouseMove(UINT nFlags, CPoint point)
+{
+	if(m_bNMMsgHandle)
+	{
+		CToolBar::OnMouseMove(nFlags, point);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL CMyToolBar::MouseLeave()
+{
+	if(m_bNMMsgHandle)
+	{
+		m_bNMMsgHandle=FALSE;
+		CToolBar::OnMouseLeave();
+		return TRUE;
+	}
+	return FALSE;
+}

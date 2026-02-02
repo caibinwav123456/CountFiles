@@ -94,6 +94,11 @@ private:
 	void CalcSize(void* lpVoid);
 	CSize GetBarSize();
 
+	BOOL LButtonDown(UINT nFlags, CPoint point);
+	BOOL LButtonUp(UINT nFlags, CPoint point);
+	BOOL MouseMove(UINT nFlags, CPoint point);
+	BOOL MouseLeave();
+
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
 	afx_msg void OnPaint();
