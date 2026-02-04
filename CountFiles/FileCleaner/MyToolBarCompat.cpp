@@ -637,12 +637,12 @@ void CMyToolBar::PrepareForDraw()
 		Layout();
 }
 
-BOOL CMyToolBar::HitTest(CPoint pt)
+inline BOOL CMyToolBar::HitTest(CPoint pt)
 {
 	if(!IsVertical())
-		return pt.x <= 0;
+		return pt.x < 0;
 	else
-		return pt.y <= 0;
+		return pt.y < 0;
 }
 
 BOOL CMyToolBar::LButtonDown(UINT nFlags, CPoint point)
