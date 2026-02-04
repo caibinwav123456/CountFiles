@@ -20,7 +20,6 @@ CMyToolBar::CMyToolBar():CToolBar()
 {
 	m_pData=NULL;
 	m_nDropWidth=0;
-	m_bNMMsgHandle=FALSE;
 }
 
 CMyToolBar::~CMyToolBar()
@@ -95,27 +94,25 @@ void CMyToolBar::OnPaint()
 
 void CMyToolBar::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	if (LButtonDown(nFlags,point))
+	if(LButtonDown(nFlags,point))
 		return;
+	CWnd::OnLButtonDown(nFlags,point);
 }
 
 
 void CMyToolBar::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	if(LButtonUp(nFlags,point))
-		return;
+	CToolBar::OnLButtonUp(nFlags, point);
 }
 
 
 void CMyToolBar::OnMouseMove(UINT nFlags, CPoint point)
 {
-	if(MouseMove(nFlags,point))
-		return;
+	CToolBar::OnMouseMove(nFlags, point);
 }
 
 
 void CMyToolBar::OnMouseLeave()
 {
-	if(MouseLeave())
-		return;
+	CToolBar::OnMouseLeave();
 }

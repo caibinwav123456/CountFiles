@@ -84,8 +84,6 @@ private:
 	INT m_nDropWidth;
 	CSize m_szBtnOrg;
 	CSize m_szImgOrg;
-	BOOL m_bNMMsgHandle;
-
 	BOOL ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt);
 	void ConfigButtons(int nLength, DWORD dwMode);
 	void ConfigButton(int nLength,BOOL bVert=FALSE);
@@ -96,9 +94,6 @@ private:
 	void PrepareForDraw();
 
 	BOOL LButtonDown(UINT nFlags, CPoint point);
-	BOOL LButtonUp(UINT nFlags, CPoint point);
-	BOOL MouseMove(UINT nFlags, CPoint point);
-	BOOL MouseLeave();
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
