@@ -14,7 +14,6 @@
 		delete[] ptr; \
 		ptr=NULL; \
 	}
-#define for_each_item(iter) for(ItemIterator iter(this);iter;iter++)
 
 CMyToolBar::CMyToolBar():CToolBar()
 {

@@ -8,6 +8,8 @@
 
 #define MTB_STYLE_CUSTOM   MTB_STYLE_DROPBTN
 
+#define for_each_item(iter) for(ItemIterator iter(this);iter;iter++)
+
 enum E_MTB_STATE
 {
 	eMTBNormal,
@@ -29,7 +31,7 @@ class CMyToolBar : public CToolBar
 public:
 	struct ItemIterator
 	{
-		ItemIterator(CMyToolBar* host,CRect* prcWnd=NULL);
+		ItemIterator(const CMyToolBar* host,CRect* prcWnd=NULL);
 		operator bool();
 		void operator++(int);
 		BOOL m_bVert;
@@ -72,12 +74,14 @@ public:
 	BOOL LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo);
 	void InitialDock(CFrameWnd* frame,BOOL bNewRow=FALSE);
 	virtual CSize CalcDynamicLayout(int nLength, DWORD nMode);
+	virtual INT_PTR OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 protected:
-	CSize GetButtonSize(){return m_sizeButton;}
-	CSize GetImageSize(){return m_sizeImage;}
-	UINT GetButtonCount(){return m_nCount;}
-	BOOL IsVertical(){return !!(GetBarStyle()&(CBRS_ALIGN_LEFT|CBRS_ALIGN_RIGHT));}
+	CSize GetButtonSize() const{return m_sizeButton;}
+	CSize GetImageSize() const{return m_sizeImage;}
+	UINT GetButtonCount() const{return m_nCount;}
+	BOOL IsVertical() const{return !!((const_cast<CMyToolBar*>(this))->GetBarStyle()&(CBRS_ALIGN_LEFT|CBRS_ALIGN_RIGHT));}
 	BOOL HitTest(CPoint pt);
+	BOOL ItemFromPoint(const CPoint& pt,INT_PTR* nID,BOOL* bDrop,CRect* rect=NULL) const;
 private:
 	CBitmap m_bmpButton;
 	MyToolBarData* m_pData;

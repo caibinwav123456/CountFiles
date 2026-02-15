@@ -27,7 +27,7 @@ struct CToolBarData
 	WORD* items()
 		{ return (WORD*)(this+1); }
 };
-CMyToolBar::ItemIterator::ItemIterator(CMyToolBar* host,CRect* prcWnd)
+CMyToolBar::ItemIterator::ItemIterator(const CMyToolBar* host,CRect* prcWnd)
 	:m_bVert(host->IsVertical())
 	,m_szBtn(host->m_szBtnOrg)
 	,m_szImg(host->m_szImgOrg)
@@ -643,6 +643,86 @@ inline BOOL CMyToolBar::HitTest(CPoint pt)
 		return pt.x < 0;
 	else
 		return pt.y < 0;
+}
+
+typedef struct tagAFX_OLDTOOLINFO
+{
+	UINT cbSize;
+	UINT uFlags;
+	HWND hwnd;
+	UINT uId;
+	RECT rect;
+	HINSTANCE hinst;
+	LPTSTR lpszText;
+	LPARAM lParam;
+} AFX_OLDTOOLINFO;
+
+BOOL CMyToolBar::ItemFromPoint(const CPoint& pt,INT_PTR* nID,BOOL* bDrop,CRect* rect) const
+{
+	CRect rcBtn(0,0,0,0);
+	BOOL drop=FALSE;
+	INT_PTR nHit=0;
+	for_each_item(btn)
+	{
+		if(m_pData[btn.m_idx].nID!=0)
+		{
+			if(m_pData[btn.m_idx].style&MTB_STYLE_DROPBTN && 
+				btn.m_rcDrop.PtInRect(pt))
+			{
+				nHit=(INT_PTR)m_pData[btn.m_idx].nID;
+				rcBtn=btn.m_rcDrop;
+				drop=TRUE;
+				break;
+			}
+			if(btn.m_rcBtn.PtInRect(pt))
+			{
+				nHit=(INT_PTR)m_pData[btn.m_idx].nID;
+				rcBtn=btn.m_rcBtn;
+				break;
+			}
+		}
+	}
+	*nID=nHit;
+	*bDrop=drop;
+	if(nHit!=0)
+	{
+		if(rect!=NULL)
+			*rect=rcBtn;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+INT_PTR CMyToolBar::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	ASSERT_VALID(this);
+	ASSERT(::IsWindow(m_hWnd));
+
+	// check child windows first by calling CControlBar
+	INT_PTR nHit = CControlBar::OnToolHitTest(point, pTI);
+	if (nHit != -1)
+		return nHit;
+
+	CRect rect(0,0,0,0);
+	BOOL bDrop;
+	ItemFromPoint(point,&nHit,&bDrop,&rect);
+	if (pTI != NULL && pTI->cbSize >= sizeof(AFX_OLDTOOLINFO))
+	{
+		pTI->hwnd = m_hWnd;
+		pTI->rect = rect;
+		pTI->uId = nHit;
+		pTI->lpszText = LPSTR_TEXTCALLBACK;
+		if (nHit != 0)
+		{
+			CString strTip;
+			strTip.LoadString((UINT)nHit);
+			size_t len = sizeof(TCHAR) * (strTip.GetLength() + 1);
+			LPTSTR w=(LPTSTR)malloc(len);
+			memcpy(w,strTip,len);
+			pTI->lpszText=w;
+		}
+	}
+	return nHit != 0 ? nHit : static_cast<INT_PTR>(-1);
 }
 
 BOOL CMyToolBar::LButtonDown(UINT nFlags, CPoint point)
