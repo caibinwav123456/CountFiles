@@ -9,6 +9,9 @@
 #define IDS_TAB_NAME                    129
 #define IDS_TAB_SIZE                    130
 #define IDS_TAB_MODIFY                  131
+#define IDS_TOOLBAR_CONF_COMP           132
+#define IDS_TOOLBAR_CONF_VIEW           133
+#define IDS_TOOLBAR_CONF_OP             134
 #define IDB_FOLDER                      310
 #define IDB_FOLDER_MASK                 311
 #define IDB_FOLDER_EXP                  312
@@ -57,8 +60,14 @@
 #define IDB_BMP_TABR_D                  355
 #define IDB_BMP_TABR_H                  356
 #define IDB_BMP_TABR_N                  357
-#define IDC_CUR_BAN                     358
-#define IDC_CUR_MOVE                    359
+#define IDB_TOOLBAR_VIEW_COMP           358
+#define IDB_TOOLBAR_VIEW_VIEW           359
+#define IDB_TOOLBAR_VIEW_OP             360
+#define IDB_TOOLBAR_BACK_COMP           361
+#define IDB_TOOLBAR_BACK_VIEW           362
+#define IDB_TOOLBAR_BACK_OP             363
+#define IDC_CUR_BAN                     364
+#define IDC_CUR_MOVE                    365
 #define IDC_COMBO_BASE_PATH             1000
 #define IDC_BUTTON_GO                   1001
 #define IDC_BUTTON_OPEN                 1002
@@ -107,7 +116,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        360
+#define _APS_NEXT_RESOURCE_VALUE        366
 #define _APS_NEXT_COMMAND_VALUE         32802
 #define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           310

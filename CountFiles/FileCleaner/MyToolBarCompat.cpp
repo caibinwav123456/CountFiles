@@ -265,7 +265,7 @@ BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt
 	return TRUE;
 }
 
-BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo)
+BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo,LPCTSTR bmp,LPCTSTR bmpBack)
 {
 	ASSERT_VALID(this);
 	ASSERT(lpszResourceName != NULL);
@@ -302,7 +302,10 @@ BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo)
 	CalcSize(pData);
 
 	// load bitmap now that sizes are known by the toolbar control
-	bResult=m_bmpButton.LoadBitmap(lpszResourceName);
+	if(!(bResult=m_bmpButton.LoadBitmap(bmp)))
+		goto end;
+	if(!(bResult=m_bmpButtonBack.LoadBitmap(bmpBack)))
+		goto end;
 
 end:
 	UnlockResource(hGlobal);
@@ -717,9 +720,9 @@ INT_PTR CMyToolBar::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			CString strTip;
 			strTip.LoadString((UINT)nHit);
 			size_t len = sizeof(TCHAR) * (strTip.GetLength() + 1);
-			LPTSTR w=(LPTSTR)malloc(len);
-			memcpy(w,strTip,len);
-			pTI->lpszText=w;
+			LPTSTR w = (LPTSTR)malloc(len);
+			memcpy(w, strTip, len);
+			pTI->lpszText = w;
 		}
 	}
 	return nHit != 0 ? nHit : static_cast<INT_PTR>(-1);

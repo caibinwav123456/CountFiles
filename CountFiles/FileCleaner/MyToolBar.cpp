@@ -26,14 +26,14 @@ CMyToolBar::~CMyToolBar()
 	SAFE_DELETE_ARRAY(m_pData);
 }
 
-BOOL CMyToolBar::MyCreate(UINT nID,CFrameWnd* pParentFrm,BOOL bNextRow)
+BOOL CMyToolBar::MyCreate(UINT nID,UINT nIDConf,UINT bmp,UINT bmpBack,CFrameWnd* pParentFrm,BOOL bNextRow)
 {
 	if (!CreateEx(pParentFrm, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP |
 		CBRS_BORDER_ANY | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC,
 		CRect(0,0,0,0), nID))
 		return FALSE;
 
-	if(!LoadToolBar(nID))
+	if(!LoadToolBar(nID,nIDConf,bmp,bmpBack))
 		return FALSE;
 
 	EnableDocking(CBRS_ALIGN_ANY);
@@ -66,6 +66,7 @@ void CMyToolBar::OnDestroy()
 
 	// TODO: Add your message handler code here
 	m_bmpButton.DeleteObject();
+	m_bmpButtonBack.DeleteObject();
 }
 
 

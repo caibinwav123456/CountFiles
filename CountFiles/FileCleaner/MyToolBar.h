@@ -64,14 +64,14 @@ public:
 	};
 	CMyToolBar();
 	~CMyToolBar();
-	BOOL MyCreate(UINT nID,CFrameWnd* pParentFrm,BOOL bNextRow=FALSE);
-	BOOL LoadToolBar(UINT nIDResource)
+	BOOL MyCreate(UINT nID,UINT nIDConf,UINT bmp,UINT bmpBack,CFrameWnd* pParentFrm,BOOL bNextRow=FALSE);
+	BOOL LoadToolBar(UINT nID,UINT nIDConf,UINT bmp,UINT bmpBack)
 	{
 		CString strInfo;
-		strInfo.LoadString(nIDResource);
-		return LoadToolBar(MAKEINTRESOURCE(nIDResource),strInfo);
+		strInfo.LoadString(nIDConf);
+		return LoadToolBar(MAKEINTRESOURCE(nID),strInfo,MAKEINTRESOURCE(bmp),MAKEINTRESOURCE(bmpBack));
 	}
-	BOOL LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo);
+	BOOL LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo,LPCTSTR bmp,LPCTSTR bmpBack);
 	void InitialDock(CFrameWnd* frame,BOOL bNewRow=FALSE);
 	virtual CSize CalcDynamicLayout(int nLength, DWORD nMode);
 	virtual INT_PTR OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
@@ -84,6 +84,7 @@ protected:
 	BOOL ItemFromPoint(const CPoint& pt,INT_PTR* nID,BOOL* bDrop,CRect* rect=NULL) const;
 private:
 	CBitmap m_bmpButton;
+	CBitmap m_bmpButtonBack;
 	MyToolBarData* m_pData;
 	INT m_nDropWidth;
 	CSize m_szBtnOrg;

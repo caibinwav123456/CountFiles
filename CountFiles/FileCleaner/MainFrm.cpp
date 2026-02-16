@@ -72,18 +72,25 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	{
 		CMyToolBar* pToolBar;
 		UINT nIDRsrc;
+		UINT nIDConf;
+		UINT nIDBmp;
+		UINT nIDBmpBack;
 	};
 	ToolBarLoadData arrToolBar[]={
-		{&m_wndToolBarComp,ID_TOOLBAR_VIEW_COMP},
-		{&m_wndToolBarView,ID_TOOLBAR_VIEW_VIEW},
-		{&m_wndToolBarOper,ID_TOOLBAR_VIEW_OP},
+		{&m_wndToolBarComp,ID_TOOLBAR_VIEW_COMP,IDS_TOOLBAR_CONF_COMP,
+		IDB_TOOLBAR_VIEW_COMP,IDB_TOOLBAR_BACK_COMP},
+		{&m_wndToolBarView,ID_TOOLBAR_VIEW_VIEW,IDS_TOOLBAR_CONF_VIEW,
+		IDB_TOOLBAR_VIEW_VIEW,IDB_TOOLBAR_BACK_VIEW},
+		{&m_wndToolBarOper,ID_TOOLBAR_VIEW_OP,IDS_TOOLBAR_CONF_OP,
+		IDB_TOOLBAR_VIEW_OP,IDB_TOOLBAR_BACK_OP},
 	};
 
 	for(int i=0;i<sizeof(arrToolBar)/sizeof(ToolBarLoadData);i++)
 	{
-		if (!arrToolBar[i].pToolBar->MyCreate(arrToolBar[i].nIDRsrc, this))
+		ToolBarLoadData& bar=arrToolBar[i];
+		if (!bar.pToolBar->MyCreate(bar.nIDRsrc, bar.nIDConf, bar.nIDBmp, bar.nIDBmpBack, this))
 		{
-			TRACE("Failed to create toolbar ID 0x%04X\n", arrToolBar[i].nIDRsrc);
+			TRACE("Failed to create toolbar ID 0x%04X\n", bar.nIDRsrc);
 			return -1;      // fail to create
 		}
 	}
