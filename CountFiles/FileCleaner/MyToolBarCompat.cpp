@@ -2,10 +2,7 @@
 #include "MyToolBar.h"
 #include <vector>
 using namespace std;
-#define SEPARATOR_THICKNESS 2
 #define PLACEHOLDER_ID      1
-#define TOOLBAR_HORZ_PAD    5
-#define TOOLBAR_VERT_PAD    5
 LPCTSTR MTB_TAGS[]={_T("NULL"),_T("CHECK"),_T("GROUP"),_T("DROP"),_T("DROPW")};
 enum
 {
@@ -265,7 +262,7 @@ BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt
 	return TRUE;
 }
 
-BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo,LPCTSTR bmp,LPCTSTR bmpBack)
+BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,LPCTSTR strInfo,LPCTSTR bmp,LPCTSTR bmpBack)
 {
 	ASSERT_VALID(this);
 	ASSERT(lpszResourceName != NULL);
@@ -718,11 +715,17 @@ INT_PTR CMyToolBar::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		if (nHit != 0)
 		{
 			CString strTip;
-			strTip.LoadString((UINT)nHit);
-			size_t len = sizeof(TCHAR) * (strTip.GetLength() + 1);
-			LPTSTR w = (LPTSTR)malloc(len);
-			memcpy(w, strTip, len);
-			pTI->lpszText = w;
+			if (strTip.LoadString((UINT)nHit))
+			{
+				size_t len = sizeof(TCHAR) * (strTip.GetLength() + 1);
+				LPTSTR w = (LPTSTR)malloc(len);
+				memcpy(w, strTip, len);
+				pTI->lpszText = w;
+			}
+			else
+			{
+				TRACE(traceAppMsg, 0, "Warning: no message line prompt for ID 0x%04X.\n", (UINT)nHit);
+			}
 		}
 	}
 	return nHit != 0 ? nHit : static_cast<INT_PTR>(-1);

@@ -34,6 +34,9 @@ public:
 	void DrawRect(RECT* rc,COLORREF clr=RGB(0,0,0),int linew=1,int style=PS_SOLID);
 	void FillRect(RECT* rc,COLORREF clr=RGB(0,0,0));
 
+	void DrawRoundRect(RECT* rc,POINT* r,COLORREF clr=RGB(0,0,0),int linew=1,int style=PS_SOLID);
+	void FillRoundRect(RECT* rc,POINT* r,COLORREF clr=RGB(0,0,0));
+
 	void DrawBitmap(CBitmap* pBmp,POINT* pt,DWORD dwOps=SRCCOPY,RECT* srcrc=NULL);
 	void DrawBitmapScaled(CBitmap* pBmp,RECT* dstrc,RECT* srcrc=NULL,DWORD dwOps=SRCCOPY);
 

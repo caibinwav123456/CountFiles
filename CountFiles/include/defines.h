@@ -116,6 +116,10 @@
 
 #endif
 
+#define SEPARATOR_THICKNESS 2
+#define TOOLBAR_HORZ_PAD    5
+#define TOOLBAR_VERT_PAD    5
+
 #define CONN_COLOR         RGB(128,128,128)
 #define GREY_COLOR         RGB(248,250,249)
 #define RED_COLOR          RGB(255,0,0)
@@ -126,6 +130,11 @@
 #define SELN_COLOR         RGB(226,246,226)
 #define BACK_GREY_COLOR    RGB(160,160,160)
 #define TAB_SEP_COLOR      RGB(229,229,229)
+#define SEPARATOR_COLOR    RGB(140,140,140)
+#define TOOLBAR_H_COLOR    RGB(229,243,255)
+#define TOOLBAR_C_COLOR    RGB(204,232,255)
+#define TOOLBAR_H_E_COLOR  RGB(204,232,255)
+#define TOOLBAR_C_E_COLOR  RGB(153,209,255)
 
 #define TAG_TYPE_DIR       "D "
 #define TAG_TYPE_FILE      "N "

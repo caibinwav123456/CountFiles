@@ -71,7 +71,7 @@ public:
 		strInfo.LoadString(nIDConf);
 		return LoadToolBar(MAKEINTRESOURCE(nID),strInfo,MAKEINTRESOURCE(bmp),MAKEINTRESOURCE(bmpBack));
 	}
-	BOOL LoadToolBar(LPCTSTR lpszResourceName,const CString& strInfo,LPCTSTR bmp,LPCTSTR bmpBack);
+	BOOL LoadToolBar(LPCTSTR lpszResourceName,LPCTSTR strInfo,LPCTSTR bmp,LPCTSTR bmpBack);
 	void InitialDock(CFrameWnd* frame,BOOL bNewRow=FALSE);
 	virtual CSize CalcDynamicLayout(int nLength, DWORD nMode);
 	virtual INT_PTR OnToolHitTest(CPoint point, TOOLINFO* pTI) const;

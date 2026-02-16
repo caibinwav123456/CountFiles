@@ -338,6 +338,18 @@ void CDrawer::FillRect(RECT* rc,COLORREF clr)
 	SelectDC()->SelectStockObject(NULL_PEN);
 	SelectDC()->Rectangle(rc);
 }
+void CDrawer::DrawRoundRect(RECT* rc,POINT* r,COLORREF clr,int linew,int style)
+{
+	DrawPen pen(SelectDC(),clr,linew,style);
+	SelectDC()->SelectStockObject(NULL_BRUSH);
+	SelectDC()->RoundRect(rc,*r);
+}
+void CDrawer::FillRoundRect(RECT* rc,POINT* r,COLORREF clr)
+{
+	DrawBrush brush(SelectDC(),clr);
+	SelectDC()->SelectStockObject(NULL_PEN);
+	SelectDC()->RoundRect(rc,*r);
+}
 void CDrawer::DrawBitmap(CBitmap* pBmp,POINT* pt,DWORD dwOps,RECT* srcrc)
 {
 	BITMAP bm;

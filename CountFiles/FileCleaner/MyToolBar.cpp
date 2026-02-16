@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "MyToolBar.h"
 #include "DrawObject.h"
-#define SEPARATOR_COLOR     RGB(140,140,140)
 #define SAFE_DELETE(ptr) \
 	if(ptr!=NULL) \
 	{ \
@@ -82,7 +81,27 @@ void CMyToolBar::OnPaint()
 	for_each_item(btn)
 	{
 		if(m_pData[btn.m_idx].nID!=0)
-			drawer.DrawBitmapScaled(&m_bmpButton,&btn.m_rcImg,&btn.m_rcImgSrc);
+		{
+			CRect rcBtn=btn.m_rcBtn;
+			if(m_pData[btn.m_idx].style&MTB_STYLE_DROPBTN)
+			{
+				CRect rcDrop=btn.m_rcDrop,rcCombine;
+				rcDrop.DeflateRect(CRect(0,2,2,2));
+				rcBtn.DeflateRect(CRect(2,2,0,2));
+				rcCombine.UnionRect(rcDrop,rcBtn);
+				drawer.FillRoundRect(&rcCombine,&CPoint(2,2),TOOLBAR_H_COLOR);
+				drawer.DrawRoundRect(&rcCombine,&CPoint(2,2),TOOLBAR_H_E_COLOR);
+				drawer.DrawLine(&rcDrop.TopLeft(),&rcBtn.BottomRight(),TOOLBAR_H_E_COLOR);
+			}
+			else
+			{
+				rcBtn.DeflateRect(CRect(2,2,2,2));
+				drawer.FillRoundRect(&rcBtn,&CPoint(2,2),TOOLBAR_H_COLOR);
+				drawer.DrawRoundRect(&rcBtn,&CPoint(2,2),TOOLBAR_H_E_COLOR);
+			}
+			drawer.DrawBitmapScaled(&m_bmpButtonBack,&btn.m_rcImg,&btn.m_rcImgSrc,SRCAND);
+			drawer.DrawBitmapScaled(&m_bmpButton,&btn.m_rcImg,&btn.m_rcImgSrc,SRCPAINT);
+		}
 		else
 		{
 			drawer.DrawRect(&btn.m_rcBtn,SEPARATOR_COLOR);
