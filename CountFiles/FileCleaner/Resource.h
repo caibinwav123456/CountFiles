@@ -9,9 +9,11 @@
 #define IDS_TAB_NAME                    129
 #define IDS_TAB_SIZE                    130
 #define IDS_TAB_MODIFY                  131
-#define IDS_TOOLBAR_CONF_COMP           132
-#define IDS_TOOLBAR_CONF_VIEW           133
-#define IDS_TOOLBAR_CONF_OP             134
+#define IDS_NEW_TAB_TITLE               132
+#define IDS_TOOLBAR_CONF_COMP           133
+#define IDS_TOOLBAR_CONF_VIEW           134
+#define IDS_TOOLBAR_CONF_OP             135
+#define IDS_TAB_CLOSE_PROMPT            136
 #define IDB_FOLDER                      310
 #define IDB_FOLDER_MASK                 311
 #define IDB_FOLDER_EXP                  312

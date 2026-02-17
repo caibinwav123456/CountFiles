@@ -168,11 +168,8 @@ void CMainFrame::OnClose()
 		CFrameWnd::OnClose();
 		return;
 	}
-	LPCTSTR msg=_T(
-		"You have opened more than one tab, do you want to close the whole program or just the current tab?\n"
-		"Yes - close the whole program\n"
-		"No - close the current tab"
-	);
+	CString msg;
+	msg.LoadString(IDS_TAB_CLOSE_PROMPT);
 	int ret=MessageBox(msg,NULL,MB_YESNOCANCEL);
 	switch(ret)
 	{

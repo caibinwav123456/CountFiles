@@ -304,11 +304,12 @@ void CPropWnd::DrawTab(CDrawer& drawer,int xpos,int tabidx,const CString& left,c
 
 	if(left==_T("")&&right==_T(""))
 	{
-		CString strNewTab,strTabNew(_T("New Tab"));
+		CString strNewTab,strDefNewTab;
+		strDefNewTab.LoadString(IDS_NEW_TAB_TITLE);
 		if(tabidx==0)
-			strNewTab=strTabNew;
+			strNewTab=strDefNewTab;
 		else
-			strNewTab.Format(_T("%s(%d)"),(LPCTSTR)strTabNew,tabidx);
+			strNewTab.Format(_T("%s(%d)"),(LPCTSTR)strDefNewTab,tabidx);
 		drawer.DrawText(rcString,DT_ALIGN_LEFT,strNewTab,TEXT_HEIGHT,RGB(0,0,0),TRANSPARENT,VIEW_FONT);
 		return;
 	}
