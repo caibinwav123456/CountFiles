@@ -11,12 +11,6 @@
 		free(ptr); \
 		ptr=NULL; \
 	}
-#define SAFE_RELEASE(img) \
-	if(img!=NULL) \
-	{ \
-		cvReleaseImage(&img); \
-		img=NULL; \
-	}
 enum op_type
 {
 	eOpMask=0,
@@ -52,7 +46,7 @@ const char* get_err_desc(int err)
 	switch(err)
 	{
 	case -eParamErr:
-		return "Parameter Incorrect";
+		return "Invalid Parameters";
 	case -eLoadErr:
 		return "Load Image Failed";
 	case -eSaveErr:
@@ -261,8 +255,8 @@ int _tmain(int argc,TCHAR** argv)
 		if(!cvSaveImage(file_out,image_out))
 			ret=-eSaveErr;
 	release:
-		SAFE_RELEASE(image_in);
-		SAFE_RELEASE(image_out);
+		cvReleaseImage(&image_in);
+		cvReleaseImage(&image_out);
 	}
 end:
 	if(ret!=0)
