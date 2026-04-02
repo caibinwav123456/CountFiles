@@ -669,7 +669,7 @@ BOOL CMyToolBar::ItemFromPoint(const CPoint& pt,INT_PTR* nID,BOOL* bDrop,INT* id
 	{
 		if(m_pData[btn.m_idx].nID!=0)
 		{
-			if(m_pData[btn.m_idx].style&MTB_STYLE_DROPBTN && 
+			if((m_pData[btn.m_idx].style&MTB_STYLE_DROPBTN) && 
 				btn.m_rcDrop.PtInRect(pt))
 			{
 				nHit=(INT_PTR)m_pData[btn.m_idx].nID;
