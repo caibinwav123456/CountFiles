@@ -56,6 +56,7 @@ BOOL PDXRemoveFromIDWndPtrMap(UINT id);
 CWnd* PDXGetWndFromID(UINT id);
 void PDXShowMessage(LPCTSTR format,...);
 void PDXSetMainWndTitle(LPCTSTR msg);
+void PDXSetMouseEvent(HWND hWnd,DWORD dwFlags);
 template<typename T>
 class CAddToWndMap
 {

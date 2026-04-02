@@ -96,12 +96,7 @@ void CMyBmpButton::OnMouseMove(UINT nFlags, CPoint point)
 	else if(m_iBtnState==0)
 	{
 		m_iBtnState=ODS_FOCUS;
-		TRACKMOUSEEVENT tme;
-		ZeroMemory(&tme,sizeof(tme));
-		tme.cbSize=sizeof(TRACKMOUSEEVENT);
-		tme.dwFlags=TME_LEAVE;
-		tme.hwndTrack=m_hWnd;
-		TrackMouseEvent(&tme);
+		PDXSetMouseEvent(m_hWnd,TME_LEAVE);
 		Invalidate(FALSE);
 	}
 	CBitmapButton::OnMouseMove(nFlags, point);
@@ -167,12 +162,7 @@ void DropDownButton::OnMouseMove(CPoint point,E_MYBUTTON_STYLE style)
 	{
 		m_iCompState=ODS_FOCUS;
 		m_bInWndRect=FALSE;
-		TRACKMOUSEEVENT tme;
-		ZeroMemory(&tme,sizeof(tme));
-		tme.cbSize=sizeof(TRACKMOUSEEVENT);
-		tme.dwFlags=TME_LEAVE;
-		tme.hwndTrack=get_btn_hwnd(style);
-		TrackMouseEvent(&tme);
+		PDXSetMouseEvent(get_btn_hwnd(style),TME_LEAVE);
 		UpdateButtonState();
 	}
 }

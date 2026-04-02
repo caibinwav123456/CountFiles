@@ -518,7 +518,6 @@ void CBaseBar::OnCbnSelchangeComboBasePath2()
 void CBaseBar::OnCmdMenuOpenDir()
 {
 	// TODO: Add your command handler code here
-	RestoreCtrlState();
 	OnBnClickedButtonOpen();
 }
 
@@ -526,7 +525,6 @@ void CBaseBar::OnCmdMenuOpenDir()
 void CBaseBar::OnCmdMenuImpFile()
 {
 	// TODO: Add your command handler code here
-	RestoreCtrlState();
 	UpdateData(TRUE);
 	CString strImpFile=GetHandleFileName(m_strComboBasePath);
 	if(strImpFile.IsEmpty())
@@ -540,7 +538,6 @@ void CBaseBar::OnCmdMenuImpFile()
 void CBaseBar::OnCmdMenuSelectRec()
 {
 	// TODO: Add your command handler code here
-	RestoreCtrlState();
 	OnBnClickedButtonOpen2();
 }
 
@@ -548,7 +545,6 @@ void CBaseBar::OnCmdMenuSelectRec()
 void CBaseBar::OnCmdMenuImpFileRef()
 {
 	// TODO: Add your command handler code here
-	RestoreCtrlState();
 	UpdateData(TRUE);
 	CString strImpFile=GetHandleFileName(m_strComboBasePathRef);
 	if(strImpFile.IsEmpty())

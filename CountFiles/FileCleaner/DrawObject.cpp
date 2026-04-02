@@ -271,7 +271,7 @@ inline CDC* CDrawer::SelectDC()
 {
 	return m_pDCDraw;
 }
-void CDrawer::DrawLine(POINT* start,POINT* end,COLORREF clr,int width,int style)
+void CDrawer::DrawLine(const POINT* start,const POINT* end,COLORREF clr,int width,int style)
 {
 	if(width==1&&style==PS_DOT)
 	{
@@ -295,19 +295,19 @@ void CDrawer::DrawLine(POINT* start,POINT* end,COLORREF clr,int width,int style)
 	SelectDC()->MoveTo(*start);
 	SelectDC()->LineTo(*end);
 }
-void CDrawer::DrawEllipse(RECT* rc,COLORREF clr,int linew)
+void CDrawer::DrawEllipse(LPCRECT rc,COLORREF clr,int linew)
 {
 	DrawPen pen(SelectDC(),clr,linew,PS_SOLID);
 	SelectDC()->SelectStockObject(NULL_BRUSH);
 	SelectDC()->Ellipse(rc);
 }
-void CDrawer::FillEllipse(RECT* rc,COLORREF clr)
+void CDrawer::FillEllipse(LPCRECT rc,COLORREF clr)
 {
 	DrawBrush brush(SelectDC(),clr);
 	SelectDC()->SelectStockObject(NULL_PEN);
 	SelectDC()->Ellipse(rc);
 }
-void DrawDotRect(CDrawer* pDraw,RECT* rc)
+void DrawDotRect(CDrawer* pDraw,LPCRECT rc)
 {
 	CRect rect=*(CRect*)rc;
 	if(rect.left>rect.right)
@@ -319,7 +319,7 @@ void DrawDotRect(CDrawer* pDraw,RECT* rc)
 	s_DRes.DrawHDotLine(pDraw,&CPoint(rect.left,rect.bottom),rect.Width());
 	s_DRes.DrawVDotLine(pDraw,&CPoint(rect.right,rect.top),rect.Height());
 }
-void CDrawer::DrawRect(RECT* rc,COLORREF clr,int linew,int style)
+void CDrawer::DrawRect(LPCRECT rc,COLORREF clr,int linew,int style)
 {
 	if(linew==1&&style==PS_DOT)
 	{
@@ -332,25 +332,25 @@ void CDrawer::DrawRect(RECT* rc,COLORREF clr,int linew,int style)
 		SelectDC()->Rectangle(rc);
 	}
 }
-void CDrawer::FillRect(RECT* rc,COLORREF clr)
+void CDrawer::FillRect(LPCRECT rc,COLORREF clr)
 {
 	DrawBrush brush(SelectDC(),clr);
 	SelectDC()->SelectStockObject(NULL_PEN);
 	SelectDC()->Rectangle(rc);
 }
-void CDrawer::DrawRoundRect(RECT* rc,POINT* r,COLORREF clr,int linew,int style)
+void CDrawer::DrawRoundRect(LPCRECT rc,const POINT* r,COLORREF clr,int linew,int style)
 {
 	DrawPen pen(SelectDC(),clr,linew,style);
 	SelectDC()->SelectStockObject(NULL_BRUSH);
 	SelectDC()->RoundRect(rc,*r);
 }
-void CDrawer::FillRoundRect(RECT* rc,POINT* r,COLORREF clr)
+void CDrawer::FillRoundRect(LPCRECT rc,const POINT* r,COLORREF clr)
 {
 	DrawBrush brush(SelectDC(),clr);
 	SelectDC()->SelectStockObject(NULL_PEN);
 	SelectDC()->RoundRect(rc,*r);
 }
-void CDrawer::DrawBitmap(CBitmap* pBmp,POINT* pt,DWORD dwOps,RECT* srcrc)
+void CDrawer::DrawBitmap(CBitmap* pBmp,const POINT* pt,DWORD dwOps,LPCRECT srcrc)
 {
 	BITMAP bm;
 	pBmp->GetBitmap(&bm);
@@ -371,7 +371,7 @@ void CDrawer::DrawBitmap(CBitmap* pBmp,POINT* pt,DWORD dwOps,RECT* srcrc)
 	dcBmp.SelectObject(oldbmp);
 	dcBmp.DeleteDC();
 }
-void CDrawer::DrawBitmapScaled(CBitmap* pBmp,RECT* dstrc,RECT* srcrc,DWORD dwOps)
+void CDrawer::DrawBitmapScaled(CBitmap* pBmp,LPCRECT dstrc,LPCRECT srcrc,DWORD dwOps)
 {
 	BITMAP bm;
 	pBmp->GetBitmap(&bm);
@@ -397,7 +397,7 @@ void CDrawer::DrawBitmapScaled(CBitmap* pBmp,RECT* dstrc,RECT* srcrc,DWORD dwOps
 	dcBmp.SelectObject(oldbmp);
 	dcBmp.DeleteDC();
 }
-void CDrawer::DrawText(POINT* pos,LPCTSTR text,int height,COLORREF clr,UINT backmode,LPCTSTR ftname)
+void CDrawer::DrawText(const POINT* pos,LPCTSTR text,int height,COLORREF clr,UINT backmode,LPCTSTR ftname)
 {
 	DrawFont font(SelectDC(),height,ftname);
 	SelectDC()->SetTextColor(clr);

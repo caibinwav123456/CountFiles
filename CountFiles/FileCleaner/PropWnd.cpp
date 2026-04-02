@@ -645,12 +645,7 @@ void CPropWnd::OnMouseMove(UINT nFlags, CPoint point)
 		m_nCancelMMove--;
 		return;
 	}
-	TRACKMOUSEEVENT tme;
-	ZeroMemory(&tme,sizeof(tme));
-	tme.cbSize=sizeof(TRACKMOUSEEVENT);
-	tme.dwFlags=TME_LEAVE;
-	tme.hwndTrack=m_hWnd;
-	TrackMouseEvent(&tme);
+	PDXSetMouseEvent(m_hWnd,TME_LEAVE);
 
 	E_PROP_GRAB_TYPE type;
 	int idx=DetectGrabState(&point,!!(nFlags&MK_LBUTTON),type);

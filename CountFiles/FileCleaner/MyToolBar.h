@@ -1,4 +1,5 @@
 #pragma once
+#include "DrawObject.h"
 #define MTB_STYLE_PUSHBTN  0
 #define MTB_STYLE_CHECK    1
 #define MTB_STYLE_GROUPBTN 2
@@ -16,15 +17,46 @@ enum E_MTB_STATE
 	eMTBHighlight,
 	eMTBClick,
 	eMTBEXClick,
-	eMTBDisable,
+};
+enum E_CHECK_OP
+{
+	eUncheck,
+	eCheck,
+	eInvChk,
+};
+struct AnimateSeg
+{
+	UINT m_nImgIndex;
+	UINT m_nTime;
+};
+struct AnimateItem
+{
+	INT m_nSegCnt;
+	AnimateSeg* m_pSegs;
+};
+struct AnimateData
+{
+	AnimateItem* m_pItems;
+};
+struct ImageIndex
+{
+	UINT m_idxNormal;
+	UINT m_idxDisabled;
 };
 struct MyToolBarData
 {
 	UINT nID;
+	INT menuidx;
+	INT menucard;
+	INT menucnt;
 	UINT style;
 	UINT state;
 	BOOL checked;
+	BOOL disabled;
+	BOOL animating;
 	MyToolBarData* pGrpNext;
+	ImageIndex* m_pIcons;
+	AnimateData* m_pAnims;
 };
 class CMyToolBar : public CToolBar
 {
@@ -54,9 +86,9 @@ public:
 		INT m_nExImgWidthT;
 		INT m_nImgWidthT;
 		INT m_nImgHeightT;
-		UINT m_nCnt;
-		UINT m_idx;
-		UINT m_iNext;
+		INT m_nCnt;
+		INT m_idx;
+		INT m_iNext;
 		MyToolBarData* m_pData;
 		void CalcItemRect(BOOL bSep, BOOL bWrap, BOOL bDrop);
 		void NextItem(BOOL bSep, BOOL bWrap, BOOL bDrop);
@@ -73,20 +105,26 @@ public:
 	}
 	BOOL LoadToolBar(LPCTSTR lpszResourceName,LPCTSTR strInfo,LPCTSTR bmp,LPCTSTR bmpBack);
 	void InitialDock(CFrameWnd* frame,BOOL bNewRow=FALSE);
+	UINT GetButtonCount() const{return m_nBtnCnt;}
+	BOOL CheckButton(int idx,int op);
+
 	virtual CSize CalcDynamicLayout(int nLength, DWORD nMode);
 	virtual INT_PTR OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
+
 protected:
 	CSize GetButtonSize() const{return m_sizeButton;}
 	CSize GetImageSize() const{return m_sizeImage;}
-	UINT GetButtonCount() const{return m_nCount;}
 	BOOL IsVertical() const{return !!((const_cast<CMyToolBar*>(this))->GetBarStyle()&(CBRS_ALIGN_LEFT|CBRS_ALIGN_RIGHT));}
 	BOOL HitTest(CPoint pt);
-	BOOL ItemFromPoint(const CPoint& pt,INT_PTR* nID,BOOL* bDrop,CRect* rect=NULL) const;
+	BOOL ItemFromPoint(const CPoint& pt,INT_PTR* nID,BOOL* bDrop,INT* idx=NULL,CRect* rect=NULL) const;
 private:
 	CBitmap m_bmpButton;
 	CBitmap m_bmpButtonBack;
 	MyToolBarData* m_pData;
+	INT m_nBtnCnt;
+	INT m_nBtnCntOrg;
 	INT m_nDropWidth;
+	INT m_iGrab;
 	CSize m_szBtnOrg;
 	CSize m_szImgOrg;
 	BOOL ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt);
@@ -97,6 +135,11 @@ private:
 	void CalcSize(void* lpVoid);
 	CSize GetBarSize();
 	void PrepareForDraw();
+	void DrawItem(CDrawer& drawer,const ItemIterator& item);
+	void DrawBtnBack(CDrawer& drawer,const ItemIterator& item);
+	void DrawDropBtnBack(CDrawer& drawer,const ItemIterator& item);
+	void DrawBtnImg(CDrawer& drawer,const ItemIterator& item);
+	void RestoreBarState();
 
 	BOOL LButtonDown(UINT nFlags, CPoint point);
 
@@ -110,4 +153,7 @@ private:
 
 	static CPoint s_ptBarTileOrg;
 	static int s_nBarRowHeight;
+
+protected:
+	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 };

@@ -64,6 +64,15 @@ void PDXSetMainWndTitle(LPCTSTR msg)
 		strWndText.Format(_T("%s - %s"),msg,(LPCTSTR)strWndName);
 	AfxGetMainWnd()->SetWindowText(strWndText);
 }
+void PDXSetMouseEvent(HWND hWnd,DWORD dwFlags)
+{
+	TRACKMOUSEEVENT tme;
+	ZeroMemory(&tme,sizeof(tme));
+	tme.cbSize=sizeof(tme);
+	tme.dwFlags=dwFlags;
+	tme.hwndTrack=hWnd;
+	TrackMouseEvent(&tme);
+}
 class CBaseTree;
 class CBaseList;
 struct PathNodeList:public PathNode

@@ -287,6 +287,8 @@ BOOL CMyToolBar::LoadToolBar(LPCTSTR lpszResourceName,LPCTSTR strInfo,LPCTSTR bm
 	BOOL bResult=ParseConfigString(strInfo,pData->items(),pData->wItemCount,cntfinal);
 	if(!bResult)
 		goto end;
+	m_nBtnCntOrg=pData->wItemCount;
+	m_nBtnCnt=cntfinal;
 	pIDs=new UINT[cntfinal];
 	for(int i=0;i<cntfinal;i++)
 		pIDs[i]=m_pData[i].nID;
@@ -657,11 +659,12 @@ typedef struct tagAFX_OLDTOOLINFO
 	LPARAM lParam;
 } AFX_OLDTOOLINFO;
 
-BOOL CMyToolBar::ItemFromPoint(const CPoint& pt,INT_PTR* nID,BOOL* bDrop,CRect* rect) const
+BOOL CMyToolBar::ItemFromPoint(const CPoint& pt,INT_PTR* nID,BOOL* bDrop,INT* idx,CRect* rect) const
 {
 	CRect rcBtn(0,0,0,0);
 	BOOL drop=FALSE;
 	INT_PTR nHit=0;
+	INT i=-1;
 	for_each_item(btn)
 	{
 		if(m_pData[btn.m_idx].nID!=0)
@@ -672,25 +675,25 @@ BOOL CMyToolBar::ItemFromPoint(const CPoint& pt,INT_PTR* nID,BOOL* bDrop,CRect* 
 				nHit=(INT_PTR)m_pData[btn.m_idx].nID;
 				rcBtn=btn.m_rcDrop;
 				drop=TRUE;
+				i=btn.m_idx;
 				break;
 			}
 			if(btn.m_rcBtn.PtInRect(pt))
 			{
 				nHit=(INT_PTR)m_pData[btn.m_idx].nID;
 				rcBtn=btn.m_rcBtn;
+				i=btn.m_idx;
 				break;
 			}
 		}
 	}
 	*nID=nHit;
 	*bDrop=drop;
-	if(nHit!=0)
-	{
-		if(rect!=NULL)
-			*rect=rcBtn;
-		return TRUE;
-	}
-	return FALSE;
+	if(idx!=NULL)
+		*idx=i;
+	if(rect!=NULL)
+		*rect=rcBtn;
+	return nHit!=0;
 }
 
 INT_PTR CMyToolBar::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
@@ -705,7 +708,7 @@ INT_PTR CMyToolBar::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 	CRect rect(0,0,0,0);
 	BOOL bDrop;
-	ItemFromPoint(point,&nHit,&bDrop,&rect);
+	ItemFromPoint(point,&nHit,&bDrop,NULL,&rect);
 	if (pTI != NULL && pTI->cbSize >= sizeof(AFX_OLDTOOLINFO))
 	{
 		pTI->hwnd = m_hWnd;
@@ -715,7 +718,7 @@ INT_PTR CMyToolBar::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		if (nHit != 0)
 		{
 			CString strTip;
-			if (strTip.LoadString((UINT)nHit))
+			if (strTip.LoadString((UINT)nHit)&&!strTip.IsEmpty())
 			{
 				size_t len = sizeof(TCHAR) * (strTip.GetLength() + 1);
 				LPTSTR w = (LPTSTR)malloc(len);
@@ -743,4 +746,19 @@ BOOL CMyToolBar::LButtonDown(UINT nFlags, CPoint point)
 		return TRUE;
 	}
 	return FALSE;
+}
+
+LRESULT CMyToolBar::DefWindowProc(UINT nMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch(nMsg)
+	{
+	case WM_LBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_LBUTTONDBLCLK:
+	case WM_MOUSEMOVE:
+	case WM_MOUSELEAVE:
+		return ::DefWindowProc(m_hWnd, nMsg, wParam, lParam);
+	default:
+		return CToolBar::DefWindowProc(nMsg, wParam, lParam);
+	}
 }
