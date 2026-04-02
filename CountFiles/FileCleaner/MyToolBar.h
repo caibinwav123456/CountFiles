@@ -18,25 +18,22 @@ enum E_MTB_STATE
 	eMTBClick,
 	eMTBEXClick,
 };
-enum E_CHECK_OP
+enum E_ON_OFF_OP
 {
-	eUncheck,
-	eCheck,
-	eInvChk,
+	eOff,
+	eOn,
+	eInv,
 };
 struct AnimateSeg
 {
 	UINT m_nImgIndex;
 	UINT m_nTime;
 };
-struct AnimateItem
-{
-	INT m_nSegCnt;
-	AnimateSeg* m_pSegs;
-};
 struct AnimateData
 {
-	AnimateItem* m_pItems;
+	INT m_nSegCnt;
+	INT m_iSeg;
+	AnimateSeg* m_pSegs;
 };
 struct ImageIndex
 {
@@ -106,7 +103,7 @@ public:
 	BOOL LoadToolBar(LPCTSTR lpszResourceName,LPCTSTR strInfo,LPCTSTR bmp,LPCTSTR bmpBack);
 	void InitialDock(CFrameWnd* frame,BOOL bNewRow=FALSE);
 	UINT GetButtonCount() const{return m_nBtnCnt;}
-	BOOL CheckButton(int idx,int op);
+	BOOL CheckButton(int idx,int op,int* oldstate=NULL);
 
 	virtual CSize CalcDynamicLayout(int nLength, DWORD nMode);
 	virtual INT_PTR OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
@@ -146,6 +143,7 @@ private:
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
 	afx_msg void OnPaint();
+	afx_msg void OnExitMenuLoop(BOOL bIsTrackPopupMenu);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);

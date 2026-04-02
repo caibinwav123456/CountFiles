@@ -33,7 +33,7 @@ CMyToolBar::~CMyToolBar()
 			{
 				for(int j=0;j<m_pData[i].menucnt;j++)
 				{
-					m_pData[i].m_pAnims[j].m_pItems->m_pSegs;
+					SAFE_DELETE_ARRAY(m_pData[i].m_pAnims[j].m_pSegs);
 				}
 			}
 			SAFE_DELETE_ARRAY(m_pData[i].m_pAnims);
@@ -69,6 +69,7 @@ CSize CMyToolBar::CalcDynamicLayout(int nLength,DWORD dwMode)
 BEGIN_MESSAGE_MAP(CMyToolBar, CToolBar)
 	ON_WM_DESTROY()
 	ON_WM_PAINT()
+	ON_WM_EXITMENULOOP()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
@@ -98,6 +99,12 @@ void CMyToolBar::OnPaint()
 	{
 		DrawItem(drawer,item);
 	}
+}
+
+void CMyToolBar::OnExitMenuLoop(BOOL bIsTrackPopupMenu)
+{
+	if(bIsTrackPopupMenu)
+		RestoreBarState();
 }
 
 void CMyToolBar::DrawItem(CDrawer& drawer,const ItemIterator& item)
@@ -177,20 +184,26 @@ void CMyToolBar::DrawDropBtnBack(CDrawer& drawer,const ItemIterator& item)
 void CMyToolBar::DrawBtnImg(CDrawer& drawer,const ItemIterator& item)
 {
 	MyToolBarData& tData=m_pData[item.m_idx];
-	ImageIndex* iImg=tData.m_pIcons;
 	int shift;
+	ImageIndex* iImg=tData.m_pIcons;
 	if(iImg==NULL)
 		shift=0;
 	else if(tData.disabled)
 		shift=iImg[tData.menuidx].m_idxDisabled;
 	else
 		shift=iImg[tData.menuidx].m_idxNormal;
+	if((!tData.disabled)&&tData.animating&&tData.m_pAnims!=NULL)
+	{
+		AnimateData& anim=tData.m_pAnims[tData.menuidx];
+		if(anim.m_pSegs!=NULL)
+			shift=anim.m_pSegs[anim.m_iSeg].m_nImgIndex;
+	}
 	CRect rcSrc=item.m_rcImgSrc+CPoint(0,item.m_szImg.cy*shift);
 	drawer.DrawBitmapScaled(&m_bmpButtonBack,&item.m_rcImg,&rcSrc,SRCAND);
 	drawer.DrawBitmapScaled(&m_bmpButton,&item.m_rcImg,&rcSrc,SRCPAINT);
 }
 
-BOOL CMyToolBar::CheckButton(int idx,int op)
+BOOL CMyToolBar::CheckButton(int idx,int op,int* oldstate)
 {
 	if(idx<0||idx>=m_nBtnCnt)
 		return FALSE;
@@ -198,7 +211,7 @@ BOOL CMyToolBar::CheckButton(int idx,int op)
 		return FALSE;
 	if(m_pData[idx].style&MTB_STYLE_GROUPBTN)
 	{
-		if(op!=eCheck)
+		if(op!=eOn)
 			return FALSE;
 		for(MyToolBarData* p=m_pData[idx].pGrpNext;
 			p!=&m_pData[idx];p=p->pGrpNext)
@@ -207,6 +220,8 @@ BOOL CMyToolBar::CheckButton(int idx,int op)
 		}
 		BOOL checked=m_pData[idx].checked;
 		m_pData[idx].checked=TRUE;
+		if(oldstate!=NULL)
+			*oldstate=(checked?eOn:eOff);
 		if(!checked)
 		{
 			//TODO: handle check group btn
@@ -216,15 +231,17 @@ BOOL CMyToolBar::CheckButton(int idx,int op)
 	else if(m_pData[idx].style&MTB_STYLE_CHECK)
 	{
 		BOOL checked=m_pData[idx].checked,changed=FALSE;
+		if(oldstate!=NULL)
+			*oldstate=(checked?eOn:eOff);
 		switch(op)
 		{
-		case eCheck:
+		case eOn:
 			checked=TRUE;
 			break;
-		case eUncheck:
+		case eOff:
 			checked=FALSE;
 			break;
-		case eInvChk:
+		case eInv:
 			checked=!checked;
 			break;
 		}
@@ -264,7 +281,7 @@ void CMyToolBar::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		m_pData[idx].state=(drop?eMTBEXClick:eMTBClick);
 		if(!drop)
-			CheckButton(idx,m_pData[idx].style&MTB_STYLE_GROUPBTN?eCheck:eInvChk);
+			CheckButton(idx,m_pData[idx].style&MTB_STYLE_GROUPBTN?eOn:eInv);
 	}
 	Invalidate();
 	CWnd::OnLButtonDown(nFlags,point);
