@@ -81,7 +81,6 @@ void CMyToolBar::OnDestroy()
 {
 	CToolBar::OnDestroy();
 
-	// TODO: Add your message handler code here
 	m_bmpButton.DeleteObject();
 	m_bmpButtonBack.DeleteObject();
 }
@@ -104,7 +103,10 @@ void CMyToolBar::OnPaint()
 void CMyToolBar::OnExitMenuLoop(BOOL bIsTrackPopupMenu)
 {
 	if(bIsTrackPopupMenu)
+	{
 		RestoreBarState();
+		Invalidate();
+	}
 }
 
 void CMyToolBar::DrawItem(CDrawer& drawer,const ItemIterator& item)
@@ -205,7 +207,7 @@ void CMyToolBar::DrawBtnImg(CDrawer& drawer,const ItemIterator& item)
 
 BOOL CMyToolBar::CheckButton(int idx,int op,int* oldstate)
 {
-	if(idx<0||idx>=m_nBtnCnt)
+	if(idx<0||idx>=(int)GetButtonCount())
 		return FALSE;
 	if(m_pData[idx].disabled)
 		return FALSE;
@@ -225,6 +227,7 @@ BOOL CMyToolBar::CheckButton(int idx,int op,int* oldstate)
 		if(!checked)
 		{
 			//TODO: handle check group btn
+			Invalidate();
 		}
 		return TRUE;
 	}
@@ -250,6 +253,7 @@ BOOL CMyToolBar::CheckButton(int idx,int op,int* oldstate)
 		if(changed)
 		{
 			//TODO: handle check btn
+			Invalidate();
 		}
 		return TRUE;
 	}
