@@ -46,6 +46,7 @@ struct MyToolBarData
 	INT menuidx;
 	INT menucard;
 	INT menucnt;
+	INT iorg;
 	UINT style;
 	UINT state;
 	BOOL checked;

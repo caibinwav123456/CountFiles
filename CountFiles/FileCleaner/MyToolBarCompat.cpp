@@ -258,10 +258,12 @@ BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt
 		m_pData[i].pGrpNext=(m_pData[i].pGrpNext==NULL?NULL:
 			&m_pData[*((UINT*)m_pData[i].pGrpNext)
 			+(((UINT*)m_pData[i].pGrpNext)-off_table)]);
+		m_pData[i].iorg=-1;
 	}
 	for(int i=0;i<cnt;i++)
 	{
 		off_table[i]+=i;
+		m_pData[off_table[i]].iorg=i;
 	}
 	outcnt=cntfinal;
 	return TRUE;
