@@ -16,6 +16,7 @@
 CMyToolBar::CMyToolBar():CToolBar()
 {
 	m_pData=NULL;
+	m_pIndex=NULL;
 	m_nBtnCnt=0;
 	m_nBtnCntOrg=0;
 	m_nDropWidth=0;
@@ -40,6 +41,7 @@ CMyToolBar::~CMyToolBar()
 		}
 	}
 	SAFE_DELETE_ARRAY(m_pData);
+	SAFE_DELETE_ARRAY(m_pIndex);
 }
 
 BOOL CMyToolBar::MyCreate(UINT nID,UINT nIDConf,UINT bmp,UINT bmpBack,CFrameWnd* pParentFrm,BOOL bNextRow)

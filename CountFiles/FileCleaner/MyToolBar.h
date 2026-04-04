@@ -118,6 +118,7 @@ private:
 	CBitmap m_bmpButton;
 	CBitmap m_bmpButtonBack;
 	MyToolBarData* m_pData;
+	UINT* m_pIndex;
 	INT m_nBtnCnt;
 	INT m_nBtnCntOrg;
 	INT m_nDropWidth;

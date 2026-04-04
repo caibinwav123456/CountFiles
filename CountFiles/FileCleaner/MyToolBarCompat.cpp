@@ -145,8 +145,9 @@ BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt
 	vData.resize(cnt,padD);
 	for(int i=0;i<cnt;i++)
 		vData[i].nID=pID[i];
-	vector<UINT> off_table;
-	off_table.resize(cnt,0);
+	UINT* off_table=new UINT[cnt];
+	m_pIndex=off_table;
+	memset(off_table,0,cnt*sizeof(UINT));
 	for(LPCTSTR pstr=strInfo,end=strInfo;;pstr=end)
 	{
 		for(;*end==' ';end++);
@@ -155,7 +156,7 @@ BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt
 		{
 			if(grplast!=NULL)
 			{
-				vData[(UINT*)grplast-off_table.data()].pGrpNext=grpfirst;
+				vData[(UINT*)grplast-off_table].pGrpNext=grpfirst;
 				grpfirst=grplast=NULL;
 			}
 			break;
@@ -179,7 +180,7 @@ BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt
 		{
 			if(grplast!=NULL)
 			{
-				vData[(UINT*)grplast-off_table.data()].pGrpNext=grpfirst;
+				vData[(UINT*)grplast-off_table].pGrpNext=grpfirst;
 				grpfirst=grplast=NULL;
 			}
 			continue;
@@ -215,7 +216,7 @@ BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt
 			else
 			{
 				ASSERT(grplast!=NULL);
-				vData[(UINT*)grplast-off_table.data()].pGrpNext=
+				vData[(UINT*)grplast-off_table].pGrpNext=
 					(MyToolBarData*)&off_table[index];
 				grplast=(MyToolBarData*)&off_table[index];
 			}
@@ -256,7 +257,7 @@ BOOL CMyToolBar::ParseConfigString(LPCTSTR strInfo,WORD* pID,int cnt,int& outcnt
 	{
 		m_pData[i].pGrpNext=(m_pData[i].pGrpNext==NULL?NULL:
 			&m_pData[*((UINT*)m_pData[i].pGrpNext)
-			+(((UINT*)m_pData[i].pGrpNext)-off_table.data())]);
+			+(((UINT*)m_pData[i].pGrpNext)-off_table)]);
 	}
 	outcnt=cntfinal;
 	return TRUE;
