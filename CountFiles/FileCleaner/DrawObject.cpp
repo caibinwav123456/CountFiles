@@ -392,8 +392,13 @@ void CDrawer::DrawBitmapScaled(CBitmap* pBmp,LPCRECT dstrc,LPCRECT srcrc,DWORD d
 	CDC dcBmp;
 	dcBmp.CreateCompatibleDC(m_pCanvas->m_pClientDC);
 	CBitmap* oldbmp=dcBmp.SelectObject(pBmp);
+	int oldMode=SelectDC()->SetStretchBltMode(HALFTONE);
+	CPoint oldpt;
+	::SetBrushOrgEx(SelectDC()->GetSafeHdc(),0,0,&oldpt);
 	SelectDC()->StretchBlt(dstrc->left,dstrc->top,((CRect*)dstrc)->Width(),((CRect*)dstrc)->Height(),
 		&dcBmp,srcrect.left,srcrect.top,srcrect.Width(),srcrect.Height(),dwOps);
+	::SetBrushOrgEx(SelectDC()->GetSafeHdc(),oldpt.x,oldpt.y,NULL);
+	SelectDC()->SetStretchBltMode(oldMode);
 	dcBmp.SelectObject(oldbmp);
 	dcBmp.DeleteDC();
 }

@@ -106,6 +106,7 @@ private:
 	afx_msg void OnCmdMenuSelectRec();
 	afx_msg void OnCmdMenuImpFileRef();
 	afx_msg void OnCmdMenuExpRecFileRef();
+	afx_msg void OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu);
 
 	DECLARE_MESSAGE_MAP()
 };

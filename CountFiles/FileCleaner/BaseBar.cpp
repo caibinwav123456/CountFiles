@@ -84,6 +84,7 @@ BEGIN_MESSAGE_MAP(CBaseBar, CDialog)
 	ON_COMMAND(ID_CMD_MENU_SELECT_REC, &CBaseBar::OnCmdMenuSelectRec)
 	ON_COMMAND(ID_CMD_MENU_IMP_FILE_REF, &CBaseBar::OnCmdMenuImpFileRef)
 	ON_COMMAND(ID_CMD_MENU_EXPRECFILE_REF, &CBaseBar::OnCmdMenuExpRecFileRef)
+	ON_WM_MENUSELECT()
 END_MESSAGE_MAP()
 
 
@@ -614,4 +615,11 @@ LRESULT CBaseBar::OnSetCurPath(WPARAM wParam, LPARAM lParam)
 	m_btnGo.EnableButton(FALSE);
 	m_btnGo2.EnableButton(FALSE);
 	return 0;
+}
+
+void CBaseBar::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
+{
+	CDialog::OnMenuSelect(nItemID, nFlags, hSysMenu);
+
+	AfxGetMainWnd()->SendMessage(WM_SETMESSAGESTRING, (WPARAM)nItemID);
 }

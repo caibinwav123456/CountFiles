@@ -71,6 +71,7 @@ CSize CMyToolBar::CalcDynamicLayout(int nLength,DWORD dwMode)
 BEGIN_MESSAGE_MAP(CMyToolBar, CToolBar)
 	ON_WM_DESTROY()
 	ON_WM_PAINT()
+	ON_WM_MENUSELECT()
 	ON_WM_EXITMENULOOP()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
@@ -100,6 +101,13 @@ void CMyToolBar::OnPaint()
 	{
 		DrawItem(drawer,item);
 	}
+}
+
+void CMyToolBar::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
+{
+	CToolBar::OnMenuSelect(nItemID, nFlags, hSysMenu);
+
+	AfxGetMainWnd()->SendMessage(WM_SETMESSAGESTRING, (WPARAM)nItemID);
 }
 
 void CMyToolBar::OnExitMenuLoop(BOOL bIsTrackPopupMenu)

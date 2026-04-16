@@ -113,13 +113,27 @@
 #define ID_TOOLBAR_VIEW_COMP            32799
 #define ID_TOOLBAR_VIEW_VIEW            32800
 #define ID_TOOLBAR_VIEW_OP              32801
+#define ID_DIFF_SHOWDIFF                32802
+#define ID_DIFF_HIDEORPH                32803
+#define ID_DIFF_SHOWDIFFEXCORPH         32804
+#define ID_DIFF_SHOWORPH                32805
+#define ID_DIFF_SHOWNEWERL              32806
+#define ID_DIFF_SHOWNEWERR              32807
+#define ID_DIFF_SHOWNEWERLLORPH         32808
+#define ID_DIFF_SHOWNEWERRRORPH         32809
+#define ID_DIFF_SHOWLORPH               32810
+#define ID_DIFF_SHOWRORPH               32811
+#define ID_STRUCT_ALWAYSSHOWFOLDER      32812
+#define ID_STRUCT_COMPFILEFOLDERSTRUCT  32813
+#define ID_STRUCT_COMPFILE              32814
+#define ID_STRUCT_NOFOLDERSTRUCT        32815
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        366
-#define _APS_NEXT_COMMAND_VALUE         32802
+#define _APS_NEXT_COMMAND_VALUE         32816
 #define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

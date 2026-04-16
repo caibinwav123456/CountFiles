@@ -305,5 +305,14 @@
     <Image Include="res\ToolbarOp.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\ToolbarCompareMask.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ToolbarViewMask.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ToolbarOpMask.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
