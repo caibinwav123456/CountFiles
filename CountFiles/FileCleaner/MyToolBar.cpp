@@ -75,6 +75,7 @@ BEGIN_MESSAGE_MAP(CMyToolBar, CToolBar)
 	ON_WM_EXITMENULOOP()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
+	ON_WM_LBUTTONDBLCLK()
 	ON_WM_MOUSEMOVE()
 	ON_WM_MOUSELEAVE()
 END_MESSAGE_MAP()
@@ -321,6 +322,18 @@ void CMyToolBar::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 	Invalidate();
 	CToolBar::OnLButtonUp(nFlags, point);
+}
+
+
+void CMyToolBar::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	if(LButtonDblClk(nFlags,point))
+	{
+		RestoreBarState();
+		Invalidate();
+		return;
+	}
+	CWnd::OnLButtonDblClk(nFlags, point);
 }
 
 

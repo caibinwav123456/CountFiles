@@ -755,6 +755,19 @@ BOOL CMyToolBar::LButtonDown(UINT nFlags, CPoint point)
 	return FALSE;
 }
 
+BOOL CMyToolBar::LButtonDblClk(UINT nFlags, CPoint point)
+{
+	// only toggle docking if clicked in "void" space
+	if (m_pDockBar != NULL && HitTest(point))
+	{
+		// start the drag
+		ASSERT(m_pDockContext != NULL);
+		m_pDockContext->ToggleDocking();
+		return TRUE;
+	}
+	return FALSE;
+}
+
 LRESULT CMyToolBar::DefWindowProc(UINT nMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(nMsg)
