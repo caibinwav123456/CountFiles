@@ -381,6 +381,23 @@ LRESULT CBaseBar::OnEnableBtnGo(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+void CBaseBar::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
+{
+	CDialog::OnMenuSelect(nItemID, nFlags, hSysMenu);
+
+	CFrameWnd* pFrameWnd=(CFrameWnd*)AfxGetMainWnd();
+	UINT nIDTracking=nItemID;
+	if(nFlags==0xffff)
+	{
+		if (!pFrameWnd->m_bHelpMode)
+			nIDTracking = AFX_IDS_IDLEMESSAGE;
+		else
+			nIDTracking = AFX_IDS_HELPMODEMESSAGE;
+	}
+
+	pFrameWnd->SendMessage(WM_SETMESSAGESTRING, (WPARAM)nIDTracking);
+}
+
 void CBaseBar::OnExitMenuLoop(BOOL bIsTrackPopupMenu)
 {
 	if(bIsTrackPopupMenu)
@@ -615,11 +632,4 @@ LRESULT CBaseBar::OnSetCurPath(WPARAM wParam, LPARAM lParam)
 	m_btnGo.EnableButton(FALSE);
 	m_btnGo2.EnableButton(FALSE);
 	return 0;
-}
-
-void CBaseBar::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
-{
-	CDialog::OnMenuSelect(nItemID, nFlags, hSysMenu);
-
-	AfxGetMainWnd()->SendMessage(WM_SETMESSAGESTRING, (WPARAM)nItemID);
 }

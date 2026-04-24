@@ -108,7 +108,17 @@ void CMyToolBar::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
 {
 	CToolBar::OnMenuSelect(nItemID, nFlags, hSysMenu);
 
-	AfxGetMainWnd()->SendMessage(WM_SETMESSAGESTRING, (WPARAM)nItemID);
+	CFrameWnd* pFrameWnd=(CFrameWnd*)AfxGetMainWnd();
+	UINT nIDTracking=nItemID;
+	if(nFlags==0xffff)
+	{
+		if (!pFrameWnd->m_bHelpMode)
+			nIDTracking = AFX_IDS_IDLEMESSAGE;
+		else
+			nIDTracking = AFX_IDS_HELPMODEMESSAGE;
+	}
+
+	pFrameWnd->SendMessage(WM_SETMESSAGESTRING, (WPARAM)nIDTracking);
 }
 
 void CMyToolBar::OnExitMenuLoop(BOOL bIsTrackPopupMenu)
